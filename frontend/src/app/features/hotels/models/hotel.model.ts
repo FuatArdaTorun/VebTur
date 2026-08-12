@@ -4,7 +4,9 @@ export interface HotelSummary {
   slug: string;
   city: string;
   country: string;
-  starRating: number;
+  starRating: number | null;
+  googleRating: number | null;
+  googleRatingCount: number | null;
   thumbnailUrl: string | null;
   startingNightlyPrice: number | null;
   currency: string | null;
@@ -42,7 +44,9 @@ export interface HotelDetail {
   address: string;
   latitude: number;
   longitude: number;
-  starRating: number;
+  starRating: number | null;
+  googleRating: number | null;
+  googleRatingCount: number | null;
   officialWebsiteUrl: string | null;
   images: HotelImage[];
   amenities: Amenity[];

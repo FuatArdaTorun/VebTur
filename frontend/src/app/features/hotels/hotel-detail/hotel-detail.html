@@ -10,12 +10,23 @@
 
     <header class="hotel-detail__header">
       <h1>{{ h.name }}</h1>
-      <span class="hotel-detail__stars" [attr.aria-label]="h.starRating + ' star hotel'">
-        {{ '★'.repeat(h.starRating) }}
-      </span>
+      @if (h.starRating; as rating) {
+        <span class="hotel-detail__official-stars" [attr.aria-label]="rating + ' star hotel'">{{ rating }}★ Hotel</span>
+      }
     </header>
 
     <p class="hotel-detail__location">{{ h.address }}, {{ h.city }}, {{ h.country }}</p>
+
+    @if (h.googleRating; as rating) {
+      <p class="hotel-detail__rating">
+        <span class="hotel-detail__rating-star">★</span>
+        <span class="hotel-detail__rating-value">{{ rating }}</span>
+        <span class="hotel-detail__rating-source">Google rating</span>
+        @if (h.googleRatingCount; as count) {
+          <span class="hotel-detail__rating-count">({{ count | number }} reviews)</span>
+        }
+      </p>
+    }
 
     @if (h.images.length > 0) {
       <div class="hotel-detail__gallery">

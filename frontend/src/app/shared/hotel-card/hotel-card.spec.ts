@@ -21,6 +21,8 @@ describe('HotelCard', () => {
       city: 'Antalya',
       country: 'Turkey',
       starRating: 4,
+      googleRating: 4.5,
+      googleRatingCount: 1234,
       thumbnailUrl: null,
       startingNightlyPrice: 1000,
       currency: 'TRY',

@@ -20,13 +20,38 @@
     }
   }
 
-  &__stars {
-    color: #d4a017;
+  &__official-stars {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 600;
   }
 
   &__location {
     color: #666;
-    margin: 0.25rem 0 1rem;
+    margin: 0.25rem 0 0.5rem;
+  }
+
+  &__rating {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0 0 1rem;
+  }
+
+  &__rating-star {
+    color: #d4a017;
+    font-size: 1.1rem;
+  }
+
+  &__rating-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  &__rating-source,
+  &__rating-count {
+    color: #666;
+    font-size: 0.85rem;
   }
 
   &__gallery {

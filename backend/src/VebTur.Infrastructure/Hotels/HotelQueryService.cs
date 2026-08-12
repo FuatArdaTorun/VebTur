@@ -54,8 +54,11 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
             HotelSortOrder.PriceDescending => query
                 .OrderByDescending(h => h.RoomTypes.Where(r => r.IsActive).Select(r => (decimal?)r.BaseNightlyPrice).Min())
                 .ThenBy(h => h.Name),
-            HotelSortOrder.StarRatingDescending => query.OrderByDescending(h => h.StarRating).ThenBy(h => h.Name),
-            _ => query.OrderByDescending(h => h.StarRating).ThenBy(h => h.Name),
+            // Coerce null (unrated) to -1 so hotels without a confirmed rating always sort
+            // after rated ones, regardless of direction. Sorts by Google rating (the guest
+            // rating shown as stars in the UI), not the official star classification.
+            HotelSortOrder.StarRatingDescending => query.OrderByDescending(h => h.GoogleRating ?? -1m).ThenBy(h => h.Name),
+            _ => query.OrderByDescending(h => h.GoogleRating ?? -1m).ThenBy(h => h.Name),
         };
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -70,6 +73,8 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                 h.City,
                 h.Country,
                 h.StarRating,
+                h.GoogleRating,
+                h.GoogleRatingCount,
                 h.Images.OrderBy(i => i.DisplayOrder).Select(i => i.Url).FirstOrDefault(),
                 h.RoomTypes.Where(r => r.IsActive).Select(r => (decimal?)r.BaseNightlyPrice).Min(),
                 h.RoomTypes.Where(r => r.IsActive).Select(r => r.Currency).FirstOrDefault()))
@@ -98,6 +103,8 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                 h.Latitude,
                 h.Longitude,
                 h.StarRating,
+                h.GoogleRating,
+                h.GoogleRatingCount,
                 h.OfficialWebsiteUrl,
                 h.Images.OrderBy(i => i.DisplayOrder)
                     .Select(i => new HotelImageDto(i.Url, i.AltText, i.DisplayOrder))

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HotelSummary } from '../../features/hotels/models/hotel.model';
@@ -11,5 +11,4 @@ import { HotelSummary } from '../../features/hotels/models/hotel.model';
 })
 export class HotelCard {
   readonly hotel = input.required<HotelSummary>();
-  readonly stars = computed(() => Array(this.hotel().starRating));
 }

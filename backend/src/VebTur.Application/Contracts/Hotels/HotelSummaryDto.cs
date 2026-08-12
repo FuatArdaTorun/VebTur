@@ -6,7 +6,9 @@ public record HotelSummaryDto(
     string Slug,
     string City,
     string Country,
-    int StarRating,
+    int? StarRating,
+    decimal? GoogleRating,
+    int? GoogleRatingCount,
     string? ThumbnailUrl,
     decimal? StartingNightlyPrice,
     string? Currency);

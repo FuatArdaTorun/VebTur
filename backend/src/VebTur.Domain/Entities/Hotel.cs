@@ -13,10 +13,25 @@ public class Hotel
 
     public double Latitude { get; set; }
     public double Longitude { get; set; }
-    public int StarRating { get; set; }
+    /// <summary>
+    /// Official star classification as stated by the hotel itself. Null when not
+    /// confidently sourced from the hotel's own site — never a guessed value.
+    /// </summary>
+    public int? StarRating { get; set; }
 
     public string? OfficialWebsiteUrl { get; set; }
     public string? GooglePlaceId { get; set; }
+
+    /// <summary>
+    /// The hotel's aggregate Google Maps rating (e.g. 4.5 out of 5), manually captured on
+    /// <see cref="GoogleRatingCapturedAtUtc"/> since automated Google Places API integration
+    /// is not connected. This is the public rating number only — never review text/content.
+    /// Null when not confidently found. Distinct from <see cref="StarRating"/> (the hotel's
+    /// own official classification), which is a different concept from a guest rating.
+    /// </summary>
+    public decimal? GoogleRating { get; set; }
+    public int? GoogleRatingCount { get; set; }
+    public DateTime? GoogleRatingCapturedAtUtc { get; set; }
 
     public bool IsActive { get; set; } = true;
 

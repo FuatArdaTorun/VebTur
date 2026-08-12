@@ -9,7 +9,7 @@ import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
 
 const PAGE_SIZE = 12;
-const CITIES = ['Antalya', 'Istanbul', 'Izmir', 'Bodrum', 'Fethiye', 'Cappadocia'];
+const CITIES = ['Antalya', 'Marmaris', 'Dalyan'];
 
 interface FilterFormValue {
   city: string | null;
