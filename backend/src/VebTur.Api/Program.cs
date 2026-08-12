@@ -1,4 +1,7 @@
+using VebTur.Application.Hotels;
+using VebTur.Infrastructure.Hotels;
 using VebTur.Infrastructure.Persistence;
+using VebTur.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +20,8 @@ builder.Services.AddDbContext<VebTurDbContext>(options =>
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<VebTurDbContext>();
 
+builder.Services.AddScoped<IHotelQueryService, HotelQueryService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AngularDevCorsPolicy, policy =>
@@ -33,6 +38,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using var seedScope = app.Services.CreateScope();
+    var db = seedScope.ServiceProvider.GetRequiredService<VebTurDbContext>();
+    await HotelSeeder.SeedAsync(db);
 }
 
 app.UseHttpsRedirection();
