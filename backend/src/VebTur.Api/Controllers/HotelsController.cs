@@ -13,6 +13,13 @@ public class HotelsController(IHotelQueryService hotelQueryService) : Controller
 
     [HttpGet]
     public async Task<ActionResult<PagedResult<HotelSummaryDto>>> GetHotels(
+        [FromQuery] string? city = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] int? minStarRating = null,
+        [FromQuery] string[]? amenities = null,
+        [FromQuery] int? minCapacity = null,
+        [FromQuery] string sort = "recommended",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
         CancellationToken cancellationToken = default)
@@ -20,7 +27,26 @@ public class HotelsController(IHotelQueryService hotelQueryService) : Controller
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var result = await hotelQueryService.GetHotelsAsync(page, pageSize, cancellationToken);
+        var sortOrder = sort.ToLowerInvariant() switch
+        {
+            "price-asc" => HotelSortOrder.PriceAscending,
+            "price-desc" => HotelSortOrder.PriceDescending,
+            "star-desc" => HotelSortOrder.StarRatingDescending,
+            _ => HotelSortOrder.Recommended,
+        };
+
+        var request = new HotelSearchRequest(
+            city,
+            minPrice,
+            maxPrice,
+            minStarRating,
+            amenities is { Length: > 0 } ? amenities : null,
+            minCapacity,
+            sortOrder,
+            page,
+            pageSize);
+
+        var result = await hotelQueryService.GetHotelsAsync(request, cancellationToken);
         return Ok(result);
     }
 

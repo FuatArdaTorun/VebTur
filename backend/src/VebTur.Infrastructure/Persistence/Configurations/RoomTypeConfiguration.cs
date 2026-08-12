@@ -15,6 +15,6 @@ public class RoomTypeConfiguration : IEntityTypeConfiguration<RoomType>
         builder.Property(r => r.Currency).HasMaxLength(3).IsRequired();
         builder.Property(r => r.BaseNightlyPrice).HasPrecision(10, 2);
 
-        builder.HasIndex(r => r.HotelId);
+        builder.HasIndex(r => new { r.HotelId, r.IsActive, r.BaseNightlyPrice });
     }
 }

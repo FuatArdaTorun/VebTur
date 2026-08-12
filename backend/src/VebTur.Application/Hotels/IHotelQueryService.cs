@@ -5,7 +5,7 @@ namespace VebTur.Application.Hotels;
 
 public interface IHotelQueryService
 {
-    Task<PagedResult<HotelSummaryDto>> GetHotelsAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<PagedResult<HotelSummaryDto>> GetHotelsAsync(HotelSearchRequest request, CancellationToken cancellationToken);
 
     Task<HotelDetailDto?> GetHotelByIdOrSlugAsync(string idOrSlug, CancellationToken cancellationToken);
 

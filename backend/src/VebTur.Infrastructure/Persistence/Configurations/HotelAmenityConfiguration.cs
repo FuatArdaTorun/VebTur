@@ -10,6 +10,8 @@ public class HotelAmenityConfiguration : IEntityTypeConfiguration<HotelAmenity>
     {
         builder.HasKey(ha => new { ha.HotelId, ha.AmenityId });
 
+        builder.HasIndex(ha => ha.AmenityId);
+
         builder.HasOne(ha => ha.Hotel)
             .WithMany(h => h.HotelAmenities)
             .HasForeignKey(ha => ha.HotelId)

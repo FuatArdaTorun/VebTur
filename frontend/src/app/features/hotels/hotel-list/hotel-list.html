@@ -1,17 +1,93 @@
 <section class="hotel-list">
   <h1>Hotels</h1>
 
+  <form class="hotel-list__filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+    <div class="hotel-list__filter-row">
+      <label>
+        Destination
+        <select formControlName="city">
+          <option [ngValue]="null">All destinations</option>
+          @for (city of cities; track city) {
+            <option [ngValue]="city">{{ city }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Min. Star Rating
+        <select formControlName="minStarRating">
+          <option [ngValue]="null">Any</option>
+          @for (star of [3, 4, 5]; track star) {
+            <option [ngValue]="star">{{ star }}+ stars</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Guests
+        <input type="number" min="1" formControlName="minCapacity" placeholder="Any" />
+      </label>
+
+      <label>
+        Min. Price (TRY)
+        <input type="number" min="0" formControlName="minPrice" placeholder="No min" />
+      </label>
+
+      <label>
+        Max. Price (TRY)
+        <input type="number" min="0" formControlName="maxPrice" placeholder="No max" />
+      </label>
+
+      <label>
+        Sort by
+        <select formControlName="sort">
+          <option value="recommended">Recommended</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="star-desc">Star Rating</option>
+        </select>
+      </label>
+    </div>
+
+    @if (amenitiesList().length > 0) {
+      <div class="hotel-list__amenities">
+        @for (amenity of amenitiesList(); track amenity.id) {
+          <label class="hotel-list__amenity-check">
+            <input
+              type="checkbox"
+              [checked]="selectedAmenities().includes(amenity.slug)"
+              (change)="toggleAmenity(amenity.slug)"
+            />
+            {{ amenity.name }}
+          </label>
+        }
+      </div>
+    }
+
+    <button type="submit" class="hotel-list__apply">Apply Filters</button>
+  </form>
+
   @if (loading()) {
     <app-loading-state message="Loading hotels…" />
   } @else if (error()) {
     <app-error-state message="Could not load hotels. Please try again later." />
   } @else if (hotels().length === 0) {
-    <app-empty-state message="No hotels found." />
+    <app-empty-state message="No hotels match these filters." />
   } @else {
+    <p class="hotel-list__count">{{ totalCount() }} hotels found</p>
+
     <div class="hotel-list__grid">
       @for (hotel of hotels(); track hotel.id) {
         <app-hotel-card [hotel]="hotel" />
       }
     </div>
+
+    @if (totalPages() > 1) {
+      <nav class="hotel-list__pagination" aria-label="Pagination">
+        <button type="button" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">← Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next →</button>
+      </nav>
+    }
   }
 </section>

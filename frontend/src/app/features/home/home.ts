@@ -20,7 +20,7 @@ export class Home {
   protected readonly error = signal(false);
 
   constructor() {
-    this.hotelsService.getHotels(1, 6).subscribe({
+    this.hotelsService.getHotels({ page: 1, pageSize: 6, sort: 'star-desc' }).subscribe({
       next: (result) => {
         this.featuredHotels.set(result.items);
         this.loading.set(false);

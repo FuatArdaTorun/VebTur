@@ -56,3 +56,17 @@ export interface PagedResult<T> {
   totalCount: number;
   totalPages: number;
 }
+
+export type HotelSortOrder = 'recommended' | 'price-asc' | 'price-desc' | 'star-desc';
+
+export interface HotelSearchParams {
+  city?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minStarRating?: number;
+  amenities?: string[];
+  minCapacity?: number;
+  sort?: HotelSortOrder;
+  page: number;
+  pageSize: number;
+}

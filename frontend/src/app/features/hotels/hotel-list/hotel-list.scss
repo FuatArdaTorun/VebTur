@@ -7,9 +7,98 @@
     margin-bottom: 1.25rem;
   }
 
+  &__filters {
+    background: #f8f9fa;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      color: #555;
+      font-weight: 600;
+    }
+
+    select,
+    input {
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+      font-size: 0.9rem;
+      min-width: 8rem;
+    }
+  }
+
+  &__amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-top: 1rem;
+  }
+
+  &__amenity-check {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #333;
+    font-weight: 400;
+  }
+
+  &__apply {
+    margin-top: 1rem;
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #1558b3;
+    }
+  }
+
+  &__count {
+    color: #666;
+    margin: 0 0 1rem;
+  }
+
   &__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 1.25rem;
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 2rem;
+
+    button {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
   }
 }

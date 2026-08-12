@@ -8,17 +8,61 @@ namespace VebTur.Infrastructure.Hotels;
 
 public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
 {
-    public async Task<PagedResult<HotelSummaryDto>> GetHotelsAsync(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedResult<HotelSummaryDto>> GetHotelsAsync(HotelSearchRequest request, CancellationToken cancellationToken)
     {
-        var query = db.Hotels.AsNoTracking()
-            .Where(h => h.IsActive)
-            .OrderBy(h => h.Name);
+        var query = db.Hotels.AsNoTracking().Where(h => h.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(request.City))
+        {
+            query = query.Where(h => h.City == request.City);
+        }
+
+        if (request.MinStarRating.HasValue)
+        {
+            query = query.Where(h => h.StarRating >= request.MinStarRating.Value);
+        }
+
+        if (request.MinPrice.HasValue || request.MaxPrice.HasValue)
+        {
+            // Filter on each hotel's starting (minimum) price, so the price shown on the
+            // summary card is always consistent with why the hotel matched the filter.
+            query = query.Where(h => h.RoomTypes.Any(r => r.IsActive)
+                && (!request.MinPrice.HasValue
+                    || h.RoomTypes.Where(r => r.IsActive).Min(r => r.BaseNightlyPrice) >= request.MinPrice.Value)
+                && (!request.MaxPrice.HasValue
+                    || h.RoomTypes.Where(r => r.IsActive).Min(r => r.BaseNightlyPrice) <= request.MaxPrice.Value));
+        }
+
+        if (request.MinCapacity.HasValue)
+        {
+            query = query.Where(h => h.RoomTypes.Any(r => r.IsActive && r.Capacity >= request.MinCapacity.Value));
+        }
+
+        if (request.AmenitySlugs is { Count: > 0 })
+        {
+            foreach (var slug in request.AmenitySlugs)
+            {
+                query = query.Where(h => h.HotelAmenities.Any(ha => ha.Amenity!.Slug == slug));
+            }
+        }
+
+        query = request.Sort switch
+        {
+            HotelSortOrder.PriceAscending => query
+                .OrderBy(h => h.RoomTypes.Where(r => r.IsActive).Select(r => (decimal?)r.BaseNightlyPrice).Min())
+                .ThenBy(h => h.Name),
+            HotelSortOrder.PriceDescending => query
+                .OrderByDescending(h => h.RoomTypes.Where(r => r.IsActive).Select(r => (decimal?)r.BaseNightlyPrice).Min())
+                .ThenBy(h => h.Name),
+            HotelSortOrder.StarRatingDescending => query.OrderByDescending(h => h.StarRating).ThenBy(h => h.Name),
+            _ => query.OrderByDescending(h => h.StarRating).ThenBy(h => h.Name),
+        };
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .Select(h => new HotelSummaryDto(
                 h.Id,
                 h.Name,
@@ -31,7 +75,7 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                 h.RoomTypes.Where(r => r.IsActive).Select(r => r.Currency).FirstOrDefault()))
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<HotelSummaryDto>(items, page, pageSize, totalCount);
+        return new PagedResult<HotelSummaryDto>(items, request.Page, request.PageSize, totalCount);
     }
 
     public async Task<HotelDetailDto?> GetHotelByIdOrSlugAsync(string idOrSlug, CancellationToken cancellationToken)
