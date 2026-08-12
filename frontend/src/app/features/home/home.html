@@ -1,0 +1,21 @@
+<section class="home-hero">
+  <h1>VebTur</h1>
+  <p>Discover, compare, and request hotel reservations across Turkey's top destinations.</p>
+  <a class="home-hero__cta" routerLink="/hotels">Browse Hotels</a>
+</section>
+
+<section class="home-featured">
+  <h2>Featured Hotels</h2>
+
+  @if (loading()) {
+    <app-loading-state message="Loading featured hotels…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load featured hotels." />
+  } @else {
+    <div class="home-featured__grid">
+      @for (hotel of featuredHotels(); track hotel.id) {
+        <app-hotel-card [hotel]="hotel" />
+      }
+    </div>
+  }
+</section>

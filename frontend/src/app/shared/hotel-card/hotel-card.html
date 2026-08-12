@@ -1,0 +1,29 @@
+<a class="hotel-card" [routerLink]="['/hotels', hotel().slug]">
+  <img
+    class="hotel-card__image"
+    [src]="hotel().thumbnailUrl ?? ''"
+    [alt]="hotel().name"
+    loading="lazy"
+  />
+
+  <div class="hotel-card__body">
+    <div class="hotel-card__header">
+      <h3 class="hotel-card__name">{{ hotel().name }}</h3>
+      <span class="hotel-card__stars" [attr.aria-label]="hotel().starRating + ' star hotel'">
+        @for (star of stars(); track $index) {
+          ★
+        }
+      </span>
+    </div>
+
+    <p class="hotel-card__location">{{ hotel().city }}, {{ hotel().country }}</p>
+
+    @if (hotel().startingNightlyPrice; as price) {
+      <p class="hotel-card__price">
+        <span class="hotel-card__price-label">From</span>
+        {{ price | number: '1.0-0' }} {{ hotel().currency }}
+        <span class="hotel-card__price-label">/ night</span>
+      </p>
+    }
+  </div>
+</a>

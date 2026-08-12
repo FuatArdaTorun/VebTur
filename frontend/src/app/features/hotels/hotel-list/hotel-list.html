@@ -1,0 +1,17 @@
+<section class="hotel-list">
+  <h1>Hotels</h1>
+
+  @if (loading()) {
+    <app-loading-state message="Loading hotels…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load hotels. Please try again later." />
+  } @else if (hotels().length === 0) {
+    <app-empty-state message="No hotels found." />
+  } @else {
+    <div class="hotel-list__grid">
+      @for (hotel of hotels(); track hotel.id) {
+        <app-hotel-card [hotel]="hotel" />
+      }
+    </div>
+  }
+</section>

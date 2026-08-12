@@ -1,15 +1,2 @@
-<main class="status-page">
-  <h1>{{ title() }}</h1>
-
-  @if (health(); as status) {
-    <p class="status status--ok">Backend status: {{ status.status }}</p>
-    <p>Database reachable: {{ status.databaseReachable }}</p>
-    <p class="timestamp">{{ status.timestampUtc }}</p>
-  } @else if (healthError()) {
-    <p class="status status--error">{{ healthError() }}</p>
-  } @else {
-    <p>Checking backend status…</p>
-  }
-</main>
-
+<app-navbar />
 <router-outlet />

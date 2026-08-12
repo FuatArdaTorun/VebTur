@@ -1,24 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HealthService, HealthStatus } from './core/health.service';
+import { Navbar } from './shared/navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Navbar],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
-export class App {
-  private readonly healthService = inject(HealthService);
-
-  protected readonly title = signal('VebTur');
-  protected readonly health = signal<HealthStatus | null>(null);
-  protected readonly healthError = signal<string | null>(null);
-
-  constructor() {
-    this.healthService.getHealth().subscribe({
-      next: (status) => this.health.set(status),
-      error: () => this.healthError.set('Could not reach the VebTur API.')
-    });
-  }
-}
+export class App {}

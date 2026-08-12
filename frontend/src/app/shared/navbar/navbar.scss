@@ -1,0 +1,24 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eee;
+
+  &__brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #1a73e8;
+    text-decoration: none;
+  }
+
+  &__links a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  &__link--active {
+    color: #1a73e8;
+  }
+}

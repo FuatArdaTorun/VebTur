@@ -1,0 +1,67 @@
+@if (loading()) {
+  <app-loading-state message="Loading hotel…" />
+} @else if (error() || !hotel()) {
+  <app-error-state message="Could not load this hotel." />
+} @else {
+  @let h = hotel()!;
+
+  <article class="hotel-detail">
+    <a class="hotel-detail__back" routerLink="/hotels">← Back to hotels</a>
+
+    <header class="hotel-detail__header">
+      <h1>{{ h.name }}</h1>
+      <span class="hotel-detail__stars" [attr.aria-label]="h.starRating + ' star hotel'">
+        {{ '★'.repeat(h.starRating) }}
+      </span>
+    </header>
+
+    <p class="hotel-detail__location">{{ h.address }}, {{ h.city }}, {{ h.country }}</p>
+
+    @if (h.images.length > 0) {
+      <div class="hotel-detail__gallery">
+        @for (image of h.images; track image.displayOrder) {
+          <img [src]="image.url" [alt]="image.altText ?? h.name" loading="lazy" />
+        }
+      </div>
+    }
+
+    <div class="hotel-detail__actions">
+      <a [href]="mapUrl(h)" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+      @if (h.officialWebsiteUrl) {
+        <a [href]="h.officialWebsiteUrl" target="_blank" rel="noopener noreferrer">Visit Official Website</a>
+      }
+    </div>
+
+    <p class="hotel-detail__description">{{ h.description }}</p>
+
+    @if (h.amenities.length > 0) {
+      <section>
+        <h2>Amenities</h2>
+        <ul class="hotel-detail__amenities">
+          @for (amenity of h.amenities; track amenity.id) {
+            <li>{{ amenity.name }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (h.roomTypes.length > 0) {
+      <section>
+        <h2>Room Types</h2>
+        <ul class="hotel-detail__rooms">
+          @for (room of h.roomTypes; track room.id) {
+            <li class="hotel-detail__room">
+              <div>
+                <strong>{{ room.name }}</strong>
+                <p>{{ room.description }}</p>
+              </div>
+              <div class="hotel-detail__room-price">
+                {{ room.baseNightlyPrice }} {{ room.currency }} / night
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </article>
+}
