@@ -1,0 +1,6 @@
+@VebTur.Api_HostAddress = http://localhost:5148
+
+GET {{VebTur.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

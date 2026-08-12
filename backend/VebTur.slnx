@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VebTur.Api/VebTur.Api.csproj" />
+    <Project Path="src/VebTur.Application/VebTur.Application.csproj" />
+    <Project Path="src/VebTur.Domain/VebTur.Domain.csproj" />
+    <Project Path="src/VebTur.Infrastructure/VebTur.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VebTur.IntegrationTests/VebTur.IntegrationTests.csproj" />
+    <Project Path="tests/VebTur.UnitTests/VebTur.UnitTests.csproj" />
+  </Folder>
+</Solution>
