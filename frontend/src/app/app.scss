@@ -1,0 +1,24 @@
+.status-page {
+  max-width: 32rem;
+  margin: 4rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+}
+
+.status {
+  font-weight: 600;
+
+  &--ok {
+    color: #16794f;
+  }
+
+  &--error {
+    color: #b3261e;
+  }
+}
+
+.timestamp {
+  color: #666;
+  font-size: 0.875rem;
+}
