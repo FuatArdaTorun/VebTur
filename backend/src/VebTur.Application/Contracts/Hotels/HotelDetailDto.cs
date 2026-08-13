@@ -14,6 +14,7 @@ public record HotelDetailDto(
     decimal? GoogleRating,
     int? GoogleRatingCount,
     string? OfficialWebsiteUrl,
+    string? PhoneNumber,
     IReadOnlyList<HotelImageDto> Images,
     IReadOnlyList<AmenityDto> Amenities,
     IReadOnlyList<RoomTypeDto> RoomTypes);

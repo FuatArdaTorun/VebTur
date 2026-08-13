@@ -23,6 +23,12 @@ public class Hotel
     public string? GooglePlaceId { get; set; }
 
     /// <summary>
+    /// The hotel's own live-support/contact phone number, sourced from its official website
+    /// (same sourcing policy as the rest of the hotel's data). Null when not confidently found.
+    /// </summary>
+    public string? PhoneNumber { get; set; }
+
+    /// <summary>
     /// The hotel's aggregate Google Maps rating (e.g. 4.5 out of 5), manually captured on
     /// <see cref="GoogleRatingCapturedAtUtc"/> since automated Google Places API integration
     /// is not connected. This is the public rating number only — never review text/content.

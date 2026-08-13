@@ -106,6 +106,7 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                 h.GoogleRating,
                 h.GoogleRatingCount,
                 h.OfficialWebsiteUrl,
+                h.PhoneNumber,
                 h.Images.OrderBy(i => i.DisplayOrder)
                     .Select(i => new HotelImageDto(i.Url, i.AltText, i.DisplayOrder))
                     .ToList(),

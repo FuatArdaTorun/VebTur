@@ -41,6 +41,9 @@
       @if (h.officialWebsiteUrl) {
         <a [href]="h.officialWebsiteUrl" target="_blank" rel="noopener noreferrer">Visit Official Website</a>
       }
+      @if (h.phoneNumber) {
+        <a [href]="'tel:' + h.phoneNumber">☎ {{ h.phoneNumber }}</a>
+      }
     </div>
 
     <p class="hotel-detail__description">{{ h.description }}</p>

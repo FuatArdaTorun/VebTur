@@ -48,6 +48,7 @@ export interface HotelDetail {
   googleRating: number | null;
   googleRatingCount: number | null;
   officialWebsiteUrl: string | null;
+  phoneNumber: string | null;
   images: HotelImage[];
   amenities: Amenity[];
   roomTypes: RoomType[];
