@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\VebTur.Domain\VebTur.Domain.csproj" />
     <ProjectReference Include="..\..\src\VebTur.Application\VebTur.Application.csproj" />
+    <ProjectReference Include="..\..\src\VebTur.Infrastructure\VebTur.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

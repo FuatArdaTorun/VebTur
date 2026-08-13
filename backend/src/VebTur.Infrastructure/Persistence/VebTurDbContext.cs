@@ -1,9 +1,13 @@
+using VebTur.Domain.Common;
 using VebTur.Domain.Entities;
+using VebTur.Infrastructure.Auth;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace VebTur.Infrastructure.Persistence;
 
-public class VebTurDbContext(DbContextOptions<VebTurDbContext> options) : DbContext(options)
+public class VebTurDbContext(DbContextOptions<VebTurDbContext> options)
+    : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
 {
     public DbSet<Hotel> Hotels => Set<Hotel>();
     public DbSet<HotelImage> HotelImages => Set<HotelImage>();
@@ -15,6 +19,21 @@ public class VebTurDbContext(DbContextOptions<VebTurDbContext> options) : DbCont
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(VebTurDbContext).Assembly);
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<IHasTimestamps>())
+        {
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAtUtc = now;
+            }
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

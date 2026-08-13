@@ -1,6 +1,8 @@
+using VebTur.Domain.Common;
+
 namespace VebTur.Domain.Entities;
 
-public class Hotel
+public class Hotel : IHasTimestamps
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
 

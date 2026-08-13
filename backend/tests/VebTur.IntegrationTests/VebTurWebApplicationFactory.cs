@@ -1,0 +1,65 @@
+using VebTur.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+
+namespace VebTur.IntegrationTests;
+
+/// <summary>
+/// Boots the real API pipeline (Program.cs, real middleware, real controllers) against a real,
+/// dedicated Postgres database ("vebtur_test") on the same Docker instance dev uses — not a
+/// mock/in-memory provider — per this project's integration-testing philosophy. All
+/// configuration (connection string, JWT signing key, seeded dev admin credentials) is supplied
+/// explicitly here rather than relying on the developer machine's User Secrets, so the suite is
+/// reproducible on any machine/CI runner with Postgres reachable at localhost:5432.
+/// </summary>
+public class VebTurWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+{
+    public const string AdminEmail = "admin@vebtur-integration-tests.local";
+    public const string AdminPassword = "IntegrationTest1!Password";
+
+    private const string TestConnectionString =
+        "Host=localhost;Port=5432;Database=vebtur_test;Username=vebtur_app;Password=vebtur_dev_local_0812";
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Development");
+
+        // UseSetting (not ConfigureAppConfiguration + AddInMemoryCollection) — the latter's
+        // in-memory source ends up *lower* priority than this machine's own dev User Secrets
+        // in WebApplicationFactory's minimal-hosting pipeline, so it silently loses (tests were
+        // authenticating against the real local dev JWT signing key instead of this override).
+        // UseSetting is documented to always take highest precedence, which is what a test host
+        // actually needs.
+        builder.UseSetting("ConnectionStrings:DefaultConnection", TestConnectionString);
+        builder.UseSetting("Jwt:SigningKey", "integration-test-signing-key-at-least-32-bytes-long-for-hs256");
+        builder.UseSetting("Jwt:Issuer", "VebTur.IntegrationTests");
+        builder.UseSetting("Jwt:Audience", "VebTur.IntegrationTests.Frontend");
+        builder.UseSetting("Jwt:ExpiryHours", "1");
+        builder.UseSetting("Admin:Email", AdminEmail);
+        builder.UseSetting("Admin:Password", AdminPassword);
+        builder.UseSetting("Admin:DisplayName", "Integration Test Admin");
+    }
+
+    public async Task InitializeAsync()
+    {
+        // Migrate via a standalone DbContext, deliberately NOT touching this.Services first:
+        // WebApplicationFactory builds and starts the real host (running Program.cs's dev-only
+        // HotelSeeder/IdentitySeeder block) the moment Services is first accessed. On a brand
+        // new "vebtur_test" database the "Hotels"/Identity tables don't exist yet, so that
+        // seeding would fail immediately — the schema has to exist *before* the host starts.
+        // This also directly exercises "migrations apply cleanly against a real database."
+        var optionsBuilder = new DbContextOptionsBuilder<VebTurDbContext>().UseNpgsql(TestConnectionString);
+        await using var migrationContext = new VebTurDbContext(optionsBuilder.Options);
+        await migrationContext.Database.MigrateAsync();
+    }
+
+    async Task IAsyncLifetime.DisposeAsync()
+    {
+        await base.DisposeAsync();
+
+        var optionsBuilder = new DbContextOptionsBuilder<VebTurDbContext>().UseNpgsql(TestConnectionString);
+        await using var cleanupContext = new VebTurDbContext(optionsBuilder.Options);
+        await cleanupContext.Database.EnsureDeletedAsync();
+    }
+}
