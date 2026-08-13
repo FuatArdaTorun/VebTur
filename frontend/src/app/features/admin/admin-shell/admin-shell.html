@@ -1,0 +1,18 @@
+<div class="admin-shell">
+  <aside class="admin-shell__sidebar">
+    <a class="admin-shell__brand" routerLink="/">VebTur Admin</a>
+    <nav class="admin-shell__nav">
+      <a routerLink="/admin/hotels" routerLinkActive="admin-shell__link--active">Hotels</a>
+      <a routerLink="/admin/amenities" routerLinkActive="admin-shell__link--active">Amenities</a>
+    </nav>
+    <div class="admin-shell__user">
+      @if (currentUser(); as user) {
+        <span class="admin-shell__user-name">{{ user.displayName }}</span>
+      }
+      <button type="button" (click)="logout()">Log out</button>
+    </div>
+  </aside>
+  <main class="admin-shell__content">
+    <router-outlet />
+  </main>
+</div>

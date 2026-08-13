@@ -1,0 +1,28 @@
+<div class="url-list-editor">
+  <div class="url-list-editor__header">
+    <span>{{ label() }}</span>
+    <button type="button" (click)="addRow()">+ Add image</button>
+  </div>
+
+  @for (control of formArray().controls; track $index) {
+    <div class="url-list-editor__row" [formGroup]="asGroup(control)">
+      <img
+        class="url-list-editor__preview"
+        [src]="asGroup(control).get('url')?.value"
+        (error)="onImageError($event)"
+        alt=""
+      />
+      <div class="url-list-editor__fields">
+        <input type="url" formControlName="url" placeholder="https://…/photo.jpg" />
+        <input type="text" formControlName="altText" placeholder="Alt text (optional)" />
+      </div>
+      <div class="url-list-editor__actions">
+        <button type="button" (click)="moveUp($index)" [disabled]="$index === 0" title="Move up">↑</button>
+        <button type="button" (click)="moveDown($index)" [disabled]="$index === formArray().length - 1" title="Move down">↓</button>
+        <button type="button" (click)="removeRow($index)" title="Remove">✕</button>
+      </div>
+    </div>
+  } @empty {
+    <p class="url-list-editor__empty">No images yet.</p>
+  }
+</div>

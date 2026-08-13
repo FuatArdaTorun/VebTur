@@ -1,0 +1,74 @@
+<div class="admin-hotel-list">
+  <header class="admin-hotel-list__header">
+    <h1>Hotels</h1>
+    <a class="admin-hotel-list__new" routerLink="/admin/hotels/new">+ New hotel</a>
+  </header>
+
+  <div class="admin-hotel-list__filters">
+    <input type="search" placeholder="Search by name or city…" [formControl]="searchControl" (keyup.enter)="applySearch()" />
+    <label>
+      <input type="checkbox" [formControl]="showInactiveControl" (change)="applySearch()" />
+      Show deactivated
+    </label>
+    <button type="button" (click)="applySearch()">Search</button>
+  </div>
+
+  @if (loading()) {
+    <app-loading-state message="Loading hotels…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load hotels." />
+  } @else if (hotels().length === 0) {
+    <app-empty-state message="No hotels match your filters." />
+  } @else {
+    <table class="admin-hotel-list__table">
+      <thead>
+        <tr>
+          <th>Thumbnail</th>
+          <th>Name</th>
+          <th>City</th>
+          <th>Status</th>
+          <th>Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (hotel of hotels(); track hotel.id) {
+          <tr [class.admin-hotel-list__row--inactive]="!hotel.isActive">
+            <td>
+              @if (hotel.thumbnailUrl) {
+                <img class="admin-hotel-list__thumb" [src]="hotel.thumbnailUrl" [alt]="hotel.name" />
+              }
+            </td>
+            <td>{{ hotel.name }}</td>
+            <td>{{ hotel.city }}</td>
+            <td>{{ hotel.isActive ? 'Active' : 'Deactivated' }}</td>
+            <td>{{ hotel.updatedAtUtc | date: 'medium' }}</td>
+            <td class="admin-hotel-list__actions">
+              <a [routerLink]="['/admin/hotels', hotel.id, 'edit']">Edit</a>
+              <button type="button" (click)="requestToggle(hotel)">
+                {{ hotel.isActive ? 'Deactivate' : 'Reactivate' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="admin-hotel-list__pagination">
+        <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() === 1">← Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() === totalPages()">Next →</button>
+      </div>
+    }
+  }
+
+  @if (pendingToggle(); as hotel) {
+    <app-confirm-dialog
+      [message]="(hotel.isActive ? 'Deactivate' : 'Reactivate') + ' ' + hotel.name + '?'"
+      [confirmLabel]="hotel.isActive ? 'Deactivate' : 'Reactivate'"
+      (confirmed)="confirmToggle()"
+      (cancelled)="pendingToggle.set(null)"
+    />
+  }
+</div>

@@ -1,0 +1,64 @@
+<div class="admin-amenity-list">
+  <h1>Amenities</h1>
+
+  <form class="admin-amenity-list__add" [formGroup]="addForm" (ngSubmit)="addAmenity()">
+    <input type="text" formControlName="name" placeholder="Name (e.g. Sea View)" />
+    <input type="text" formControlName="slug" placeholder="Slug (e.g. sea-view)" />
+    <input type="text" formControlName="iconKey" placeholder="Icon key (optional)" />
+    <button type="submit">+ Add amenity</button>
+  </form>
+
+  @if (loading()) {
+    <app-loading-state message="Loading amenities…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load amenities." />
+  } @else {
+    <table class="admin-amenity-list__table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Slug</th>
+          <th>Icon key</th>
+          <th>Used by</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (amenity of amenities(); track amenity.id) {
+          @if (editingId() === amenity.id) {
+            <tr [formGroup]="editForm">
+              <td><input type="text" formControlName="name" /></td>
+              <td><input type="text" formControlName="slug" /></td>
+              <td><input type="text" formControlName="iconKey" /></td>
+              <td>{{ amenity.hotelCount }} hotels</td>
+              <td class="admin-amenity-list__actions">
+                <button type="button" (click)="saveEdit(amenity.id)">Save</button>
+                <button type="button" (click)="cancelEdit()">Cancel</button>
+              </td>
+            </tr>
+          } @else {
+            <tr>
+              <td>{{ amenity.name }}</td>
+              <td>{{ amenity.slug }}</td>
+              <td>{{ amenity.iconKey || '—' }}</td>
+              <td>{{ amenity.hotelCount }} hotels</td>
+              <td class="admin-amenity-list__actions">
+                <button type="button" (click)="startEdit(amenity)">Edit</button>
+                <button type="button" class="admin-amenity-list__delete" (click)="requestDelete(amenity)">Delete</button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (pendingDelete(); as amenity) {
+    <app-confirm-dialog
+      [message]="'Delete ' + amenity.name + '? This removes it from ' + amenity.hotelCount + ' hotel(s).'"
+      confirmLabel="Delete"
+      (confirmed)="confirmDelete()"
+      (cancelled)="pendingDelete.set(null)"
+    />
+  }
+</div>

@@ -1,0 +1,69 @@
+.admin-amenity-list {
+  max-width: 700px;
+
+  h1 {
+    margin-bottom: 1rem;
+  }
+
+  &__add {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+
+    input {
+      padding: 0.45rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      flex: 1;
+    }
+
+    button {
+      padding: 0.45rem 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: #1a73e8;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      text-align: left;
+      padding: 0.55rem 0.5rem;
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+    }
+
+    input {
+      padding: 0.3rem 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.6rem;
+
+    button {
+      border: none;
+      background: none;
+      color: #1a73e8;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+    }
+  }
+
+  &__delete {
+    color: #c5221f !important;
+  }
+}
