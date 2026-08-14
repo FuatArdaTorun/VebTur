@@ -4,19 +4,10 @@
   </header>
 
   <div class="admin-notification-list__filters">
-    <label>
-      Status
-      <select [formControl]="statusControl" (change)="applyFilter()">
-        <option value="">All</option>
-        @for (status of statuses; track status) {
-          <option [value]="status">{{ status }}</option>
-        }
-      </select>
-    </label>
     <div class="admin-notification-list__search">
       <input
         type="search"
-        placeholder="Search by reference, hotel, or subject…"
+        placeholder="Search by reference, hotel, recipient, or subject…"
         [formControl]="searchControl"
         (keyup.enter)="applyFilter()"
       />
@@ -46,7 +37,6 @@
           <th>Reference</th>
           <th>Recipient</th>
           <th>Subject</th>
-          <th>Status</th>
           <th></th>
         </tr>
       </thead>
@@ -65,7 +55,6 @@
             <td>{{ n.reservationReferenceNumber }}</td>
             <td>{{ n.recipient }}</td>
             <td>{{ n.subject }}</td>
-            <td>{{ n.status }}</td>
             <td class="admin-notification-list__actions">
               <a [routerLink]="['/admin/reservations', n.reservationRequestId]">View reservation</a>
             </td>

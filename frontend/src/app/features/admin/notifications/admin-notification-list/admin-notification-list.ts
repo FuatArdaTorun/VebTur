@@ -3,14 +3,13 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AdminNotificationsService } from '../admin-notifications.service';
-import { AdminNotificationLog, NotificationStatus } from '../models/admin-notification.model';
+import { AdminNotificationLog } from '../models/admin-notification.model';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 
 const PAGE_SIZE = 20;
-const STATUSES: NotificationStatus[] = ['Sent'];
 
 @Component({
   selector: 'app-admin-notification-list',
@@ -21,7 +20,6 @@ const STATUSES: NotificationStatus[] = ['Sent'];
 export class AdminNotificationList {
   private readonly notificationsService = inject(AdminNotificationsService);
 
-  protected readonly statuses = STATUSES;
   protected readonly notifications = signal<AdminNotificationLog[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
@@ -30,7 +28,6 @@ export class AdminNotificationList {
   protected readonly selectedIds = signal<Set<string>>(new Set());
   protected readonly confirmingBulkDelete = signal(false);
 
-  protected readonly statusControl = new FormControl<NotificationStatus | ''>('', { nonNullable: true });
   protected readonly searchControl = new FormControl('', { nonNullable: true });
 
   protected readonly selectedCount = computed(() => this.selectedIds().size);
@@ -96,7 +93,6 @@ export class AdminNotificationList {
 
     this.notificationsService
       .getNotifications({
-        status: this.statusControl.value || undefined,
         search: this.searchControl.value || undefined,
         page: this.page(),
         pageSize: PAGE_SIZE,

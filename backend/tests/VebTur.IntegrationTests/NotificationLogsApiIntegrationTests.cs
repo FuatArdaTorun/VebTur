@@ -41,11 +41,53 @@ public class NotificationLogsApiIntegrationTests
         var log = paged.Items[0];
         Assert.Equal(reservation.Id, log.ReservationRequestId);
         Assert.Equal(reservation.ReferenceNumber, log.ReservationReferenceNumber);
-        Assert.Equal("Sent", log.Status);
     }
 
     [Fact]
-    public async Task SearchBySubjectOrRecipient_ReturnsOnlyMatchingLogs()
+    public async Task Recipient_IsTheHotelsActiveSupervisorEmail()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var supervisorEmail = $"supervisor-{Guid.NewGuid():N}@example.com";
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 3, supervisorEmail: supervisorEmail);
+        var reservation = await CreateAsGuestAsync(hotelId, roomTypeId);
+
+        var paged = await ListAsync(adminToken, search: reservation.ReferenceNumber);
+
+        Assert.Single(paged.Items);
+        Assert.Equal(supervisorEmail, paged.Items[0].Recipient);
+    }
+
+    [Fact]
+    public async Task Recipient_FallsBackToAPlaceholder_WhenTheHotelHasNoActiveSupervisor()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 3);
+        var reservation = await CreateAsGuestAsync(hotelId, roomTypeId);
+
+        var paged = await ListAsync(adminToken, search: reservation.ReferenceNumber);
+
+        Assert.Single(paged.Items);
+        Assert.Equal("No active supervisor email on file", paged.Items[0].Recipient);
+    }
+
+    [Fact]
+    public async Task SearchByRecipientEmail_ReturnsOnlyMatchingLogs()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var supervisorEmail = $"search-recipient-{Guid.NewGuid():N}@example.com";
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, 5, supervisorEmail: supervisorEmail);
+
+        var target = await CreateAsGuestAsync(hotelId, roomTypeId);
+        await CreateHotelWithRoomTypeAsync(adminToken, 5); // unrelated hotel/reservation noise
+
+        var paged = await ListAsync(adminToken, search: supervisorEmail);
+
+        Assert.Single(paged.Items);
+        Assert.Equal(target.Id, paged.Items[0].ReservationRequestId);
+    }
+
+    [Fact]
+    public async Task SearchByHotelName_ReturnsOnlyMatchingLogs()
     {
         var adminToken = await GetAdminTokenAsync();
         var suffix = Guid.NewGuid().ToString("N")[..8];
@@ -153,7 +195,8 @@ public class NotificationLogsApiIntegrationTests
         return (await response.Content.ReadFromJsonAsync<PagedResult<AdminNotificationLogDto>>())!;
     }
 
-    private async Task<(Guid HotelId, Guid RoomTypeId, string Slug)> CreateHotelWithRoomTypeAsync(string adminToken, int availableCount, string? name = null)
+    private async Task<(Guid HotelId, Guid RoomTypeId, string Slug)> CreateHotelWithRoomTypeAsync(
+        string adminToken, int availableCount, string? name = null, string? supervisorEmail = null)
     {
         var slug = $"notification-test-{Guid.NewGuid():N}";
         var dto = new AdminHotelUpsertDto(
@@ -174,7 +217,7 @@ public class NotificationLogsApiIntegrationTests
             IsActive: true,
             Images: [],
             RoomTypes: [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", availableCount, true)],
-            Supervisors: [],
+            Supervisors: supervisorEmail is null ? [] : [new AdminHotelSupervisorDto(null, "Test Supervisor", supervisorEmail, true)],
             AmenitySlugs: []);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/admin/hotels") { Content = JsonContent.Create(dto) };

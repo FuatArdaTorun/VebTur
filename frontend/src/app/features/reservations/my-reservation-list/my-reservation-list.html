@@ -24,7 +24,7 @@
             <td>{{ r.referenceNumber }}</td>
             <td>{{ r.hotelName }}</td>
             <td>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</td>
-            <td>{{ r.status }}</td>
+            <td>{{ r.status | statusLabel }}</td>
             <td><a [routerLink]="['/my-reservations', r.id]">View</a></td>
           </tr>
         }

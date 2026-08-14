@@ -29,12 +29,10 @@ public class ReservationStatusTransitionsTests
         Assert.Equal(3, reservation.RoomType!.AvailableCount);
     }
 
-    [Theory]
-    [InlineData(ReservationStatus.Pending)]
-    [InlineData(ReservationStatus.Sent)]
-    public void Cancel_FromNonConfirmedActiveStatus_DoesNotChangeAvailableCount(ReservationStatus status)
+    [Fact]
+    public void Cancel_FromAwaitingApproval_DoesNotChangeAvailableCount()
     {
-        var reservation = BuildReservation(status, availableCount: 2);
+        var reservation = BuildReservation(ReservationStatus.AwaitingApproval, availableCount: 2);
 
         ReservationStatusTransitions.Cancel(reservation);
 

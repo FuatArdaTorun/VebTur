@@ -7,13 +7,13 @@ import { AdminReservationDetail as AdminReservationDetailModel } from '../models
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
+import { StatusLabelPipe } from '../../../../shared/status-label/status-label.pipe';
 
-const ACTIONABLE_STATUSES = new Set(['Pending', 'Sent']);
-const CANCELLABLE_STATUSES = new Set(['Pending', 'Sent', 'Confirmed']);
+const CANCELLABLE_STATUSES = new Set(['AwaitingApproval', 'Confirmed']);
 
 @Component({
   selector: 'app-admin-reservation-detail',
-  imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog],
+  imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog, StatusLabelPipe],
   templateUrl: './admin-reservation-detail.html',
   styleUrl: './admin-reservation-detail.scss',
 })
@@ -32,8 +32,7 @@ export class AdminReservationDetail {
   }
 
   protected canActOn(): boolean {
-    const status = this.reservation()?.status;
-    return status !== undefined && ACTIONABLE_STATUSES.has(status);
+    return this.reservation()?.status === 'AwaitingApproval';
   }
 
   protected canCancel(): boolean {

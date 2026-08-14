@@ -45,8 +45,8 @@ describe('ReservationLookup', () => {
     expect(component['reservation']()?.id).toBe('res-1');
   });
 
-  it.each(['Pending', 'Sent'])('shows the "not confirmed" notice while the reservation is %s', (status) => {
-    serviceStub = { getByReference: vi.fn().mockReturnValue(of({ id: 'res-1', referenceNumber: 'VEB-ABC12345', status })) };
+  it('shows the "not confirmed" notice while the reservation is AwaitingApproval', () => {
+    serviceStub = { getByReference: vi.fn().mockReturnValue(of({ id: 'res-1', referenceNumber: 'VEB-ABC12345', status: 'AwaitingApproval' })) };
     createComponent('VEB-ABC12345');
 
     expect(component['isAwaitingDecision']()).toBe(true);

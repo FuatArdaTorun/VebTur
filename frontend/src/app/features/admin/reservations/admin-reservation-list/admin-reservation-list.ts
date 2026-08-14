@@ -9,15 +9,16 @@ import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
+import { StatusLabelPipe } from '../../../../shared/status-label/status-label.pipe';
 
 const PAGE_SIZE = 20;
-const STATUSES: ReservationStatus[] = ['Pending', 'Sent', 'Confirmed', 'Rejected', 'Cancelled'];
+const STATUSES: ReservationStatus[] = ['AwaitingApproval', 'Confirmed', 'Rejected', 'Cancelled'];
 
 type SortableColumn = 'hotel' | 'checkin' | 'status';
 
 @Component({
   selector: 'app-admin-reservation-list',
-  imports: [RouterLink, ReactiveFormsModule, DatePipe, LoadingState, EmptyState, ErrorState, ConfirmDialog],
+  imports: [RouterLink, ReactiveFormsModule, DatePipe, LoadingState, EmptyState, ErrorState, ConfirmDialog, StatusLabelPipe],
   templateUrl: './admin-reservation-list.html',
   styleUrl: './admin-reservation-list.scss',
 })

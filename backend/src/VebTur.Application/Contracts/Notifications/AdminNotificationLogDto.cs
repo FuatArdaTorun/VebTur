@@ -8,7 +8,6 @@ public record AdminNotificationLogDto(
     string Type,
     string Recipient,
     string Subject,
-    string Status,
     DateTime CreatedAtUtc,
     DateTime? SentAtUtc,
     string? ErrorMessage);

@@ -20,7 +20,7 @@ public class DemoHotelNotificationService(VebTurDbContext db, ILogger<DemoHotelN
         {
             ReservationRequestId = reservation.Id,
             Type = NotificationType.DemoHotelApi,
-            Recipient = $"{reservation.Hotel!.Name} booking system (demo)",
+            Recipient = BuildRecipient(reservation.Hotel!),
             Subject = $"New reservation request {reservation.ReferenceNumber}",
             Status = NotificationStatus.Sent,
             SentAtUtc = DateTime.UtcNow,
@@ -30,5 +30,16 @@ public class DemoHotelNotificationService(VebTurDbContext db, ILogger<DemoHotelN
         logger.LogInformation("Demo hotel notification logged for reservation {Reference}", reservation.ReferenceNumber);
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// A snapshot of who this would really have gone to, at the time it was (simulated as) sent —
+    /// not recomputed later, so editing a supervisor's email afterward doesn't retroactively
+    /// rewrite the audit trail. Requires <c>hotel.Supervisors</c> to already be loaded.
+    /// </summary>
+    private static string BuildRecipient(Hotel hotel)
+    {
+        var activeEmails = hotel.Supervisors.Where(s => s.IsActive).Select(s => s.Email).ToList();
+        return activeEmails.Count > 0 ? string.Join(", ", activeEmails) : "No active supervisor email on file";
     }
 }

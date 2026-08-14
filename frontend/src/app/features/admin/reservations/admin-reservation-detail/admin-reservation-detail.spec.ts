@@ -65,8 +65,8 @@ describe('AdminReservationDetail', () => {
     fixture.detectChanges();
   }
 
-  it.each<ReservationStatus>(['Pending', 'Sent'])('allows confirm/reject for a %s reservation', (status) => {
-    createComponent(status);
+  it('allows confirm/reject for an AwaitingApproval reservation', () => {
+    createComponent('AwaitingApproval');
 
     expect(component['canActOn']()).toBe(true);
   });
@@ -78,7 +78,7 @@ describe('AdminReservationDetail', () => {
   });
 
   it('confirm calls the service and refetches on success', () => {
-    createComponent('Sent');
+    createComponent('AwaitingApproval');
     serviceStub.confirm.mockReturnValue(of(undefined));
 
     component['confirm']();
@@ -88,7 +88,7 @@ describe('AdminReservationDetail', () => {
   });
 
   it('surfaces the "no rooms available" error from a failed confirm without refetching', () => {
-    createComponent('Sent');
+    createComponent('AwaitingApproval');
     const httpError = new HttpErrorResponse({ status: 400, error: { errors: { AvailableCount: ['No rooms available for this room type.'] } } });
     serviceStub.confirm.mockReturnValue(throwError(() => httpError));
 

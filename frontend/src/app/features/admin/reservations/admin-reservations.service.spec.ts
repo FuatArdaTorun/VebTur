@@ -18,14 +18,22 @@ describe('AdminReservationsService', () => {
 
   it('getReservations GETs /admin/reservation-requests with status, hotelId, search, and sort', () => {
     service
-      .getReservations({ status: 'Pending', hotelId: 'h1', search: 'jane@example.com', sort: 'hotel-asc', page: 1, pageSize: 20 })
+      .getReservations({ status: 'AwaitingApproval', hotelId: 'h1', search: 'jane@example.com', sort: 'hotel-asc', page: 1, pageSize: 20 })
       .subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/reservation-requests'));
-    expect(req.request.params.get('status')).toBe('Pending');
+    expect(req.request.params.get('status')).toBe('AwaitingApproval');
     expect(req.request.params.get('hotelId')).toBe('h1');
     expect(req.request.params.get('search')).toBe('jane@example.com');
     expect(req.request.params.get('sort')).toBe('hotel-asc');
+    req.flush({});
+  });
+
+  it('getReservations appends one status param per value when given an array', () => {
+    service.getReservations({ status: ['AwaitingApproval', 'Rejected'], page: 1, pageSize: 20 }).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/reservation-requests'));
+    expect(req.request.params.getAll('status')).toEqual(['AwaitingApproval', 'Rejected']);
     req.flush({});
   });
 

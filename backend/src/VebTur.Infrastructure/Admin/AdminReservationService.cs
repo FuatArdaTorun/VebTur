@@ -83,9 +83,9 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
             return false;
         }
 
-        if (reservation.Status is not (ReservationStatus.Pending or ReservationStatus.Sent))
+        if (reservation.Status != ReservationStatus.AwaitingApproval)
         {
-            throw new ValidationException(nameof(reservation.Status), "Only pending/sent reservations can be confirmed.");
+            throw new ValidationException(nameof(reservation.Status), "Only reservations awaiting approval can be confirmed.");
         }
 
         if (reservation.RoomType!.AvailableCount <= 0)
@@ -108,9 +108,9 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
             return false;
         }
 
-        if (reservation.Status is not (ReservationStatus.Pending or ReservationStatus.Sent))
+        if (reservation.Status != ReservationStatus.AwaitingApproval)
         {
-            throw new ValidationException(nameof(reservation.Status), "Only pending/sent reservations can be rejected.");
+            throw new ValidationException(nameof(reservation.Status), "Only reservations awaiting approval can be rejected.");
         }
 
         reservation.Status = ReservationStatus.Rejected;

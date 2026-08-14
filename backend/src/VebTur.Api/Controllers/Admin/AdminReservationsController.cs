@@ -39,8 +39,8 @@ public class AdminReservationsController(IAdminReservationService adminReservati
             _ => AdminReservationSortOrder.CreatedDescending,
         };
 
-        // `status` binds both ?status=Pending&status=Sent (multi-value) and a single ?status=Pending
-        // (one-element array) — backward compatible with the existing single-status dropdown filter.
+        // `status` binds both multiple values (?status=Confirmed&status=Rejected) and a single
+        // ?status=X (one-element array) — backward compatible with the single-status dropdown filter.
         var result = await adminReservationService.GetReservationsAsync(
             new AdminReservationListRequest(status, hotelId, search, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);

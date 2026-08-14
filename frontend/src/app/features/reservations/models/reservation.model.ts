@@ -1,4 +1,4 @@
-export type ReservationStatus = 'Pending' | 'Sent' | 'Confirmed' | 'Rejected' | 'Cancelled';
+export type ReservationStatus = 'AwaitingApproval' | 'Confirmed' | 'Rejected' | 'Cancelled';
 
 export interface CreateReservationRequest {
   hotelId: string;

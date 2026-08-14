@@ -12,18 +12,14 @@ public class AdminNotificationService(VebTurDbContext db) : IAdminNotificationSe
     {
         var query = db.NotificationLogs.AsNoTracking().AsQueryable();
 
-        if (request.Status.HasValue)
-        {
-            query = query.Where(n => n.Status == request.Status.Value);
-        }
-
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var pattern = $"%{request.Search.Trim()}%";
             query = query.Where(n =>
                 EF.Functions.ILike(n.Recipient, pattern) ||
                 EF.Functions.ILike(n.Subject, pattern) ||
-                EF.Functions.ILike(n.ReservationRequest!.ReferenceNumber, pattern));
+                EF.Functions.ILike(n.ReservationRequest!.ReferenceNumber, pattern) ||
+                EF.Functions.ILike(n.ReservationRequest.Hotel!.Name, pattern));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -34,7 +30,7 @@ public class AdminNotificationService(VebTurDbContext db) : IAdminNotificationSe
             .Take(request.PageSize)
             .Select(n => new AdminNotificationLogDto(
                 n.Id, n.ReservationRequestId, n.ReservationRequest!.ReferenceNumber, n.ReservationRequest.Hotel!.Name,
-                n.Type.ToString(), n.Recipient, n.Subject, n.Status.ToString(), n.CreatedAtUtc, n.SentAtUtc, n.ErrorMessage))
+                n.Type.ToString(), n.Recipient, n.Subject, n.CreatedAtUtc, n.SentAtUtc, n.ErrorMessage))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<AdminNotificationLogDto>(items, request.Page, request.PageSize, totalCount);

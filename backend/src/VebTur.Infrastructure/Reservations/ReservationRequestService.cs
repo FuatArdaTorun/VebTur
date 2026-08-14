@@ -14,7 +14,9 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
 {
     public async Task<ReservationRequestDetailDto> CreateAsync(CreateReservationRequestDto dto, Guid? userId, CancellationToken cancellationToken)
     {
-        var hotel = await db.Hotels.FirstOrDefaultAsync(h => h.Id == dto.HotelId && h.IsActive, cancellationToken)
+        // Supervisors included — DemoHotelNotificationService.NotifyHotelAsync needs them to build
+        // a real recipient email snapshot.
+        var hotel = await db.Hotels.Include(h => h.Supervisors).FirstOrDefaultAsync(h => h.Id == dto.HotelId && h.IsActive, cancellationToken)
             ?? throw new ValidationException(nameof(dto.HotelId), "Hotel not found.");
 
         var roomType = await db.RoomTypes.FirstOrDefaultAsync(r => r.Id == dto.RoomTypeId && r.HotelId == dto.HotelId && r.IsActive, cancellationToken)
@@ -40,7 +42,6 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
             SpecialRequests = dto.SpecialRequests,
             EstimatedPrice = ReservationPricingCalculator.CalculateEstimatedPrice(dto.CheckInDate, dto.CheckOutDate, roomType.BaseNightlyPrice),
             Currency = roomType.Currency,
-            Status = ReservationStatus.Pending,
         };
 
         db.ReservationRequests.Add(reservation);
@@ -81,7 +82,7 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
     public async Task<ReservationRequestDetailDto?> UpdateMineAsync(Guid userId, Guid id, UpdateReservationRequestDto dto, CancellationToken cancellationToken)
     {
         var reservation = await db.ReservationRequests
-            .Include(r => r.Hotel)
+            .Include(r => r.Hotel!).ThenInclude(h => h.Supervisors)
             .Include(r => r.RoomType)
             .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId, cancellationToken);
 
@@ -90,12 +91,12 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
             return null;
         }
 
-        if (reservation.Status is not (ReservationStatus.Pending or ReservationStatus.Sent))
+        if (reservation.Status != ReservationStatus.AwaitingApproval)
         {
             // Confirmed reservations can no longer be self-edited — silently reopening a settled
             // confirmation (and briefly releasing its held slot) was more surprising than useful;
             // cancelling and submitting a new request is the supported path once confirmed.
-            throw new ValidationException(nameof(reservation.Status), "Only pending reservations can be edited — confirmed, cancelled, or rejected reservations can't be changed.");
+            throw new ValidationException(nameof(reservation.Status), "Only reservations awaiting approval can be edited — confirmed, cancelled, or rejected reservations can't be changed.");
         }
 
         var newRoomType = await db.RoomTypes.FirstOrDefaultAsync(r => r.Id == dto.RoomTypeId && r.HotelId == reservation.HotelId && r.IsActive, cancellationToken)
@@ -112,7 +113,6 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
         reservation.SpecialRequests = dto.SpecialRequests;
         reservation.EstimatedPrice = ReservationPricingCalculator.CalculateEstimatedPrice(dto.CheckInDate, dto.CheckOutDate, newRoomType.BaseNightlyPrice);
         reservation.Currency = newRoomType.Currency;
-        reservation.Status = ReservationStatus.Pending;
 
         await SendAndMarkNotifiedAsync(reservation, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
@@ -139,7 +139,7 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
     private async Task SendAndMarkNotifiedAsync(ReservationRequest reservation, CancellationToken cancellationToken)
     {
         await notificationService.NotifyHotelAsync(reservation, cancellationToken);
-        reservation.Status = ReservationStatus.Sent;
+        reservation.Status = ReservationStatus.AwaitingApproval;
         reservation.NotificationSentAtUtc = DateTime.UtcNow;
     }
 

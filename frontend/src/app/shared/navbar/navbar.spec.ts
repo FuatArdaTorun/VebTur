@@ -93,14 +93,14 @@ describe('Navbar', () => {
     httpMock.expectNone((r) => r.url.endsWith('/api/v1/reservation-requests/mine'));
   });
 
-  it('only surfaces reservations with a decided status (Confirmed/Rejected/Cancelled), not Pending/Sent', async () => {
+  it('only surfaces reservations with a decided status (Confirmed/Rejected/Cancelled), not AwaitingApproval', async () => {
     loginAs(['Customer']);
     await createFixture();
     fixture.detectChanges();
 
     httpMock.expectOne((r) => r.url.endsWith('/api/v1/reservation-requests/mine')).flush({
       items: [
-        { id: 'pending-1', hotelName: 'Pending Hotel', referenceNumber: 'VEB-PENDING1', status: 'Sent' },
+        { id: 'awaiting-1', hotelName: 'Awaiting Hotel', referenceNumber: 'VEB-AWAITNG1', status: 'AwaitingApproval' },
         { id: 'confirmed-1', hotelName: 'Confirmed Hotel', referenceNumber: 'VEB-CONFRM1', status: 'Confirmed' },
       ],
       page: 1,

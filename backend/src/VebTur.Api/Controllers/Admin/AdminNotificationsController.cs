@@ -2,7 +2,6 @@ using VebTur.Api.Validation;
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Notifications;
-using VebTur.Domain.Enums;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +19,6 @@ public class AdminNotificationsController(
 
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminNotificationLogDto>>> GetNotifications(
-        [FromQuery] NotificationStatus? status = null,
         [FromQuery] string? search = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
@@ -30,7 +28,7 @@ public class AdminNotificationsController(
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
         var result = await adminNotificationService.GetNotificationsAsync(
-            new AdminNotificationListRequest(status, search, page, pageSize), cancellationToken);
+            new AdminNotificationListRequest(search, page, pageSize), cancellationToken);
         return Ok(result);
     }
 

@@ -9,7 +9,7 @@
       <select [formControl]="statusControl" (change)="applyFilter()">
         <option value="">All</option>
         @for (status of statuses; track status) {
-          <option [value]="status">{{ status }}</option>
+          <option [value]="status">{{ status | statusLabel }}</option>
         }
       </select>
     </label>
@@ -49,7 +49,7 @@
             <td>{{ r.hotelName }}</td>
             <td>{{ r.guestFullName }}</td>
             <td>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</td>
-            <td>{{ r.status }}</td>
+            <td>{{ r.status | statusLabel }}</td>
             <td class="admin-reservation-list__actions">
               <a [routerLink]="['/admin/reservations', r.id]">View</a>
               <button type="button" class="admin-reservation-list__delete" (click)="requestDelete(r)">Delete</button>

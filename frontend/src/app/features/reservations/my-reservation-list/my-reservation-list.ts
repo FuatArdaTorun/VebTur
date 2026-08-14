@@ -6,12 +6,13 @@ import { ReservationRequestDetail } from '../models/reservation.model';
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
+import { StatusLabelPipe } from '../../../shared/status-label/status-label.pipe';
 
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-my-reservation-list',
-  imports: [RouterLink, DatePipe, LoadingState, ErrorState, EmptyState],
+  imports: [RouterLink, DatePipe, LoadingState, ErrorState, EmptyState, StatusLabelPipe],
   templateUrl: './my-reservation-list.html',
   styleUrl: './my-reservation-list.scss',
 })

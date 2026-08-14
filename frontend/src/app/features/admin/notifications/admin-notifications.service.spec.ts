@@ -16,22 +16,20 @@ describe('AdminNotificationsService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('getNotifications GETs /admin/notifications with status and search', () => {
-    service.getNotifications({ status: 'Sent', search: 'VEB-1234', page: 1, pageSize: 20 }).subscribe();
+  it('getNotifications GETs /admin/notifications with search', () => {
+    service.getNotifications({ search: 'VEB-1234', page: 1, pageSize: 20 }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/notifications'));
-    expect(req.request.params.get('status')).toBe('Sent');
     expect(req.request.params.get('search')).toBe('VEB-1234');
     expect(req.request.params.get('page')).toBe('1');
     expect(req.request.params.get('pageSize')).toBe('20');
     req.flush({});
   });
 
-  it('getNotifications omits status and search params when not provided', () => {
+  it('getNotifications omits the search param when not provided', () => {
     service.getNotifications({ page: 1, pageSize: 20 }).subscribe();
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/notifications'));
-    expect(req.request.params.has('status')).toBe(false);
     expect(req.request.params.has('search')).toBe(false);
     req.flush({});
   });

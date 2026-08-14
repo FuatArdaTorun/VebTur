@@ -13,8 +13,7 @@ namespace VebTur.IntegrationTests;
 /// <summary>
 /// End-to-end coverage of the reservation-request workflow: guest create + reference lookup,
 /// logged-in customer create/ownership isolation, admin confirm/reject/cancel with the
-/// AvailableCount business rule, and customer self-edit resetting a Confirmed reservation back
-/// to Pending/Sent (releasing its availability slot).
+/// AvailableCount business rule, and self-edit only being allowed while AwaitingApproval.
 /// </summary>
 [Collection(VebTurApiCollection.Name)]
 public class ReservationRequestsApiIntegrationTests
@@ -39,7 +38,7 @@ public class ReservationRequestsApiIntegrationTests
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = await response.Content.ReadFromJsonAsync<ReservationRequestDetailDto>();
         Assert.NotNull(created);
-        Assert.Equal("Sent", created!.Status);
+        Assert.Equal("AwaitingApproval", created!.Status);
         Assert.Equal(3000m, created.EstimatedPrice); // 3 nights * 1000
 
         var lookup = await _client.GetAsync($"/api/v1/reservation-requests/{created.ReferenceNumber}");
@@ -159,13 +158,13 @@ public class ReservationRequestsApiIntegrationTests
     }
 
     [Fact]
-    public async Task AdminReject_FromSent_Succeeds_ButNotFromAlreadyConfirmed()
+    public async Task AdminReject_FromAwaitingApproval_Succeeds_ButNotFromAlreadyConfirmed()
     {
         var adminToken = await GetAdminTokenAsync();
         var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 2);
 
-        var pending = await CreateAsGuestAsync(hotelId, roomTypeId);
-        using var rejectRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{pending.Id}/reject");
+        var awaitingApproval = await CreateAsGuestAsync(hotelId, roomTypeId);
+        using var rejectRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{awaitingApproval.Id}/reject");
         rejectRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         Assert.Equal(HttpStatusCode.NoContent, (await _client.SendAsync(rejectRequest)).StatusCode);
 
@@ -281,7 +280,7 @@ public class ReservationRequestsApiIntegrationTests
         var adminToken = await GetAdminTokenAsync();
         var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
 
-        var sent = await CreateAsGuestAsync(hotelId, roomTypeId);
+        var awaitingApproval = await CreateAsGuestAsync(hotelId, roomTypeId);
         var confirmed = await CreateAsGuestAsync(hotelId, roomTypeId);
         Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, confirmed.Id));
         var rejected = await CreateAsGuestAsync(hotelId, roomTypeId);
@@ -290,14 +289,14 @@ public class ReservationRequestsApiIntegrationTests
         (await _client.SendAsync(rejectRequest)).EnsureSuccessStatusCode();
 
         using var request = new HttpRequestMessage(
-            HttpMethod.Get, "/api/v1/admin/reservation-requests?status=Sent&status=Rejected&pageSize=200");
+            HttpMethod.Get, "/api/v1/admin/reservation-requests?status=AwaitingApproval&status=Rejected&pageSize=200");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var paged = await response.Content.ReadFromJsonAsync<PagedResult<AdminReservationSummaryDto>>();
 
         var ids = paged!.Items.Select(r => r.Id).ToList();
-        Assert.Contains(sent.Id, ids);
+        Assert.Contains(awaitingApproval.Id, ids);
         Assert.Contains(rejected.Id, ids);
         Assert.DoesNotContain(confirmed.Id, ids);
     }

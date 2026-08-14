@@ -15,7 +15,7 @@
     <app-error-state message="No reservation found for that reference number." />
   } @else if (reservation(); as r) {
     <div class="reservation-lookup__result">
-      <p class="reservation-lookup__status">Status: <strong>{{ r.status }}</strong></p>
+      <p class="reservation-lookup__status">Status: <strong>{{ r.status | statusLabel }}</strong></p>
       <h2>{{ r.hotelName }}</h2>
       <p>{{ r.roomTypeName }}</p>
       <p>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</p>

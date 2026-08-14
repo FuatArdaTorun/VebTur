@@ -23,9 +23,9 @@ describe('AdminShell', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('fetches pending-approval reservations (Pending + Sent) on init', () => {
+  it('fetches AwaitingApproval reservations on init', () => {
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/reservation-requests'));
-    expect(req.request.params.getAll('status')).toEqual(['Pending', 'Sent']);
+    expect(req.request.params.getAll('status')).toEqual(['AwaitingApproval']);
 
     req.flush({
       items: [{ id: 'res-1', hotelName: 'Test Hotel', referenceNumber: 'VEB-ABC12345', guestFullName: 'Jane Guest' }],

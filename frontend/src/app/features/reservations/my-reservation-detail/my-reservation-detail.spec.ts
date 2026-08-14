@@ -55,7 +55,7 @@ describe('MyReservationDetail', () => {
     fixture.detectChanges();
   }
 
-  it.each<ReservationStatus>(['Pending', 'Sent', 'Confirmed'])('shows the actions bar for a %s reservation', (status) => {
+  it.each<ReservationStatus>(['AwaitingApproval', 'Confirmed'])('shows the actions bar for a %s reservation', (status) => {
     createComponent(status);
 
     expect(component['canManage']()).toBe(true);
@@ -67,8 +67,8 @@ describe('MyReservationDetail', () => {
     expect(component['canManage']()).toBe(false);
   });
 
-  it('shows the Edit link for a Pending reservation', () => {
-    createComponent('Pending');
+  it('shows the Edit link for an AwaitingApproval reservation', () => {
+    createComponent('AwaitingApproval');
     expect(fixture.nativeElement.querySelector('a[href*="/edit"]')).not.toBeNull();
   });
 
@@ -77,8 +77,8 @@ describe('MyReservationDetail', () => {
     expect(fixture.nativeElement.querySelector('a[href*="/edit"]')).toBeNull();
   });
 
-  it.each<ReservationStatus>(['Pending', 'Sent'])('shows the "not confirmed" notice while a %s reservation awaits a decision', (status) => {
-    createComponent(status);
+  it('shows the "not confirmed" notice while an AwaitingApproval reservation awaits a decision', () => {
+    createComponent('AwaitingApproval');
 
     expect(component['isAwaitingDecision']()).toBe(true);
   });

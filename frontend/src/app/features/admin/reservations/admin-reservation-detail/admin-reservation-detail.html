@@ -9,7 +9,7 @@
     <a class="admin-reservation-detail__back" routerLink="/admin/reservations">← Back to reservations</a>
 
     <h1>{{ r.hotelName }}</h1>
-    <p class="admin-reservation-detail__reference">{{ r.referenceNumber }} · <strong>{{ r.status }}</strong></p>
+    <p class="admin-reservation-detail__reference">{{ r.referenceNumber }} · <strong>{{ r.status | statusLabel }}</strong></p>
 
     <dl>
       <dt>Room type</dt>

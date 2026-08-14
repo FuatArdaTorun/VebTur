@@ -6,12 +6,11 @@ import { ReservationsService } from '../reservations.service';
 import { ReservationRequestDetail } from '../models/reservation.model';
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
-
-const AWAITING_DECISION_STATUSES = new Set(['Pending', 'Sent']);
+import { StatusLabelPipe } from '../../../shared/status-label/status-label.pipe';
 
 @Component({
   selector: 'app-reservation-lookup',
-  imports: [ReactiveFormsModule, DatePipe, LoadingState, ErrorState],
+  imports: [ReactiveFormsModule, DatePipe, LoadingState, ErrorState, StatusLabelPipe],
   templateUrl: './reservation-lookup.html',
   styleUrl: './reservation-lookup.scss',
 })
@@ -38,8 +37,7 @@ export class ReservationLookup {
 
   /** The "not confirmed until approved" notice only makes sense while a decision is still pending. */
   protected isAwaitingDecision(): boolean {
-    const status = this.reservation()?.status;
-    return status !== undefined && AWAITING_DECISION_STATUSES.has(status);
+    return this.reservation()?.status === 'AwaitingApproval';
   }
 
   protected submit(): void {

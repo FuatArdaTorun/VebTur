@@ -36,7 +36,7 @@ public class ReservationRequest : IHasTimestamps
     public decimal EstimatedPrice { get; set; }
     public required string Currency { get; set; }
 
-    public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
+    public ReservationStatus Status { get; set; } = ReservationStatus.AwaitingApproval;
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;

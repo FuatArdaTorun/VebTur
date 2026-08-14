@@ -32,7 +32,7 @@ export class AdminShell {
 
   protected fetchPendingApprovals(): void {
     this.reservationsService
-      .getReservations({ status: ['Pending', 'Sent'], sort: 'created-desc', page: 1, pageSize: PENDING_APPROVAL_LIMIT })
+      .getReservations({ status: 'AwaitingApproval', sort: 'created-desc', page: 1, pageSize: PENDING_APPROVAL_LIMIT })
       .subscribe((result) => {
         this.pendingApprovals.set(
           result.items.map((r) => ({
