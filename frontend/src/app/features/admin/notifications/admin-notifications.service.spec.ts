@@ -35,4 +35,13 @@ describe('AdminNotificationsService', () => {
     expect(req.request.params.has('search')).toBe(false);
     req.flush({});
   });
+
+  it('deleteNotifications DELETEs /admin/notifications with the ids in the body', () => {
+    service.deleteNotifications(['n-1', 'n-2']).subscribe();
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/notifications'));
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.body).toEqual({ ids: ['n-1', 'n-2'] });
+    req.flush(null);
+  });
 });

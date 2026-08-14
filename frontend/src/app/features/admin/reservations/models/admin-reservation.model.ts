@@ -44,7 +44,7 @@ export type AdminReservationSort =
   | 'status-desc';
 
 export interface AdminReservationListParams {
-  status?: ReservationStatus;
+  status?: ReservationStatus | ReservationStatus[];
   hotelId?: string;
   search?: string;
   sort?: AdminReservationSort;

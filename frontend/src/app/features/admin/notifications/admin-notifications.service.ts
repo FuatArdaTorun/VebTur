@@ -15,4 +15,9 @@ export class AdminNotificationsService {
 
     return this.http.get<PagedResult<AdminNotificationLog>>(this.baseUrl, { params: httpParams });
   }
+
+  /** Irreversible. Ids that no longer exist are silently ignored by the backend. */
+  deleteNotifications(ids: string[]) {
+    return this.http.delete<void>(this.baseUrl, { body: { ids } });
+  }
 }

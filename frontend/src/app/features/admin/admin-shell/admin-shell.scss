@@ -66,4 +66,10 @@
     padding: 1.5rem 2rem;
     min-width: 0;
   }
+
+  &__topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
 }

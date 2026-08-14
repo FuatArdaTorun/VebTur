@@ -73,6 +73,31 @@ public class ReservationRequestsApiIntegrationTests
     }
 
     [Fact]
+    public async Task Mine_SortByUpdated_OrdersByMostRecentStatusChange_NotCreationOrder()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+        var customerToken = await RegisterCustomerAsync();
+
+        // Created first, but confirmed last below — should sort first under sortByUpdated=true.
+        var olderButRecentlyUpdated = await CreateAsCustomerAsync(customerToken, hotelId, roomTypeId);
+        var newerButUntouched = await CreateAsCustomerAsync(customerToken, hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, olderButRecentlyUpdated.Id));
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/reservation-requests/mine?sortByUpdated=true&pageSize=50");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", customerToken);
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var paged = await response.Content.ReadFromJsonAsync<PagedResult<ReservationRequestDetailDto>>();
+
+        var ourIds = paged!.Items
+            .Where(r => r.Id == olderButRecentlyUpdated.Id || r.Id == newerButUntouched.Id)
+            .Select(r => r.Id)
+            .ToList();
+        Assert.Equal([olderButRecentlyUpdated.Id, newerButUntouched.Id], ourIds);
+    }
+
+    [Fact]
     public async Task AdminConfirm_DecrementsAvailableCount_AndBlocksAFurtherConfirmWhenZero()
     {
         var adminToken = await GetAdminTokenAsync();
@@ -248,6 +273,33 @@ public class ReservationRequestsApiIntegrationTests
 
         Assert.Single(paged.Items);
         Assert.Equal(target.Id, paged.Items[0].Id);
+    }
+
+    [Fact]
+    public async Task AdminReservations_MultiStatusFilter_ReturnsReservationsMatchingAnyGivenStatus()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+
+        var sent = await CreateAsGuestAsync(hotelId, roomTypeId);
+        var confirmed = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, confirmed.Id));
+        var rejected = await CreateAsGuestAsync(hotelId, roomTypeId);
+        using var rejectRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{rejected.Id}/reject");
+        rejectRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        (await _client.SendAsync(rejectRequest)).EnsureSuccessStatusCode();
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get, "/api/v1/admin/reservation-requests?status=Sent&status=Rejected&pageSize=200");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var paged = await response.Content.ReadFromJsonAsync<PagedResult<AdminReservationSummaryDto>>();
+
+        var ids = paged!.Items.Select(r => r.Id).ToList();
+        Assert.Contains(sent.Id, ids);
+        Assert.Contains(rejected.Id, ids);
+        Assert.DoesNotContain(confirmed.Id, ids);
     }
 
     [Fact]

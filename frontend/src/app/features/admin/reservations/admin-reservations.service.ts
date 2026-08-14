@@ -10,7 +10,13 @@ export class AdminReservationsService {
 
   getReservations(params: AdminReservationListParams) {
     let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
-    if (params.status) httpParams = httpParams.set('status', params.status);
+    if (Array.isArray(params.status)) {
+      for (const status of params.status) {
+        httpParams = httpParams.append('status', status);
+      }
+    } else if (params.status) {
+      httpParams = httpParams.set('status', params.status);
+    }
     if (params.hotelId) httpParams = httpParams.set('hotelId', params.hotelId);
     if (params.search) httpParams = httpParams.set('search', params.search);
     if (params.sort) httpParams = httpParams.set('sort', params.sort);

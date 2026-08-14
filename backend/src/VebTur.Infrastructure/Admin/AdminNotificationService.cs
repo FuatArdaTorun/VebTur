@@ -39,4 +39,12 @@ public class AdminNotificationService(VebTurDbContext db) : IAdminNotificationSe
 
         return new PagedResult<AdminNotificationLogDto>(items, request.Page, request.PageSize, totalCount);
     }
+
+    public async Task<int> DeleteAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        var matches = await db.NotificationLogs.Where(n => ids.Contains(n.Id)).ToListAsync(cancellationToken);
+        db.NotificationLogs.RemoveRange(matches);
+        await db.SaveChangesAsync(cancellationToken);
+        return matches.Count;
+    }
 }

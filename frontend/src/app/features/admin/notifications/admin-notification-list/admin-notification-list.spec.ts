@@ -8,7 +8,7 @@ import { AdminNotificationsService } from '../admin-notifications.service';
 describe('AdminNotificationList', () => {
   let fixture: ComponentFixture<AdminNotificationList>;
   let component: AdminNotificationList;
-  let serviceStub: { getNotifications: ReturnType<typeof vi.fn> };
+  let serviceStub: { getNotifications: ReturnType<typeof vi.fn>; deleteNotifications?: ReturnType<typeof vi.fn> };
 
   function createComponent(): void {
     TestBed.configureTestingModule({
@@ -74,5 +74,71 @@ describe('AdminNotificationList', () => {
     component['goToPage'](2);
 
     expect(serviceStub.getNotifications).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+  });
+
+  it('toggling a row selects/deselects it', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }, { id: 'n-2' }], page: 1, pageSize: 20, totalCount: 2, totalPages: 1 })) };
+    createComponent();
+
+    component['toggleSelect']('n-1');
+    expect(component['isSelected']('n-1')).toBe(true);
+    expect(component['selectedCount']()).toBe(1);
+
+    component['toggleSelect']('n-1');
+    expect(component['isSelected']('n-1')).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
+  });
+
+  it('select-all selects every currently loaded row, and toggles them all off again', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }, { id: 'n-2' }], page: 1, pageSize: 20, totalCount: 2, totalPages: 1 })) };
+    createComponent();
+
+    component['toggleSelectAll']();
+    expect(component['isAllSelected']()).toBe(true);
+    expect(component['selectedCount']()).toBe(2);
+
+    component['toggleSelectAll']();
+    expect(component['isAllSelected']()).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
+  });
+
+  it('refetching (e.g. applying a filter) clears the current selection', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })) };
+    createComponent();
+    component['toggleSelect']('n-1');
+    expect(component['selectedCount']()).toBe(1);
+
+    component['applyFilter']();
+
+    expect(component['selectedCount']()).toBe(0);
+  });
+
+  it('requestBulkDelete opens the confirm dialog only when something is selected', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })) };
+    createComponent();
+
+    component['requestBulkDelete']();
+    expect(component['confirmingBulkDelete']()).toBe(false);
+
+    component['toggleSelect']('n-1');
+    component['requestBulkDelete']();
+    expect(component['confirmingBulkDelete']()).toBe(true);
+  });
+
+  it('confirming bulk delete calls the service with the selected ids, clears selection, and refetches', () => {
+    serviceStub = {
+      getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }, { id: 'n-2' }], page: 1, pageSize: 20, totalCount: 2, totalPages: 1 })),
+      deleteNotifications: vi.fn().mockReturnValue(of(undefined)),
+    };
+    createComponent();
+    component['toggleSelect']('n-1');
+    component['requestBulkDelete']();
+
+    component['confirmBulkDelete']();
+
+    expect(serviceStub.deleteNotifications).toHaveBeenCalledWith(['n-1']);
+    expect(component['confirmingBulkDelete']()).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
+    expect(serviceStub.getNotifications).toHaveBeenCalledTimes(2);
   });
 });

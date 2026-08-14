@@ -15,9 +15,9 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
     {
         var query = db.ReservationRequests.AsNoTracking().AsQueryable();
 
-        if (request.Status.HasValue)
+        if (request.Statuses is { Count: > 0 })
         {
-            query = query.Where(r => r.Status == request.Status.Value);
+            query = query.Where(r => request.Statuses.Contains(r.Status));
         }
 
         if (request.HotelId.HasValue)

@@ -18,6 +18,15 @@
     </div>
   </aside>
   <main class="admin-shell__content">
+    <div class="admin-shell__topbar">
+      <app-notification-bell
+        [items]="pendingApprovals()"
+        storageKey="admin-pending-approvals"
+        emptyMessage="No reservations awaiting approval."
+        ariaLabel="Reservations awaiting approval"
+        (opened)="fetchPendingApprovals()"
+      />
+    </div>
     <router-outlet />
   </main>
 </div>

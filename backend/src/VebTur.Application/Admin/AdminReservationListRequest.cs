@@ -3,4 +3,4 @@ using VebTur.Domain.Enums;
 
 namespace VebTur.Application.Admin;
 
-public record AdminReservationListRequest(ReservationStatus? Status, Guid? HotelId, string? Search, AdminReservationSortOrder Sort, int Page, int PageSize);
+public record AdminReservationListRequest(IReadOnlyList<ReservationStatus>? Statuses, Guid? HotelId, string? Search, AdminReservationSortOrder Sort, int Page, int PageSize);

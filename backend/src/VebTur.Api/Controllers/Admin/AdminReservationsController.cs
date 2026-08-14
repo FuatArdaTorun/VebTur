@@ -17,7 +17,7 @@ public class AdminReservationsController(IAdminReservationService adminReservati
 
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminReservationSummaryDto>>> GetReservations(
-        [FromQuery] ReservationStatus? status = null,
+        [FromQuery] ReservationStatus[]? status = null,
         [FromQuery] Guid? hotelId = null,
         [FromQuery] string? search = null,
         [FromQuery] string sort = "created-desc",
@@ -39,6 +39,8 @@ public class AdminReservationsController(IAdminReservationService adminReservati
             _ => AdminReservationSortOrder.CreatedDescending,
         };
 
+        // `status` binds both ?status=Pending&status=Sent (multi-value) and a single ?status=Pending
+        // (one-element array) — backward compatible with the existing single-status dropdown filter.
         var result = await adminReservationService.GetReservationsAsync(
             new AdminReservationListRequest(status, hotelId, search, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);

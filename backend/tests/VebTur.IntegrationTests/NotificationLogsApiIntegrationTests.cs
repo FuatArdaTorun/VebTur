@@ -81,6 +81,57 @@ public class NotificationLogsApiIntegrationTests
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+    [Fact]
+    public async Task DeleteNotifications_RemovesSpecifiedRows_AndLeavesOthersUntouched()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+
+        var toDelete = await CreateAsGuestAsync(hotelId, roomTypeId);
+        var toKeep = await CreateAsGuestAsync(hotelId, roomTypeId);
+        var logToDelete = (await ListAsync(adminToken, search: toDelete.ReferenceNumber)).Items[0];
+        var logToKeep = (await ListAsync(adminToken, search: toKeep.ReferenceNumber)).Items[0];
+
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/notifications")
+        {
+            Content = JsonContent.Create(new DeleteNotificationLogsDto([logToDelete.Id])),
+        };
+        deleteRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var deleteResponse = await _client.SendAsync(deleteRequest);
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        Assert.Empty((await ListAsync(adminToken, search: toDelete.ReferenceNumber)).Items);
+        Assert.Single((await ListAsync(adminToken, search: toKeep.ReferenceNumber)).Items);
+        Assert.Equal(logToKeep.Id, (await ListAsync(adminToken, search: toKeep.ReferenceNumber)).Items[0].Id);
+    }
+
+    [Fact]
+    public async Task DeleteNotifications_WithEmptyIds_ReturnsBadRequest()
+    {
+        var adminToken = await GetAdminTokenAsync();
+
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/notifications")
+        {
+            Content = JsonContent.Create(new DeleteNotificationLogsDto([])),
+        };
+        deleteRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var response = await _client.SendAsync(deleteRequest);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteNotifications_WithoutToken_ReturnsUnauthorized()
+    {
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/notifications")
+        {
+            Content = JsonContent.Create(new DeleteNotificationLogsDto([Guid.NewGuid()])),
+        };
+        var response = await _client.SendAsync(deleteRequest);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
     private async Task<ReservationRequestDetailDto> CreateAsGuestAsync(Guid hotelId, Guid roomTypeId)
     {
         var dto = new CreateReservationRequestDto(

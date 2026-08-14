@@ -9,7 +9,12 @@ public interface IReservationRequestService
 
     Task<ReservationRequestDetailDto?> GetByReferenceAsync(string referenceNumber, CancellationToken cancellationToken);
 
-    Task<PagedResult<ReservationRequestDetailDto>> GetMineAsync(Guid userId, int page, int pageSize, CancellationToken cancellationToken);
+    /// <summary>
+    /// <paramref name="sortByUpdated"/> orders by <c>UpdatedAtUtc</c> descending instead of the
+    /// default <c>CreatedAtUtc</c> descending — used by the "recent status changes" notification
+    /// bell, which cares about when a reservation last changed state, not when it was first made.
+    /// </summary>
+    Task<PagedResult<ReservationRequestDetailDto>> GetMineAsync(Guid userId, int page, int pageSize, bool sortByUpdated, CancellationToken cancellationToken);
 
     Task<ReservationRequestDetailDto?> GetMineByIdAsync(Guid userId, Guid id, CancellationToken cancellationToken);
 

@@ -47,12 +47,13 @@ public class ReservationRequestsController(
     public async Task<ActionResult<PagedResult<ReservationRequestDetailDto>>> GetMine(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] bool sortByUpdated = false,
         CancellationToken cancellationToken = default)
     {
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var result = await reservationRequestService.GetMineAsync(RequireCurrentUserId(), page, pageSize, cancellationToken);
+        var result = await reservationRequestService.GetMineAsync(RequireCurrentUserId(), page, pageSize, sortByUpdated, cancellationToken);
         return Ok(result);
     }
 

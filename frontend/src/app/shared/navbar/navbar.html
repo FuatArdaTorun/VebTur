@@ -10,6 +10,13 @@
         <a class="navbar__admin-link" routerLink="/admin/hotels">Admin Panel</a>
       } @else {
         <a routerLink="/my-reservations" routerLinkActive="navbar__link--active">My Reservations</a>
+        <app-notification-bell
+          [items]="recentStatusChanges()"
+          storageKey="customer-reservation-status"
+          emptyMessage="No recent updates on your reservations."
+          ariaLabel="Reservation status updates"
+          (opened)="fetchRecentStatusChanges()"
+        />
       }
       <span class="navbar__user">{{ displayName() }}</span>
       <button type="button" class="navbar__logout" (click)="logout()">Log out</button>

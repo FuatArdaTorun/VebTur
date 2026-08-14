@@ -57,13 +57,13 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
             .Select(ProjectToDetailDto)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<PagedResult<ReservationRequestDetailDto>> GetMineAsync(Guid userId, int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedResult<ReservationRequestDetailDto>> GetMineAsync(Guid userId, int page, int pageSize, bool sortByUpdated, CancellationToken cancellationToken)
     {
         var query = db.ReservationRequests.AsNoTracking().Where(r => r.UserId == userId);
 
         var totalCount = await query.CountAsync(cancellationToken);
+        query = sortByUpdated ? query.OrderByDescending(r => r.UpdatedAtUtc) : query.OrderByDescending(r => r.CreatedAtUtc);
         var items = await query
-            .OrderByDescending(r => r.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(ProjectToDetailDto)
