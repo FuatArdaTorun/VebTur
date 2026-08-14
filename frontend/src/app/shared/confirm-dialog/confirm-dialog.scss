@@ -20,6 +20,22 @@
     margin: 0 0 1.25rem;
   }
 
+  &__typed-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+
+    input {
+      padding: 0.5rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
@@ -31,6 +47,11 @@
       border: 1px solid #ccc;
       background: #fff;
       cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
     }
   }
 

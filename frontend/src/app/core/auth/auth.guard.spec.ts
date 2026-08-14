@@ -28,18 +28,18 @@ describe('authGuard', () => {
     expect(runGuard('/admin/hotels')).toBe(true);
   });
 
-  it('redirects to /admin/login with a returnUrl when not authenticated', () => {
+  it('redirects to /login with a returnUrl when not authenticated', () => {
     setup(false, false);
 
     const result = runGuard('/admin/hotels') as UrlTree;
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect(result.toString()).toContain('/admin/login');
+    expect(result.toString()).toContain('/login');
     expect(result.toString()).toContain('returnUrl');
     expect(result.toString()).toContain(encodeURIComponent('/admin/hotels'));
   });
 
-  it('redirects to /admin/login when authenticated but lacking the Admin role', () => {
+  it('redirects to /login when authenticated but lacking the Admin role', () => {
     // Proves the guard checks the role claim, not merely "is some user logged in" — the same
     // property AdminHotels_WithNonAdminRoleToken_ReturnsForbidden checks on the backend.
     setup(true, false);
@@ -47,6 +47,6 @@ describe('authGuard', () => {
     const result = runGuard('/admin/hotels') as UrlTree;
 
     expect(result).toBeInstanceOf(UrlTree);
-    expect(result.toString()).toContain('/admin/login');
+    expect(result.toString()).toContain('/login');
   });
 });

@@ -1,6 +1,21 @@
 <nav class="navbar">
-  <a class="navbar__brand" routerLink="/">VebTur</a>
+  <a class="navbar__brand" routerLink="/">
+    <img class="navbar__logo" src="/logo.png" alt="VebTur logo">
+    VebTur
+  </a>
   <div class="navbar__links">
     <a routerLink="/hotels" routerLinkActive="navbar__link--active">Hotels</a>
+    @if (isAuthenticated()) {
+      @if (isAdmin()) {
+        <a class="navbar__admin-link" routerLink="/admin/hotels">Admin Panel</a>
+      } @else {
+        <a routerLink="/my-reservations" routerLinkActive="navbar__link--active">My Reservations</a>
+      }
+      <span class="navbar__user">{{ displayName() }}</span>
+      <button type="button" class="navbar__logout" (click)="logout()">Log out</button>
+    } @else {
+      <a routerLink="/login">Sign In</a>
+      <a routerLink="/register">Sign Up</a>
+    }
   </div>
 </nav>

@@ -13,6 +13,18 @@ namespace VebTur.IntegrationTests;
 /// explicitly here rather than relying on the developer machine's User Secrets, so the suite is
 /// reproducible on any machine/CI runner with Postgres reachable at localhost:5432.
 /// </summary>
+/// <summary>
+/// Every test class that needs the API host shares this one fixture instance via
+/// <c>[Collection(Name)]</c> below (not one <see cref="VebTurWebApplicationFactory"/> per class) —
+/// two independent instances would each migrate/drop the same hardcoded "vebtur_test" database,
+/// and xUnit runs different test classes in parallel by default, racing those against each other.
+/// </summary>
+[CollectionDefinition(Name)]
+public class VebTurApiCollection : ICollectionFixture<VebTurWebApplicationFactory>
+{
+    public const string Name = "VebTur API";
+}
+
 public class VebTurWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public const string AdminEmail = "admin@vebtur-integration-tests.local";

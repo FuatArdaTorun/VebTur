@@ -114,6 +114,14 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+// "Admin"/"Customer" roles must exist in every environment (not just Development) — public
+// self-registration assigns "Customer" on first use, so the role can't be dev-seed-only.
+using (var roleSeedScope = app.Services.CreateScope())
+{
+    var roleManager = roleSeedScope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+    await IdentitySeeder.EnsureRolesExistAsync(roleManager);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

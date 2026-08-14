@@ -14,6 +14,23 @@ namespace VebTur.Infrastructure.Persistence.Seed;
 public static class IdentitySeeder
 {
     public const string AdminRoleName = "Admin";
+    public const string CustomerRoleName = "Customer";
+
+    /// <summary>
+    /// Ensures the "Admin" and "Customer" roles exist. Runs in every environment (unlike the dev
+    /// admin account below) since public self-registration assigns "Customer" and needs the role
+    /// to already be there — not gated behind <c>IsDevelopment()</c>.
+    /// </summary>
+    public static async Task EnsureRolesExistAsync(RoleManager<ApplicationRole> roleManager, CancellationToken cancellationToken = default)
+    {
+        foreach (var roleName in new[] { AdminRoleName, CustomerRoleName })
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new ApplicationRole(roleName));
+            }
+        }
+    }
 
     public static async Task SeedAsync(
         RoleManager<ApplicationRole> roleManager,
@@ -22,10 +39,7 @@ public static class IdentitySeeder
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
-        if (!await roleManager.RoleExistsAsync(AdminRoleName))
-        {
-            await roleManager.CreateAsync(new ApplicationRole(AdminRoleName));
-        }
+        await EnsureRolesExistAsync(roleManager, cancellationToken);
 
         var email = configuration["Admin:Email"];
         var password = configuration["Admin:Password"];

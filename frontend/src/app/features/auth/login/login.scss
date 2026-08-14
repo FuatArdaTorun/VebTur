@@ -1,4 +1,4 @@
-.admin-login {
+.login {
   display: flex;
   justify-content: center;
   padding: 4rem 1.5rem;
@@ -51,5 +51,12 @@
     color: #c5221f;
     font-size: 0.85rem;
     margin: 0;
+  }
+
+  &__switch {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #555;
+    text-align: center;
   }
 }

@@ -6,10 +6,24 @@
   border-bottom: 1px solid #eee;
 
   &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 700;
     font-size: 1.25rem;
     color: #1a73e8;
     text-decoration: none;
+  }
+
+  &__logo {
+    height: 32px;
+    width: 32px;
+  }
+
+  &__links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
   }
 
   &__links a {
@@ -20,5 +34,26 @@
 
   &__link--active {
     color: #1a73e8;
+  }
+
+  &__admin-link {
+    font-size: 0.85rem;
+    color: #666 !important;
+    font-weight: 400 !important;
+  }
+
+  &__user {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  &__logout {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
   }
 }

@@ -1,9 +1,15 @@
 <div class="confirm-dialog__backdrop" (click)="cancelled.emit()">
   <div class="confirm-dialog" (click)="$event.stopPropagation()">
     <p>{{ message() }}</p>
+    @if (requireTypedConfirmation(); as required) {
+      <label class="confirm-dialog__typed-label">
+        Type "{{ required }}" to confirm
+        <input type="text" [value]="typedValue()" (input)="onTypedInput($any($event.target).value)" autocomplete="off" />
+      </label>
+    }
     <div class="confirm-dialog__actions">
       <button type="button" (click)="cancelled.emit()">{{ cancelLabel() }}</button>
-      <button type="button" class="confirm-dialog__confirm" (click)="confirmed.emit()">{{ confirmLabel() }}</button>
+      <button type="button" class="confirm-dialog__confirm" [disabled]="!canConfirm()" (click)="confirmed.emit()">{{ confirmLabel() }}</button>
     </div>
   </div>
 </div>

@@ -56,7 +56,31 @@ describe('AuthService', () => {
     expect(service.getToken()).toBe('fake-jwt-token');
     expect(service.hasRole('Admin')).toBe(true);
     expect(service.hasRole('Customer')).toBe(false);
-    expect(localStorage.getItem('vebtur_admin_token')).toBe('fake-jwt-token');
+    expect(localStorage.getItem('vebtur_token')).toBe('fake-jwt-token');
+  });
+
+  it('register stores the token/user and flips isAuthenticated, same as login', () => {
+    const service = createService();
+    const response: LoginResponse = {
+      token: 'fake-jwt-token',
+      expiresAtUtc: new Date().toISOString(),
+      email: 'guest@example.com',
+      displayName: 'Guest User',
+      roles: ['Customer'],
+    };
+
+    let received: unknown;
+    service.register({ email: 'guest@example.com', password: 'Passw0rd', displayName: 'Guest User' }).subscribe((r) => (received = r));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/register'));
+    expect(req.request.method).toBe('POST');
+    req.flush(response);
+
+    expect(received).toEqual(response);
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.hasRole('Customer')).toBe(true);
+    expect(service.hasRole('Admin')).toBe(false);
+    expect(localStorage.getItem('vebtur_token')).toBe('fake-jwt-token');
   });
 
   it('logout clears stored token/user and flips isAuthenticated back to false', () => {
@@ -77,13 +101,13 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
     expect(service.currentUser()).toBeNull();
     expect(service.getToken()).toBeNull();
-    expect(localStorage.getItem('vebtur_admin_token')).toBeNull();
+    expect(localStorage.getItem('vebtur_token')).toBeNull();
   });
 
   it('restores a previously logged-in user from localStorage on construction', () => {
-    localStorage.setItem('vebtur_admin_token', 'persisted-token');
+    localStorage.setItem('vebtur_token', 'persisted-token');
     localStorage.setItem(
-      'vebtur_admin_user',
+      'vebtur_user',
       JSON.stringify({ email: 'admin@vebtur.local', displayName: 'Admin', roles: ['Admin'] }),
     );
 

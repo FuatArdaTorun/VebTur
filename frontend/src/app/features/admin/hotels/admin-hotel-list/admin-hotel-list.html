@@ -5,12 +5,14 @@
   </header>
 
   <div class="admin-hotel-list__filters">
-    <input type="search" placeholder="Search by name or city…" [formControl]="searchControl" (keyup.enter)="applySearch()" />
+    <div class="admin-hotel-list__search">
+      <input type="search" placeholder="Search by name or city…" [formControl]="searchControl" (keyup.enter)="applySearch()" />
+      <button type="button" (click)="applySearch()">Search</button>
+    </div>
     <label>
       <input type="checkbox" [formControl]="showInactiveControl" (change)="applySearch()" />
       Show deactivated
     </label>
-    <button type="button" (click)="applySearch()">Search</button>
   </div>
 
   @if (loading()) {
@@ -48,6 +50,7 @@
               <button type="button" (click)="requestToggle(hotel)">
                 {{ hotel.isActive ? 'Deactivate' : 'Reactivate' }}
               </button>
+              <button type="button" class="admin-hotel-list__delete" (click)="requestDelete(hotel)">Delete</button>
             </td>
           </tr>
         }
@@ -69,6 +72,16 @@
       [confirmLabel]="hotel.isActive ? 'Deactivate' : 'Reactivate'"
       (confirmed)="confirmToggle()"
       (cancelled)="pendingToggle.set(null)"
+    />
+  }
+
+  @if (pendingDelete(); as hotel) {
+    <app-confirm-dialog
+      [message]="'Permanently delete ' + hotel.name + '? This removes it and all its data from the database and cannot be undone.'"
+      confirmLabel="Delete permanently"
+      [requireTypedConfirmation]="hotel.name"
+      (confirmed)="confirmDelete()"
+      (cancelled)="pendingDelete.set(null)"
     />
   }
 </div>

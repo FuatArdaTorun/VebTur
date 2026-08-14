@@ -18,7 +18,8 @@ namespace VebTur.IntegrationTests;
 /// class sequentially by default), so each test uses a GUID-suffixed slug to avoid colliding
 /// with the others.
 /// </summary>
-public class AdminApiIntegrationTests : IClassFixture<VebTurWebApplicationFactory>
+[Collection(VebTurApiCollection.Name)]
+public class AdminApiIntegrationTests
 {
     private readonly VebTurWebApplicationFactory _factory;
     private readonly HttpClient _client;
@@ -241,6 +242,29 @@ public class AdminApiIntegrationTests : IClassFixture<VebTurWebApplicationFactor
         // Reappears publicly
         var publicListAfterReactivate = await _client.GetFromJsonAsync<PagedResult<HotelSummaryDto>>("/api/v1/hotels?pageSize=100");
         Assert.Contains(publicListAfterReactivate!.Items, h => h.Slug == slug);
+
+        // Permanent delete — irreversible, distinct from deactivate above
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/admin/hotels/{created.Id}/permanent");
+        deleteRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var deleteResponse = await _client.SendAsync(deleteRequest);
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        // Gone from the public surface
+        var publicDetailAfterDelete = await _client.GetAsync($"/api/v1/hotels/{slug}");
+        Assert.Equal(HttpStatusCode.NotFound, publicDetailAfterDelete.StatusCode);
+
+        // Gone from the admin surface too (unlike deactivate, no isActive=false record survives)
+        using var adminAfterDeleteRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/admin/hotels?isActive=false&pageSize=100");
+        adminAfterDeleteRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var adminAfterDeleteResponse = await _client.SendAsync(adminAfterDeleteRequest);
+        var adminListAfterDelete = await adminAfterDeleteResponse.Content.ReadFromJsonAsync<PagedResult<AdminHotelSummaryDto>>();
+        Assert.DoesNotContain(adminListAfterDelete!.Items, h => h.Slug == slug);
+
+        // Deleting again is a no-op 404, not an error
+        using var secondDeleteRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/admin/hotels/{created.Id}/permanent");
+        secondDeleteRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var secondDeleteResponse = await _client.SendAsync(secondDeleteRequest);
+        Assert.Equal(HttpStatusCode.NotFound, secondDeleteResponse.StatusCode);
     }
 
     private async Task<string> GetAdminTokenAsync()

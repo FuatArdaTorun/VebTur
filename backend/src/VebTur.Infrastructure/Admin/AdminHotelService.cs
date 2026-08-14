@@ -206,6 +206,19 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
     public async Task<bool> ReactivateHotelAsync(Guid id, CancellationToken cancellationToken)
         => await SetActiveAsync(id, isActive: true, cancellationToken);
 
+    public async Task<bool> DeleteHotelPermanentlyAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var hotel = await db.Hotels.FirstOrDefaultAsync(h => h.Id == id, cancellationToken);
+        if (hotel is null)
+        {
+            return false;
+        }
+
+        db.Hotels.Remove(hotel);
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private async Task<bool> SetActiveAsync(Guid id, bool isActive, CancellationToken cancellationToken)
     {
         var hotel = await db.Hotels.FirstOrDefaultAsync(h => h.Id == id, cancellationToken);

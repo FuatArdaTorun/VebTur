@@ -2,10 +2,12 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CurrentUser, LoginRequest, LoginResponse } from './auth.models';
+import { CurrentUser, LoginRequest, LoginResponse, RegisterRequest } from './auth.models';
 
-const TOKEN_KEY = 'vebtur_admin_token';
-const USER_KEY = 'vebtur_admin_user';
+// Shared by both admin and customer sessions — this service authenticates any signed-in user,
+// not just admins (see AuthController.Register in the backend for the "Customer" role path).
+const TOKEN_KEY = 'vebtur_token';
+const USER_KEY = 'vebtur_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -16,14 +18,18 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
 
   login(request: LoginRequest) {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, request).pipe(
-      tap((response) => {
-        const user: CurrentUser = { email: response.email, displayName: response.displayName, roles: response.roles };
-        localStorage.setItem(TOKEN_KEY, response.token);
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
-        this.currentUser.set(user);
-      }),
-    );
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, request).pipe(tap((response) => this.storeSession(response)));
+  }
+
+  register(request: RegisterRequest) {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/register`, request).pipe(tap((response) => this.storeSession(response)));
+  }
+
+  private storeSession(response: LoginResponse): void {
+    const user: CurrentUser = { email: response.email, displayName: response.displayName, roles: response.roles };
+    localStorage.setItem(TOKEN_KEY, response.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
   }
 
   logout(): void {

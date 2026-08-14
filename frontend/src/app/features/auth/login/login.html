@@ -1,6 +1,6 @@
-<div class="admin-login">
-  <form class="admin-login__form" [formGroup]="form" (ngSubmit)="submit()">
-    <h1>Admin Login</h1>
+<div class="login">
+  <form class="login__form" [formGroup]="form" (ngSubmit)="submit()">
+    <h1>Sign In</h1>
 
     <label>
       Email
@@ -13,11 +13,13 @@
     </label>
 
     @if (error()) {
-      <p class="admin-login__error">Invalid email or password.</p>
+      <p class="login__error">Invalid email or password.</p>
     }
 
     <button type="submit" [disabled]="loading()">
-      {{ loading() ? 'Logging in…' : 'Log in' }}
+      {{ loading() ? 'Signing in…' : 'Sign In' }}
     </button>
+
+    <p class="login__switch">Don't have an account? <a routerLink="/register">Sign Up</a></p>
   </form>
 </div>

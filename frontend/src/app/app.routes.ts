@@ -9,12 +9,16 @@ export const routes: Routes = [
   { path: 'hotels', component: HotelList },
   { path: 'hotels/:idOrSlug', component: HotelDetail },
   {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
+  },
+  {
     path: 'admin',
     children: [
-      {
-        path: 'login',
-        loadComponent: () => import('./features/admin/login/admin-login').then((m) => m.AdminLogin),
-      },
       {
         path: '',
         loadComponent: () => import('./features/admin/admin-shell/admin-shell').then((m) => m.AdminShell),

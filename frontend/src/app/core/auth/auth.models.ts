@@ -3,6 +3,12 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  displayName: string;
+}
+
 export interface LoginResponse {
   token: string;
   expiresAtUtc: string;

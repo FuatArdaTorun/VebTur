@@ -26,6 +26,7 @@ export class AdminHotelList {
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
   protected readonly pendingToggle = signal<AdminHotelSummary | null>(null);
+  protected readonly pendingDelete = signal<AdminHotelSummary | null>(null);
 
   protected readonly searchControl = new FormControl('', { nonNullable: true });
   protected readonly showInactiveControl = new FormControl(false, { nonNullable: true });
@@ -64,6 +65,22 @@ export class AdminHotelList {
 
     request.subscribe(() => {
       this.pendingToggle.set(null);
+      this.fetch();
+    });
+  }
+
+  protected requestDelete(hotel: AdminHotelSummary): void {
+    this.pendingDelete.set(hotel);
+  }
+
+  protected confirmDelete(): void {
+    const hotel = this.pendingDelete();
+    if (!hotel) {
+      return;
+    }
+
+    this.hotelsService.deleteHotelPermanently(hotel.id).subscribe(() => {
+      this.pendingDelete.set(null);
       this.fetch();
     });
   }

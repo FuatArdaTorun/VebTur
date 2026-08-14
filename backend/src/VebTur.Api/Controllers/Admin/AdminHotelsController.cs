@@ -78,4 +78,12 @@ public class AdminHotelsController(
         var reactivated = await adminHotelService.ReactivateHotelAsync(id, cancellationToken);
         return reactivated ? NoContent() : NotFound();
     }
+
+    /// <summary>Irreversible — distinct from the soft-delete <see cref="DeactivateHotel"/> above.</summary>
+    [HttpDelete("{id:guid}/permanent")]
+    public async Task<IActionResult> DeleteHotelPermanently(Guid id, CancellationToken cancellationToken)
+    {
+        var deleted = await adminHotelService.DeleteHotelPermanentlyAsync(id, cancellationToken);
+        return deleted ? NoContent() : NotFound();
+    }
 }

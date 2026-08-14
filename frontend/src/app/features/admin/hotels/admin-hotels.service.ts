@@ -35,4 +35,9 @@ export class AdminHotelsService {
   reactivateHotel(id: string) {
     return this.http.post<void>(`${this.baseUrl}/${id}/reactivate`, {});
   }
+
+  /** Irreversible — removes the hotel and all its owned data from the database. */
+  deleteHotelPermanently(id: string) {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/permanent`);
+  }
 }
