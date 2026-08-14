@@ -90,21 +90,18 @@ public class ReservationRequestService(VebTurDbContext db, IHotelNotificationSer
             return null;
         }
 
-        if (reservation.Status is ReservationStatus.Cancelled or ReservationStatus.Rejected)
+        if (reservation.Status is not (ReservationStatus.Pending or ReservationStatus.Sent))
         {
-            throw new ValidationException(nameof(reservation.Status), "Cancelled or rejected reservations can't be edited.");
+            // Confirmed reservations can no longer be self-edited — silently reopening a settled
+            // confirmation (and briefly releasing its held slot) was more surprising than useful;
+            // cancelling and submitting a new request is the supported path once confirmed.
+            throw new ValidationException(nameof(reservation.Status), "Only pending reservations can be edited — confirmed, cancelled, or rejected reservations can't be changed.");
         }
 
         var newRoomType = await db.RoomTypes.FirstOrDefaultAsync(r => r.Id == dto.RoomTypeId && r.HotelId == reservation.HotelId && r.IsActive, cancellationToken)
             ?? throw new ValidationException(nameof(dto.RoomTypeId), "Room type not found for this hotel.");
 
         EnsureCapacity(dto.AdultCount, dto.ChildCount, newRoomType.Capacity);
-
-        if (reservation.Status == ReservationStatus.Confirmed)
-        {
-            // Release the old slot — re-approval (which re-checks/re-decrements) is required after any edit.
-            reservation.RoomType!.AvailableCount += 1;
-        }
 
         reservation.RoomTypeId = newRoomType.Id;
         reservation.RoomType = newRoomType;

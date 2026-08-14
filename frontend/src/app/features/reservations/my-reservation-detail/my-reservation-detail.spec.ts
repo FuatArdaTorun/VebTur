@@ -55,16 +55,38 @@ describe('MyReservationDetail', () => {
     fixture.detectChanges();
   }
 
-  it.each<ReservationStatus>(['Pending', 'Sent', 'Confirmed'])('allows managing (edit/cancel) a %s reservation', (status) => {
+  it.each<ReservationStatus>(['Pending', 'Sent', 'Confirmed'])('shows the actions bar for a %s reservation', (status) => {
     createComponent(status);
 
     expect(component['canManage']()).toBe(true);
   });
 
-  it.each<ReservationStatus>(['Cancelled', 'Rejected'])('does not allow managing a %s reservation', (status) => {
+  it.each<ReservationStatus>(['Cancelled', 'Rejected'])('hides the actions bar for a %s reservation', (status) => {
     createComponent(status);
 
     expect(component['canManage']()).toBe(false);
+  });
+
+  it('shows the Edit link for a Pending reservation', () => {
+    createComponent('Pending');
+    expect(fixture.nativeElement.querySelector('a[href*="/edit"]')).not.toBeNull();
+  });
+
+  it('hides the Edit link for a Confirmed reservation', () => {
+    createComponent('Confirmed');
+    expect(fixture.nativeElement.querySelector('a[href*="/edit"]')).toBeNull();
+  });
+
+  it.each<ReservationStatus>(['Pending', 'Sent'])('shows the "not confirmed" notice while a %s reservation awaits a decision', (status) => {
+    createComponent(status);
+
+    expect(component['isAwaitingDecision']()).toBe(true);
+  });
+
+  it.each<ReservationStatus>(['Confirmed', 'Rejected', 'Cancelled'])('hides the "not confirmed" notice once a %s reservation has a final decision', (status) => {
+    createComponent(status);
+
+    expect(component['isAwaitingDecision']()).toBe(false);
   });
 
   it('cancels the reservation and refetches it', () => {

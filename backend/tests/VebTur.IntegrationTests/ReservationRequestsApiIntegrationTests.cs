@@ -88,7 +88,7 @@ public class ReservationRequestsApiIntegrationTests
     }
 
     [Fact]
-    public async Task CustomerEdit_OfConfirmedReservation_ReleasesAvailabilityAndResetsToSent()
+    public async Task CustomerEdit_OfConfirmedReservation_IsRejected_AndDoesNotTouchAvailability()
     {
         var adminToken = await GetAdminTokenAsync();
         var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 1);
@@ -105,14 +105,14 @@ public class ReservationRequestsApiIntegrationTests
         };
         updateRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", customerToken);
         var updateResponse = await _client.SendAsync(updateRequest);
-        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
-        var updated = await updateResponse.Content.ReadFromJsonAsync<ReservationRequestDetailDto>();
-        Assert.Equal("Sent", updated!.Status);
+        Assert.Equal(HttpStatusCode.BadRequest, updateResponse.StatusCode);
 
-        // The old Confirmed slot should have been released — a fresh reservation against the
-        // same (still availableCount: 1) room type must be confirmable again.
+        // The Confirmed slot must still be held — a further reservation against the same
+        // (availableCount: 1) room type must NOT be confirmable, since the edit never released it.
         var another = await CreateAsGuestAsync(hotelId, roomTypeId);
-        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, another.Id));
+        using var anotherConfirm = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{another.Id}/confirm");
+        anotherConfirm.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.BadRequest, (await _client.SendAsync(anotherConfirm)).StatusCode);
     }
 
     [Fact]

@@ -45,6 +45,20 @@ describe('ReservationLookup', () => {
     expect(component['reservation']()?.id).toBe('res-1');
   });
 
+  it.each(['Pending', 'Sent'])('shows the "not confirmed" notice while the reservation is %s', (status) => {
+    serviceStub = { getByReference: vi.fn().mockReturnValue(of({ id: 'res-1', referenceNumber: 'VEB-ABC12345', status })) };
+    createComponent('VEB-ABC12345');
+
+    expect(component['isAwaitingDecision']()).toBe(true);
+  });
+
+  it.each(['Confirmed', 'Rejected', 'Cancelled'])('hides the "not confirmed" notice once the reservation is %s', (status) => {
+    serviceStub = { getByReference: vi.fn().mockReturnValue(of({ id: 'res-1', referenceNumber: 'VEB-ABC12345', status })) };
+    createComponent('VEB-ABC12345');
+
+    expect(component['isAwaitingDecision']()).toBe(false);
+  });
+
   it('shows an error when the reference is not found', () => {
     serviceStub = { getByReference: vi.fn().mockReturnValue(throwError(() => new Error('not found'))) };
     createComponent('VEB-DOESNOTEXIST');

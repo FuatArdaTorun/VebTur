@@ -30,13 +30,17 @@
       <dd>{{ r.estimatedPrice }} {{ r.currency }}</dd>
     </dl>
 
-    <p class="my-reservation-detail__notice">
-      This is a reservation request — it is not a confirmed booking until approved.
-    </p>
+    @if (isAwaitingDecision()) {
+      <p class="my-reservation-detail__notice">
+        This is a reservation request — it is not a confirmed booking until approved.
+      </p>
+    }
 
     @if (canManage()) {
       <div class="my-reservation-detail__actions">
-        <a [routerLink]="['/my-reservations', r.id, 'edit']">Edit</a>
+        @if (isAwaitingDecision()) {
+          <a [routerLink]="['/my-reservations', r.id, 'edit']">Edit</a>
+        }
         <button type="button" (click)="confirmingCancel.set(true)">Cancel Reservation</button>
       </div>
     }

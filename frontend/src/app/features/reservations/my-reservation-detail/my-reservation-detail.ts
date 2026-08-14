@@ -8,6 +8,7 @@ import { ErrorState } from '../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 
 const CANCELLABLE_STATUSES = new Set(['Pending', 'Sent', 'Confirmed']);
+const AWAITING_DECISION_STATUSES = new Set(['Pending', 'Sent']);
 
 @Component({
   selector: 'app-my-reservation-detail',
@@ -32,6 +33,12 @@ export class MyReservationDetail {
   protected canManage(): boolean {
     const status = this.reservation()?.status;
     return status !== undefined && CANCELLABLE_STATUSES.has(status);
+  }
+
+  /** The "not confirmed until approved" notice only makes sense while a decision is still pending. */
+  protected isAwaitingDecision(): boolean {
+    const status = this.reservation()?.status;
+    return status !== undefined && AWAITING_DECISION_STATUSES.has(status);
   }
 
   protected confirmCancel(): void {

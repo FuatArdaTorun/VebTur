@@ -24,7 +24,9 @@
         <p>Special requests: {{ r.specialRequests }}</p>
       }
       <p>Estimated total: {{ r.estimatedPrice }} {{ r.currency }}</p>
-      <p class="reservation-lookup__notice">This is not a confirmed booking until the hotel approves the request.</p>
+      @if (isAwaitingDecision()) {
+        <p class="reservation-lookup__notice">This is not a confirmed booking until the hotel approves the request.</p>
+      }
     </div>
   }
 </div>
