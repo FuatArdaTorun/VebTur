@@ -176,6 +176,33 @@ public class ReservationRequestsApiIntegrationTests
         Assert.Equal(HttpStatusCode.BadRequest, (await _client.SendAsync(rejectConfirmedRequest)).StatusCode);
     }
 
+    /// <summary>
+    /// Admin cancel is deliberately narrower than the shared cancel transition: from
+    /// AwaitingApproval it's redundant with Reject (same terminal-status-flip, no availability
+    /// change), so it's blocked there — a still-pending reservation should be rejected instead.
+    /// From Confirmed it does something Reject can't (releases the held room slot), so it's allowed.
+    /// </summary>
+    [Fact]
+    public async Task AdminCancel_FromConfirmed_Succeeds_ButNotFromAwaitingApproval()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 1);
+
+        var awaitingApproval = await CreateAsGuestAsync(hotelId, roomTypeId);
+        using var cancelAwaitingRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{awaitingApproval.Id}/cancel");
+        cancelAwaitingRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.BadRequest, (await _client.SendAsync(cancelAwaitingRequest)).StatusCode);
+
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, awaitingApproval.Id));
+        using var cancelConfirmedRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{awaitingApproval.Id}/cancel");
+        cancelConfirmedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.NoContent, (await _client.SendAsync(cancelConfirmedRequest)).StatusCode);
+
+        // The slot held by the cancelled Confirmed reservation must have been released.
+        var another = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, another.Id));
+    }
+
     [Fact]
     public async Task AdminReservations_WithoutToken_ReturnsUnauthorized()
     {

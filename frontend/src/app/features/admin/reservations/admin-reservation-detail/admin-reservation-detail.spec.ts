@@ -98,6 +98,17 @@ describe('AdminReservationDetail', () => {
     expect(serviceStub.getReservation).toHaveBeenCalledTimes(1);
   });
 
+  it('allows cancel only for a Confirmed reservation, not AwaitingApproval (that should be rejected instead)', () => {
+    createComponent('Confirmed');
+    expect(component['canCancel']()).toBe(true);
+  });
+
+  it.each<ReservationStatus>(['AwaitingApproval', 'Rejected', 'Cancelled'])('does not allow cancel for a %s reservation', (status) => {
+    createComponent(status);
+
+    expect(component['canCancel']()).toBe(false);
+  });
+
   it('cancel calls the service, closes the confirm dialog, and refetches', () => {
     createComponent('Confirmed');
     serviceStub.cancel.mockReturnValue(of(undefined));

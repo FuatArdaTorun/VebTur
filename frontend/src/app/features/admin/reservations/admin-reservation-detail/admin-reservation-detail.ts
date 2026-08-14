@@ -9,8 +9,6 @@ import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 import { StatusLabelPipe } from '../../../../shared/status-label/status-label.pipe';
 
-const CANCELLABLE_STATUSES = new Set(['AwaitingApproval', 'Confirmed']);
-
 @Component({
   selector: 'app-admin-reservation-detail',
   imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog, StatusLabelPipe],
@@ -35,9 +33,14 @@ export class AdminReservationDetail {
     return this.reservation()?.status === 'AwaitingApproval';
   }
 
+  /**
+   * Admin-side cancel only makes sense from Confirmed — that's the only status where it does
+   * anything Reject doesn't (releasing the held room slot). A still-AwaitingApproval reservation
+   * should be Rejected instead; showing both there was redundant (matches the backend guard in
+   * AdminReservationService.CancelAsync).
+   */
   protected canCancel(): boolean {
-    const status = this.reservation()?.status;
-    return status !== undefined && CANCELLABLE_STATUSES.has(status);
+    return this.reservation()?.status === 'Confirmed';
   }
 
   protected confirm(): void {

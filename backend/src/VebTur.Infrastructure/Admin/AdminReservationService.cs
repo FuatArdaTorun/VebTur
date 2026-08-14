@@ -118,6 +118,15 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
         return true;
     }
 
+    /// <summary>
+    /// Admin-side cancel only makes sense from Confirmed — that's the only status where it does
+    /// anything Reject doesn't (releasing the held AvailableCount slot). For a still-AwaitingApproval
+    /// reservation, Cancel and Reject are otherwise identical (terminal status flip, no availability
+    /// change), so AwaitingApproval is deliberately excluded here even though the shared
+    /// <see cref="ReservationStatusTransitions.Cancel"/> helper itself would allow it — that broader
+    /// allowance is for the customer's own self-service cancel (<c>ReservationRequestService</c>),
+    /// which has no separate "reject" concept and must let a customer withdraw a still-pending request.
+    /// </summary>
     public async Task<bool> CancelAsync(Guid id, CancellationToken cancellationToken)
     {
         var reservation = await db.ReservationRequests
@@ -127,6 +136,11 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
         if (reservation is null)
         {
             return false;
+        }
+
+        if (reservation.Status == ReservationStatus.AwaitingApproval)
+        {
+            throw new ValidationException(nameof(reservation.Status), "A reservation still awaiting approval should be rejected, not cancelled.");
         }
 
         ReservationStatusTransitions.Cancel(reservation);
