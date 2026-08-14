@@ -97,6 +97,13 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/admin/amenities/admin-amenity-list/admin-amenity-list').then((m) => m.AdminAmenityList),
           },
+          {
+            path: 'notifications',
+            loadComponent: () =>
+              import('./features/admin/notifications/admin-notification-list/admin-notification-list').then(
+                (m) => m.AdminNotificationList,
+              ),
+          },
         ],
       },
     ],

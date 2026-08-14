@@ -54,6 +54,7 @@ builder.Services.AddScoped<IAdminHotelService, AdminHotelService>();
 builder.Services.AddScoped<IAdminAmenityService, AdminAmenityService>();
 builder.Services.AddScoped<IReservationRequestService, ReservationRequestService>();
 builder.Services.AddScoped<IAdminReservationService, AdminReservationService>();
+builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationService>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(IHotelQueryService).Assembly);
