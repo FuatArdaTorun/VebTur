@@ -1,0 +1,67 @@
+.admin-reservation-detail {
+  max-width: 560px;
+
+  &__back {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #1a73e8;
+    text-decoration: none;
+  }
+
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+
+  &__reference {
+    color: #555;
+    margin: 0 0 1.5rem;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    margin: 0 0 1.5rem;
+  }
+
+  dt {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  &__error {
+    color: #c5221f;
+    font-size: 0.9rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 500;
+    }
+  }
+
+  &__confirm {
+    background: #1a73e8 !important;
+    border-color: #1a73e8 !important;
+    color: #fff;
+  }
+
+  &__reject,
+  &__cancel {
+    color: #c5221f;
+  }
+}

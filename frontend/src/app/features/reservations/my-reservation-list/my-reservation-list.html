@@ -1,0 +1,42 @@
+<div class="my-reservation-list">
+  <h1>My Reservations</h1>
+
+  @if (loading()) {
+    <app-loading-state message="Loading your reservations…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load your reservations." />
+  } @else if (reservations().length === 0) {
+    <app-empty-state message="You haven't submitted any reservation requests yet." />
+  } @else {
+    <table class="my-reservation-list__table">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Hotel</th>
+          <th>Dates</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of reservations(); track r.id) {
+          <tr>
+            <td>{{ r.referenceNumber }}</td>
+            <td>{{ r.hotelName }}</td>
+            <td>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</td>
+            <td>{{ r.status }}</td>
+            <td><a [routerLink]="['/my-reservations', r.id]">View</a></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="my-reservation-list__pagination">
+        <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() === 1">← Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() === totalPages()">Next →</button>
+      </div>
+    }
+  }
+</div>

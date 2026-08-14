@@ -41,7 +41,7 @@ const sampleDetail: AdminHotelDetail = {
   createdAtUtc: new Date().toISOString(),
   updatedAtUtc: new Date().toISOString(),
   images: [{ id: 'img-1', url: 'https://example.com/a.jpg', altText: null, displayOrder: 1 }],
-  roomTypes: [{ id: 'room-1', name: 'Standard', description: 'd', capacity: 2, baseNightlyPrice: 1000, currency: 'TRY', isActive: true }],
+  roomTypes: [{ id: 'room-1', name: 'Standard', description: 'd', capacity: 2, baseNightlyPrice: 1000, currency: 'TRY', availableCount: 5, isActive: true }],
   supervisors: [{ id: 'sup-1', fullName: 'Jane Doe', email: 'jane@example.com', isActive: true }],
   amenitySlugs: ['wifi'],
 };

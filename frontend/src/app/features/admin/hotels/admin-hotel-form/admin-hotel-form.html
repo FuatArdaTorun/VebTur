@@ -91,6 +91,7 @@
               <input type="number" formControlName="capacity" placeholder="Capacity" min="1" />
               <input type="number" formControlName="baseNightlyPrice" placeholder="Price" min="0" />
               <input type="text" formControlName="currency" placeholder="TRY" />
+              <input type="number" formControlName="availableCount" placeholder="Available" min="0" title="Rooms available" />
               <label><input type="checkbox" formControlName="isActive" /> Active</label>
               <button type="button" (click)="removeRoomType($index)">✕</button>
             </div>

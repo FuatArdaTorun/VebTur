@@ -1,0 +1,123 @@
+import { Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AdminReservationsService } from '../admin-reservations.service';
+import { AdminReservationDetail as AdminReservationDetailModel } from '../models/admin-reservation.model';
+import { LoadingState } from '../../../../shared/loading-state/loading-state';
+import { ErrorState } from '../../../../shared/error-state/error-state';
+import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
+
+const ACTIONABLE_STATUSES = new Set(['Pending', 'Sent']);
+const CANCELLABLE_STATUSES = new Set(['Pending', 'Sent', 'Confirmed']);
+
+@Component({
+  selector: 'app-admin-reservation-detail',
+  imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog],
+  templateUrl: './admin-reservation-detail.html',
+  styleUrl: './admin-reservation-detail.scss',
+})
+export class AdminReservationDetail {
+  private readonly route = inject(ActivatedRoute);
+  private readonly reservationsService = inject(AdminReservationsService);
+
+  protected readonly reservation = signal<AdminReservationDetailModel | null>(null);
+  protected readonly loading = signal(true);
+  protected readonly loadError = signal(false);
+  protected readonly actionError = signal<string | null>(null);
+  protected readonly pendingCancel = signal(false);
+
+  constructor() {
+    this.fetch();
+  }
+
+  protected canActOn(): boolean {
+    const status = this.reservation()?.status;
+    return status !== undefined && ACTIONABLE_STATUSES.has(status);
+  }
+
+  protected canCancel(): boolean {
+    const status = this.reservation()?.status;
+    return status !== undefined && CANCELLABLE_STATUSES.has(status);
+  }
+
+  protected confirm(): void {
+    const reservation = this.reservation();
+    if (!reservation) {
+      return;
+    }
+
+    this.actionError.set(null);
+    this.reservationsService.confirm(reservation.id).subscribe({
+      next: () => this.fetch(),
+      error: (response: HttpErrorResponse) => this.actionError.set(extractErrorMessage(response)),
+    });
+  }
+
+  protected reject(): void {
+    const reservation = this.reservation();
+    if (!reservation) {
+      return;
+    }
+
+    this.actionError.set(null);
+    this.reservationsService.reject(reservation.id).subscribe({
+      next: () => this.fetch(),
+      error: (response: HttpErrorResponse) => this.actionError.set(extractErrorMessage(response)),
+    });
+  }
+
+  protected confirmCancel(): void {
+    const reservation = this.reservation();
+    if (!reservation) {
+      return;
+    }
+
+    this.actionError.set(null);
+    this.reservationsService.cancel(reservation.id).subscribe({
+      next: () => {
+        this.pendingCancel.set(false);
+        this.fetch();
+      },
+      error: (response: HttpErrorResponse) => {
+        this.pendingCancel.set(false);
+        this.actionError.set(extractErrorMessage(response));
+      },
+    });
+  }
+
+  private fetch(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.loadError.set(true);
+      this.loading.set(false);
+      return;
+    }
+
+    this.loading.set(true);
+    this.loadError.set(false);
+
+    this.reservationsService.getReservation(id).subscribe({
+      next: (result) => {
+        this.reservation.set(result);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loadError.set(true);
+        this.loading.set(false);
+      },
+    });
+  }
+}
+
+function extractErrorMessage(response: HttpErrorResponse): string {
+  const errors = response.error?.errors;
+  if (errors && typeof errors === 'object') {
+    const firstMessage = Object.values(errors).flat()[0];
+    if (typeof firstMessage === 'string') {
+      return firstMessage;
+    }
+  }
+
+  return 'This action could not be completed.';
+}

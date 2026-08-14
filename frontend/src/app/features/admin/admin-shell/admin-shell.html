@@ -1,8 +1,12 @@
 <div class="admin-shell">
   <aside class="admin-shell__sidebar">
-    <a class="admin-shell__brand" routerLink="/">VebTur Admin</a>
+    <a class="admin-shell__brand" routerLink="/">
+      <img class="admin-shell__logo" src="/logo.png" alt="VebTur logo">
+      VebTur Admin
+    </a>
     <nav class="admin-shell__nav">
       <a routerLink="/admin/hotels" routerLinkActive="admin-shell__link--active">Hotels</a>
+      <a routerLink="/admin/reservations" routerLinkActive="admin-shell__link--active">Reservations</a>
       <a routerLink="/admin/amenities" routerLinkActive="admin-shell__link--active">Amenities</a>
     </nav>
     <div class="admin-shell__user">

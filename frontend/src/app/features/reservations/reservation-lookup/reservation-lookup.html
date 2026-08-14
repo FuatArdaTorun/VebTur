@@ -1,0 +1,30 @@
+<div class="reservation-lookup">
+  <h1>Find Your Reservation Request</h1>
+
+  <form class="reservation-lookup__form" [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Reference number
+      <input type="text" formControlName="reference" placeholder="VEB-XXXXXXXX" />
+    </label>
+    <button type="submit">Look up</button>
+  </form>
+
+  @if (loading()) {
+    <app-loading-state message="Looking up your reservation…" />
+  } @else if (error()) {
+    <app-error-state message="No reservation found for that reference number." />
+  } @else if (reservation(); as r) {
+    <div class="reservation-lookup__result">
+      <p class="reservation-lookup__status">Status: <strong>{{ r.status }}</strong></p>
+      <h2>{{ r.hotelName }}</h2>
+      <p>{{ r.roomTypeName }}</p>
+      <p>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</p>
+      <p>{{ r.adultCount }} adult(s), {{ r.childCount }} child(ren)</p>
+      @if (r.specialRequests) {
+        <p>Special requests: {{ r.specialRequests }}</p>
+      }
+      <p>Estimated total: {{ r.estimatedPrice }} {{ r.currency }}</p>
+      <p class="reservation-lookup__notice">This is not a confirmed booking until the hotel approves the request.</p>
+    </div>
+  }
+</div>

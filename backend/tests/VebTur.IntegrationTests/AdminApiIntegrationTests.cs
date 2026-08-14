@@ -151,7 +151,7 @@ public class AdminApiIntegrationTests
             GoogleRatingCount: 100,
             IsActive: true,
             Images: [new AdminHotelImageDto(null, "https://example.com/photo1.jpg", "Exterior", 1)],
-            RoomTypes: [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", true)],
+            RoomTypes: [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", 5, true)],
             Supervisors: [new AdminHotelSupervisorDto(null, "Jane Doe", "jane@example.com", true)],
             AmenitySlugs: ["wifi", "pool"]);
 
@@ -187,7 +187,7 @@ public class AdminApiIntegrationTests
                 new AdminHotelImageDto(existingImageId, "https://example.com/photo1-updated.jpg", "Exterior updated", 1),
                 new AdminHotelImageDto(null, "https://example.com/photo2.jpg", "Pool", 2),
             ],
-            RoomTypes: [new AdminRoomTypeDto(null, "Deluxe Room", "Desc", 3, 2000m, "TRY", true)],
+            RoomTypes: [new AdminRoomTypeDto(null, "Deluxe Room", "Desc", 3, 2000m, "TRY", 5, true)],
             Supervisors: [],
             AmenitySlugs: ["wifi"]);
 

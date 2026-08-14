@@ -1,0 +1,81 @@
+@if (loading()) {
+  <app-loading-state message="Loading…" />
+} @else if (loadError()) {
+  <app-error-state message="Could not load this reservation." />
+} @else {
+  <div class="reservation-form">
+    <h1>{{ isEditMode() ? 'Edit Reservation' : 'Request a Reservation' }}</h1>
+    <p class="reservation-form__hotel">{{ hotelName() }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        Full name
+        <input type="text" formControlName="guestFullName" />
+      </label>
+
+      <label>
+        Email
+        <input type="email" formControlName="guestEmail" />
+      </label>
+
+      <label>
+        Phone
+        <input type="tel" formControlName="guestPhone" />
+      </label>
+
+      <label>
+        Room type
+        <select formControlName="roomTypeId">
+          @for (room of roomTypes(); track room.id) {
+            <option [value]="room.id">{{ room.name }} — {{ room.baseNightlyPrice }} {{ room.currency }}/night ({{ room.availableCount }} available)</option>
+          }
+        </select>
+      </label>
+
+      <div class="reservation-form__row">
+        <label>
+          Check-in
+          <input type="date" formControlName="checkInDate" />
+        </label>
+
+        <label>
+          Check-out
+          <input type="date" formControlName="checkOutDate" />
+        </label>
+      </div>
+
+      <div class="reservation-form__row">
+        <label>
+          Adults
+          <input type="number" min="1" formControlName="adultCount" />
+        </label>
+
+        <label>
+          Children
+          <input type="number" min="0" formControlName="childCount" />
+        </label>
+      </div>
+
+      <label>
+        Special requests
+        <textarea rows="3" formControlName="specialRequests"></textarea>
+      </label>
+
+      @if (estimatedPrice() > 0) {
+        <p class="reservation-form__price">Estimated total: <strong>{{ estimatedPrice() }} {{ selectedCurrency() }}</strong></p>
+      }
+
+      @if (submitError(); as message) {
+        <p class="reservation-form__error">{{ message }}</p>
+      }
+
+      <p class="reservation-form__notice">
+        This sends a reservation request — it is not confirmed until the hotel (via VebTur) approves it.
+      </p>
+
+      <button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Submitting…' : (isEditMode() ? 'Save Changes' : 'Submit Request') }}
+      </button>
+    </form>
+  </div>
+}

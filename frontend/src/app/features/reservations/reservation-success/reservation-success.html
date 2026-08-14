@@ -1,0 +1,15 @@
+<div class="reservation-success">
+  <h1>Request Sent</h1>
+  <p class="reservation-success__notice">
+    Your reservation request has been sent to the hotel. Your reservation is <strong>not confirmed</strong> until the hotel approves it.
+  </p>
+
+  <p class="reservation-success__reference-label">Your reference number</p>
+  <p class="reservation-success__reference">{{ reference }}</p>
+  <p class="reservation-success__hint">Save this — you can look up your request with it at any time.</p>
+
+  <div class="reservation-success__actions">
+    <a [routerLink]="['/reservations/lookup', reference]">View this request</a>
+    <a routerLink="/hotels">Back to hotels</a>
+  </div>
+</div>

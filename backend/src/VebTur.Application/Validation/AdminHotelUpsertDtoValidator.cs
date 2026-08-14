@@ -45,6 +45,7 @@ public class AdminHotelUpsertDtoValidator : AbstractValidator<AdminHotelUpsertDt
             room.RuleFor(r => r.Capacity).GreaterThan(0);
             room.RuleFor(r => r.BaseNightlyPrice).GreaterThanOrEqualTo(0);
             room.RuleFor(r => r.Currency).NotEmpty().Length(3);
+            room.RuleFor(r => r.AvailableCount).GreaterThanOrEqualTo(0);
         });
 
         RuleForEach(x => x.Supervisors).ChildRules(supervisor =>

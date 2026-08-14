@@ -7,4 +7,5 @@ public record AdminRoomTypeDto(
     int Capacity,
     decimal BaseNightlyPrice,
     string Currency,
+    int AvailableCount,
     bool IsActive);

@@ -33,11 +33,11 @@ describe('authInterceptor', () => {
     httpMock.verify();
   });
 
-  it('does not attach an Authorization header to public API calls', () => {
+  it('attaches a Bearer token to any request when one is stored, including public endpoints', () => {
     httpClient.get('/api/v1/hotels').subscribe();
 
     const req = httpMock.expectOne('/api/v1/hotels');
-    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     req.flush({});
   });
 
@@ -49,7 +49,7 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
-  it('sends an admin request without a token unmodified when none is stored', () => {
+  it('sends a request without a token unmodified when none is stored', () => {
     authServiceStub.getToken = () => null;
 
     httpClient.get('/api/v1/admin/hotels').subscribe();
@@ -59,17 +59,17 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
-  it('logs out and redirects to /admin/login on a 401 from an admin call', () => {
+  it('logs out and redirects to /login on a 401, regardless of URL', () => {
     const navigateSpy = vi.spyOn(router, 'navigate');
 
-    httpClient.get('/api/v1/admin/hotels').subscribe({ error: () => {} });
-    httpMock.expectOne('/api/v1/admin/hotels').flush({ message: 'unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+    httpClient.get('/api/v1/reservation-requests/mine').subscribe({ error: () => {} });
+    httpMock.expectOne('/api/v1/reservation-requests/mine').flush({ message: 'unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
     expect(authServiceStub.logout).toHaveBeenCalled();
-    expect(navigateSpy).toHaveBeenCalledWith(['/admin/login']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 
-  it('does not log out on a non-401 error from an admin call', () => {
+  it('does not log out on a non-401 error', () => {
     httpClient.get('/api/v1/admin/hotels').subscribe({ error: () => {} });
     httpMock.expectOne('/api/v1/admin/hotels').flush({ message: 'boom' }, { status: 500, statusText: 'Server Error' });
 

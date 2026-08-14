@@ -79,7 +79,7 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
             .Select(i => new HotelImage { HotelId = hotel.Id, Url = i.Url, AltText = i.AltText, DisplayOrder = i.DisplayOrder })
             .ToList();
         hotel.RoomTypes = dto.RoomTypes
-            .Select(r => new RoomType { HotelId = hotel.Id, Name = r.Name, Description = r.Description, Capacity = r.Capacity, BaseNightlyPrice = r.BaseNightlyPrice, Currency = r.Currency, IsActive = r.IsActive })
+            .Select(r => new RoomType { HotelId = hotel.Id, Name = r.Name, Description = r.Description, Capacity = r.Capacity, BaseNightlyPrice = r.BaseNightlyPrice, Currency = r.Currency, AvailableCount = r.AvailableCount, IsActive = r.IsActive })
             .ToList();
         hotel.Supervisors = dto.Supervisors
             .Select(s => new HotelSupervisor { HotelId = hotel.Id, FullName = s.FullName, Email = s.Email, IsActive = s.IsActive })
@@ -157,10 +157,10 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
             dto.RoomTypes,
             getEntityId: e => e.Id,
             getDtoId: d => d.Id,
-            applyToExisting: (e, d) => { e.Name = d.Name; e.Description = d.Description; e.Capacity = d.Capacity; e.BaseNightlyPrice = d.BaseNightlyPrice; e.Currency = d.Currency; e.IsActive = d.IsActive; },
+            applyToExisting: (e, d) => { e.Name = d.Name; e.Description = d.Description; e.Capacity = d.Capacity; e.BaseNightlyPrice = d.BaseNightlyPrice; e.Currency = d.Currency; e.AvailableCount = d.AvailableCount; e.IsActive = d.IsActive; },
             createFromDto: d =>
             {
-                var room = new RoomType { HotelId = hotel.Id, Name = d.Name, Description = d.Description, Capacity = d.Capacity, BaseNightlyPrice = d.BaseNightlyPrice, Currency = d.Currency, IsActive = d.IsActive };
+                var room = new RoomType { HotelId = hotel.Id, Name = d.Name, Description = d.Description, Capacity = d.Capacity, BaseNightlyPrice = d.BaseNightlyPrice, Currency = d.Currency, AvailableCount = d.AvailableCount, IsActive = d.IsActive };
                 db.Add(room);
                 return room;
             });
@@ -276,7 +276,7 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
         h.StarRating, h.OfficialWebsiteUrl, h.GooglePlaceId, h.PhoneNumber, h.GoogleRating, h.GoogleRatingCount,
         h.IsActive, h.CreatedAtUtc, h.UpdatedAtUtc,
         h.Images.OrderBy(i => i.DisplayOrder).Select(i => new AdminHotelImageDto(i.Id, i.Url, i.AltText, i.DisplayOrder)).ToList(),
-        h.RoomTypes.Select(r => new AdminRoomTypeDto(r.Id, r.Name, r.Description, r.Capacity, r.BaseNightlyPrice, r.Currency, r.IsActive)).ToList(),
+        h.RoomTypes.Select(r => new AdminRoomTypeDto(r.Id, r.Name, r.Description, r.Capacity, r.BaseNightlyPrice, r.Currency, r.AvailableCount, r.IsActive)).ToList(),
         h.Supervisors.Select(s => new AdminHotelSupervisorDto(s.Id, s.FullName, s.Email, s.IsActive)).ToList(),
         h.HotelAmenities.Select(ha => ha.Amenity!.Slug).ToList());
 }

@@ -114,7 +114,7 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                     .Select(ha => new AmenityDto(ha.Amenity!.Id, ha.Amenity.Name, ha.Amenity.Slug, ha.Amenity.IconKey))
                     .ToList(),
                 h.RoomTypes.Where(r => r.IsActive)
-                    .Select(r => new RoomTypeDto(r.Id, r.Name, r.Description, r.Capacity, r.BaseNightlyPrice, r.Currency))
+                    .Select(r => new RoomTypeDto(r.Id, r.Name, r.Description, r.Capacity, r.BaseNightlyPrice, r.Currency, r.AvailableCount))
                     .ToList()))
             .FirstOrDefaultAsync(cancellationToken);
     }

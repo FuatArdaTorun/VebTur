@@ -1,0 +1,63 @@
+@if (loading()) {
+  <app-loading-state message="Loading reservation…" />
+} @else if (loadError() || !reservation()) {
+  <app-error-state message="Could not load this reservation." />
+} @else {
+  @let r = reservation()!;
+
+  <div class="admin-reservation-detail">
+    <a class="admin-reservation-detail__back" routerLink="/admin/reservations">← Back to reservations</a>
+
+    <h1>{{ r.hotelName }}</h1>
+    <p class="admin-reservation-detail__reference">{{ r.referenceNumber }} · <strong>{{ r.status }}</strong></p>
+
+    <dl>
+      <dt>Room type</dt>
+      <dd>{{ r.roomTypeName }} ({{ r.roomTypeAvailableCount }} currently available)</dd>
+
+      <dt>Guest</dt>
+      <dd>{{ r.guestFullName }} — {{ r.guestEmail }} — {{ r.guestPhone }}</dd>
+
+      <dt>Dates</dt>
+      <dd>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</dd>
+
+      <dt>Guests</dt>
+      <dd>{{ r.adultCount }} adult(s), {{ r.childCount }} child(ren)</dd>
+
+      @if (r.specialRequests) {
+        <dt>Special requests</dt>
+        <dd>{{ r.specialRequests }}</dd>
+      }
+
+      <dt>Estimated price</dt>
+      <dd>{{ r.estimatedPrice }} {{ r.currency }}</dd>
+
+      <dt>Submitted</dt>
+      <dd>{{ r.createdAtUtc | date: 'medium' }}</dd>
+    </dl>
+
+    @if (actionError(); as message) {
+      <p class="admin-reservation-detail__error">{{ message }}</p>
+    }
+
+    <div class="admin-reservation-detail__actions">
+      @if (canActOn()) {
+        <button type="button" class="admin-reservation-detail__confirm" (click)="confirm()">Confirm</button>
+        <button type="button" class="admin-reservation-detail__reject" (click)="reject()">Reject</button>
+      }
+      @if (canCancel()) {
+        <button type="button" class="admin-reservation-detail__cancel" (click)="pendingCancel.set(true)">Cancel</button>
+      }
+    </div>
+  </div>
+
+  @if (pendingCancel()) {
+    <app-confirm-dialog
+      message="Cancel this reservation?"
+      confirmLabel="Cancel Reservation"
+      cancelLabel="Keep it"
+      (confirmed)="confirmCancel()"
+      (cancelled)="pendingCancel.set(false)"
+    />
+  }
+}

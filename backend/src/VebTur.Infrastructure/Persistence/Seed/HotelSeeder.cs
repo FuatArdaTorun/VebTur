@@ -467,6 +467,11 @@ public static class HotelSeeder
                 Capacity = r.Capacity,
                 BaseNightlyPrice = r.Price,
                 Currency = "TRY",
+                // Demo/estimated, same as BaseNightlyPrice. There is no live
+                // inventory feed. Derived from capacity so smaller
+                // room types start with more availability than suites/villas, admin-editable
+                // from there.
+                AvailableCount = Math.Max(2, 8 - r.Capacity),
             })
             .ToList();
 

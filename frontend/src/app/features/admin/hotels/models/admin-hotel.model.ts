@@ -12,6 +12,7 @@ export interface AdminRoomType {
   capacity: number;
   baseNightlyPrice: number;
   currency: string;
+  availableCount: number;
   isActive: boolean;
 }
 

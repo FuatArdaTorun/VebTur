@@ -4,11 +4,13 @@ using VebTur.Api.ExceptionHandling;
 using VebTur.Application.Admin;
 using VebTur.Application.Auth;
 using VebTur.Application.Hotels;
+using VebTur.Application.Reservations;
 using VebTur.Infrastructure.Admin;
 using VebTur.Infrastructure.Auth;
 using VebTur.Infrastructure.Hotels;
 using VebTur.Infrastructure.Persistence;
 using VebTur.Infrastructure.Persistence.Seed;
+using VebTur.Infrastructure.Reservations;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -50,6 +52,9 @@ builder.Services.AddHealthChecks()
 builder.Services.AddScoped<IHotelQueryService, HotelQueryService>();
 builder.Services.AddScoped<IAdminHotelService, AdminHotelService>();
 builder.Services.AddScoped<IAdminAmenityService, AdminAmenityService>();
+builder.Services.AddScoped<IReservationRequestService, ReservationRequestService>();
+builder.Services.AddScoped<IAdminReservationService, AdminReservationService>();
+builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationService>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(IHotelQueryService).Assembly);
 

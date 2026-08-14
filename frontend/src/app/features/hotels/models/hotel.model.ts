@@ -32,6 +32,7 @@ export interface RoomType {
   capacity: number;
   baseNightlyPrice: number;
   currency: string;
+  availableCount: number;
 }
 
 export interface HotelDetail {

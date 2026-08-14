@@ -24,7 +24,7 @@ public class AdminHotelUpsertDtoValidatorTests
         GoogleRatingCount: 100,
         IsActive: true,
         Images: [new AdminHotelImageDto(null, "https://example.com/a.jpg", "Alt", 1)],
-        RoomTypes: [new AdminRoomTypeDto(null, "Standard", "Desc", 2, 1000m, "TRY", true)],
+        RoomTypes: [new AdminRoomTypeDto(null, "Standard", "Desc", 2, 1000m, "TRY", 5, true)],
         Supervisors: [new AdminHotelSupervisorDto(null, "Jane Doe", "jane@example.com", true)],
         AmenitySlugs: ["wifi"]);
 
@@ -95,7 +95,7 @@ public class AdminHotelUpsertDtoValidatorTests
     [Fact]
     public void NegativeRoomPrice_FailsValidation()
     {
-        var dto = ValidDto() with { RoomTypes = [new AdminRoomTypeDto(null, "Standard", "Desc", 2, -100m, "TRY", true)] };
+        var dto = ValidDto() with { RoomTypes = [new AdminRoomTypeDto(null, "Standard", "Desc", 2, -100m, "TRY", 5, true)] };
         var result = _validator.Validate(dto);
         Assert.False(result.IsValid);
     }
@@ -103,7 +103,7 @@ public class AdminHotelUpsertDtoValidatorTests
     [Fact]
     public void ZeroCapacityRoomType_FailsValidation()
     {
-        var dto = ValidDto() with { RoomTypes = [new AdminRoomTypeDto(null, "Standard", "Desc", 0, 1000m, "TRY", true)] };
+        var dto = ValidDto() with { RoomTypes = [new AdminRoomTypeDto(null, "Standard", "Desc", 0, 1000m, "TRY", 5, true)] };
         var result = _validator.Validate(dto);
         Assert.False(result.IsValid);
     }

@@ -1,0 +1,54 @@
+@if (loading()) {
+  <app-loading-state message="Loading reservation…" />
+} @else if (error() || !reservation()) {
+  <app-error-state message="Could not load this reservation." />
+} @else {
+  @let r = reservation()!;
+
+  <div class="my-reservation-detail">
+    <a class="my-reservation-detail__back" routerLink="/my-reservations">← Back to my reservations</a>
+
+    <h1>{{ r.hotelName }}</h1>
+    <p class="my-reservation-detail__reference">{{ r.referenceNumber }} · <strong>{{ r.status }}</strong></p>
+
+    <dl>
+      <dt>Room type</dt>
+      <dd>{{ r.roomTypeName }}</dd>
+
+      <dt>Dates</dt>
+      <dd>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</dd>
+
+      <dt>Guests</dt>
+      <dd>{{ r.adultCount }} adult(s), {{ r.childCount }} child(ren)</dd>
+
+      @if (r.specialRequests) {
+        <dt>Special requests</dt>
+        <dd>{{ r.specialRequests }}</dd>
+      }
+
+      <dt>Estimated price</dt>
+      <dd>{{ r.estimatedPrice }} {{ r.currency }}</dd>
+    </dl>
+
+    <p class="my-reservation-detail__notice">
+      This is a reservation request — it is not a confirmed booking until approved.
+    </p>
+
+    @if (canManage()) {
+      <div class="my-reservation-detail__actions">
+        <a [routerLink]="['/my-reservations', r.id, 'edit']">Edit</a>
+        <button type="button" (click)="confirmingCancel.set(true)">Cancel Reservation</button>
+      </div>
+    }
+  </div>
+
+  @if (confirmingCancel()) {
+    <app-confirm-dialog
+      message="Cancel this reservation request?"
+      confirmLabel="Cancel Reservation"
+      cancelLabel="Keep it"
+      (confirmed)="confirmCancel()"
+      (cancelled)="confirmingCancel.set(false)"
+    />
+  }
+}

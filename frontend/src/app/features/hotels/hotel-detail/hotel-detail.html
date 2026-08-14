@@ -68,9 +68,19 @@
               <div>
                 <strong>{{ room.name }}</strong>
                 <p>{{ room.description }}</p>
+                @if (room.availableCount > 0) {
+                  <p class="hotel-detail__room-availability">{{ room.availableCount }} room(s) available</p>
+                } @else {
+                  <p class="hotel-detail__room-availability hotel-detail__room-availability--none">Limited availability — request will be reviewed</p>
+                }
               </div>
               <div class="hotel-detail__room-price">
                 {{ room.baseNightlyPrice }} {{ room.currency }} / night
+                <a
+                  class="hotel-detail__room-reserve"
+                  [routerLink]="['/reservations/new']"
+                  [queryParams]="{ hotelId: h.id, roomTypeId: room.id }"
+                >Reserve</a>
               </div>
             </li>
           }

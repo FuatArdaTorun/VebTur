@@ -6,4 +6,5 @@ public record RoomTypeDto(
     string Description,
     int Capacity,
     decimal BaseNightlyPrice,
-    string Currency);
+    string Currency,
+    int AvailableCount);

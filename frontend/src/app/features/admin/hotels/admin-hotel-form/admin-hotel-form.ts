@@ -88,6 +88,7 @@ export class AdminHotelForm {
         capacity: [2, Validators.required],
         baseNightlyPrice: [0, Validators.required],
         currency: ['TRY', Validators.required],
+        availableCount: [0, Validators.required],
         isActive: [true],
       }),
     );
@@ -187,6 +188,7 @@ export class AdminHotelForm {
           capacity: [room.capacity, Validators.required],
           baseNightlyPrice: [room.baseNightlyPrice, Validators.required],
           currency: [room.currency, Validators.required],
+          availableCount: [room.availableCount, Validators.required],
           isActive: [room.isActive],
         }),
       );
