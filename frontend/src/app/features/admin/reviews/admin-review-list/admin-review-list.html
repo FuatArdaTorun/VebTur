@@ -1,0 +1,101 @@
+<div class="admin-review-list">
+  <header class="admin-review-list__header">
+    <h1>Reviews</h1>
+  </header>
+
+  <div class="admin-review-list__filters">
+    <div class="admin-review-list__search">
+      <input
+        type="search"
+        placeholder="Search by hotel, reviewer, or comment…"
+        [formControl]="searchControl"
+        (keyup.enter)="applySearch()"
+      />
+      <button type="button" (click)="applySearch()">Search</button>
+    </div>
+    <button type="button" class="admin-review-list__select-toggle" (click)="toggleSelectionMode()">
+      {{ selectionMode() ? 'Cancel' : 'Delete Review' }}
+    </button>
+    @if (selectionMode() && selectedCount() > 0) {
+      <button type="button" class="admin-review-list__bulk-delete" (click)="requestBulkDelete()">
+        Delete selected ({{ selectedCount() }})
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <app-loading-state message="Loading reviews…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load reviews." />
+  } @else if (reviews().length === 0) {
+    <app-empty-state message="No reviews match your filters." />
+  } @else {
+    <table class="admin-review-list__table">
+      <thead>
+        <tr>
+          @if (selectionMode()) {
+            <th class="admin-review-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
+          <th>Hotel</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Comment</th>
+          <th>Stay</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (review of reviews(); track review.id) {
+          <tr [class.admin-review-list__row--hidden]="review.isHidden">
+            @if (selectionMode()) {
+              <td class="admin-review-list__checkbox-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(review.id)"
+                  (change)="toggleSelect(review.id)"
+                  [attr.aria-label]="'Select review by ' + review.reviewerName"
+                />
+              </td>
+            }
+            <td>{{ review.hotelName }}</td>
+            <td>{{ review.reviewerName }}</td>
+            <td class="admin-review-list__rating">{{ review.rating }}★</td>
+            <td class="admin-review-list__comment">{{ review.comment || '—' }}</td>
+            <td>{{ review.roomTypeName }} · {{ review.checkInDate | date: 'mediumDate' }} – {{ review.checkOutDate | date: 'mediumDate' }}</td>
+            <td>{{ review.isHidden ? 'Hidden' : 'Visible' }}</td>
+            <td class="admin-review-list__actions">
+              <button
+                type="button"
+                class="admin-review-list__action-btn"
+                [class.admin-review-list__action-btn--danger]="!review.isHidden"
+                (click)="toggleHidden(review)"
+              >
+                {{ review.isHidden ? 'Unhide' : 'Hide' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="admin-review-list__pagination">
+        <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() === 1">← Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() === totalPages()">Next →</button>
+      </div>
+    }
+  }
+
+  @if (confirmingBulkDelete()) {
+    <app-confirm-dialog
+      [message]="'Permanently delete ' + selectedCount() + ' ' + (selectedCount() === 1 ? 'review' : 'reviews') + '? This cannot be undone.'"
+      confirmLabel="Delete permanently"
+      (confirmed)="confirmBulkDelete()"
+      (cancelled)="confirmingBulkDelete.set(false)"
+    />
+  }
+</div>

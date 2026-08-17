@@ -19,6 +19,7 @@ public class VebTurDbContext(DbContextOptions<VebTurDbContext> options)
     public DbSet<ExternalRating> ExternalRatings => Set<ExternalRating>();
     public DbSet<ReservationRequest> ReservationRequests => Set<ReservationRequest>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+    public DbSet<Review> Reviews => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

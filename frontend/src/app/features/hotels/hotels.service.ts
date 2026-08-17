@@ -1,7 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Amenity, HotelDetail, HotelSearchParams, HotelSummary, PagedResult } from './models/hotel.model';
+import {
+  Amenity,
+  CreateReviewRequest,
+  ExternalRating,
+  HotelDetail,
+  HotelReviewsResponse,
+  HotelSearchParams,
+  HotelSummary,
+  PagedResult,
+  Review,
+} from './models/hotel.model';
 
 @Injectable({ providedIn: 'root' })
 export class HotelsService {
@@ -33,5 +43,19 @@ export class HotelsService {
 
   getAmenities() {
     return this.http.get<Amenity[]>(`${this.baseUrl}/amenities`);
+  }
+
+  /** Loaded separately from the main hotel record — see hotel-detail.ts. Null on a 204 (no rating available from any provider, live or demo). */
+  getExternalRating(hotelId: string) {
+    return this.http.get<ExternalRating | null>(`${this.baseUrl}/hotels/${hotelId}/external-rating`);
+  }
+
+  /** Includes the caller's own reviewable reservations when an auth token is sent — the interceptor handles that, this call needs no special-casing. */
+  getHotelReviews(hotelId: string) {
+    return this.http.get<HotelReviewsResponse>(`${this.baseUrl}/hotels/${hotelId}/reviews`);
+  }
+
+  createReview(hotelId: string, dto: CreateReviewRequest) {
+    return this.http.post<Review>(`${this.baseUrl}/hotels/${hotelId}/reviews`, dto);
   }
 }

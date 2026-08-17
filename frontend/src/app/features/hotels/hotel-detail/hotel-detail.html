@@ -17,13 +17,14 @@
 
     <p class="hotel-detail__location">{{ h.address }}, {{ h.city }}, {{ h.country }}</p>
 
-    @if (h.googleRating; as rating) {
+    @if (externalRating(); as rating) {
       <p class="hotel-detail__rating">
         <span class="hotel-detail__rating-star">★</span>
-        <span class="hotel-detail__rating-value">{{ rating }}</span>
+        <span class="hotel-detail__rating-value">{{ rating.rating }}</span>
         <span class="hotel-detail__rating-source">Google rating</span>
-        @if (h.googleRatingCount; as count) {
-          <span class="hotel-detail__rating-count">({{ count | number }} reviews)</span>
+        <span class="hotel-detail__rating-count">({{ rating.reviewCount | number }} reviews)</span>
+        @if (rating.isDemoData) {
+          <span class="hotel-detail__rating-demo-badge" title="Manually captured from Google Maps — not a live API call yet">Demo data</span>
         }
       </p>
     }
@@ -87,5 +88,82 @@
         </ul>
       </section>
     }
+
+    <section class="hotel-detail__reviews">
+      <h2>Guest Reviews</h2>
+
+      @if (h.customerRating; as rating) {
+        <p class="hotel-detail__reviews-summary">
+          <span class="hotel-detail__reviews-summary-star">★</span>
+          <span class="hotel-detail__reviews-summary-value">{{ rating | number: '1.1-1' }}</span>
+          <span>({{ h.customerReviewCount }} {{ h.customerReviewCount === 1 ? 'review' : 'reviews' }} on VebTur)</span>
+        </p>
+      }
+
+      @if (reviewableReservations().length > 0) {
+        <form class="hotel-detail__review-form" [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <h3>Write a review</h3>
+
+          @if (reviewableReservations().length > 1) {
+            <label>
+              Which stay?
+              <select formControlName="reservationRequestId">
+                @for (r of reviewableReservations(); track r.reservationRequestId) {
+                  <option [value]="r.reservationRequestId">{{ r.roomTypeName }} — {{ r.checkInDate | date: 'mediumDate' }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <div class="hotel-detail__star-picker">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button
+                type="button"
+                class="hotel-detail__star-btn"
+                [class.hotel-detail__star-btn--filled]="star <= reviewForm.controls.rating.value"
+                (click)="setRating(star)"
+                [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')"
+              >★</button>
+            }
+          </div>
+
+          <textarea formControlName="comment" placeholder="Share your experience (optional)…" rows="3"></textarea>
+
+          @if (reviewForm.controls.rating.value === 0 && reviewForm.controls.rating.touched) {
+            <p class="hotel-detail__review-error">Please choose a star rating.</p>
+          }
+          @if (reviewSubmitError(); as message) {
+            <p class="hotel-detail__review-error">{{ message }}</p>
+          }
+
+          <button type="submit" [disabled]="reviewSubmitting()">{{ reviewSubmitting() ? 'Submitting…' : 'Submit review' }}</button>
+        </form>
+      } @else if (reviewSubmitted()) {
+        <p class="hotel-detail__review-thanks">Thanks for your review!</p>
+      } @else if (!authService.isAuthenticated()) {
+        <p class="hotel-detail__review-hint"><a routerLink="/login">Sign in</a> after a confirmed stay here to leave your own review.</p>
+      }
+
+      @if (reviewsLoading()) {
+        <app-loading-state message="Loading reviews…" />
+      } @else if (reviews().length === 0) {
+        <p class="hotel-detail__review-empty">No reviews yet — be the first to share your experience.</p>
+      } @else {
+        <ul class="hotel-detail__review-list">
+          @for (review of reviews(); track review.id) {
+            <li class="hotel-detail__review">
+              <div class="hotel-detail__review-header">
+                <span class="hotel-detail__review-stars">{{ starDisplay(review.rating) }}</span>
+                <strong>{{ review.reviewerName }}</strong>
+              </div>
+              <p class="hotel-detail__review-stay">{{ review.roomTypeName }} · {{ review.checkInDate | date: 'mediumDate' }} – {{ review.checkOutDate | date: 'mediumDate' }}</p>
+              @if (review.comment) {
+                <p class="hotel-detail__review-comment">{{ review.comment }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
   </article>
 }

@@ -54,6 +54,15 @@
     font-size: 0.85rem;
   }
 
+  &__rating-demo-badge {
+    color: #8a6d00;
+    background: #fff6dd;
+    border: 1px solid #e8d28a;
+    border-radius: 4px;
+    padding: 0.05rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
   &__gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -152,5 +161,151 @@
     font-size: 0.85rem;
     text-decoration: none;
     white-space: nowrap;
+  }
+
+  &__reviews {
+    margin-top: 1rem;
+  }
+
+  &__reviews-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0 0 1.25rem;
+    font-size: 0.95rem;
+    color: #444;
+  }
+
+  &__reviews-summary-star {
+    color: #d4a017;
+    font-size: 1.2rem;
+  }
+
+  &__reviews-summary-value {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #222;
+  }
+
+  &__review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: 30rem;
+    margin-bottom: 1.75rem;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    textarea {
+      padding: 0.5rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    button[type='submit'] {
+      align-self: flex-start;
+      padding: 0.5rem 1.1rem;
+      border: none;
+      border-radius: 6px;
+      background: #1a73e8;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: default;
+      }
+    }
+  }
+
+  &__star-picker {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  &__star-btn {
+    border: none;
+    background: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #d0d0d0;
+    cursor: pointer;
+    padding: 0;
+
+    &--filled {
+      color: #d4a017;
+    }
+  }
+
+  &__review-error {
+    color: #c5221f;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  &__review-thanks,
+  &__review-hint,
+  &__review-empty {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__review-hint a {
+    color: #1a73e8;
+  }
+
+  &__review-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__review {
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+  }
+
+  &__review-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
+  }
+
+  &__review-stars {
+    color: #d4a017;
+    letter-spacing: 0.1rem;
+  }
+
+  &__review-stay {
+    margin: 0 0 0.4rem;
+    color: #666;
+    font-size: 0.8rem;
+  }
+
+  &__review-comment {
+    margin: 0;
+    line-height: 1.5;
   }
 }

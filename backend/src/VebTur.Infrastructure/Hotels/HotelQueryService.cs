@@ -121,7 +121,10 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
                     .ToList(),
                 h.RoomTypes.Where(r => r.IsActive)
                     .Select(r => new RoomTypeDto(r.Id, r.Name, r.Description, r.Capacity, r.BaseNightlyPrice, r.Currency, r.AvailableCount))
-                    .ToList()))
+                    .ToList(),
+                // (decimal?) cast makes Average() return null instead of throwing on zero reviews.
+                db.Reviews.Where(rv => rv.HotelId == h.Id && !rv.IsHidden).Average(rv => (decimal?)rv.Rating),
+                db.Reviews.Count(rv => rv.HotelId == h.Id && !rv.IsHidden)))
             .FirstOrDefaultAsync(cancellationToken);
     }
 

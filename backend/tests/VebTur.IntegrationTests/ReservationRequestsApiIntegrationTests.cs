@@ -245,7 +245,9 @@ public class ReservationRequestsApiIntegrationTests
         var b2 = await CreateAsGuestAsync(hotelBId, roomTypeBId);
         var a2 = await CreateAsGuestAsync(hotelAId, roomTypeAId);
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/admin/reservation-requests?sort=hotel-asc&pageSize=200");
+        // Scoped to this test's own hotels via the shared suffix — a fixed pageSize alone isn't
+        // enough to guarantee both land on the same page once enough other seed/test data exists.
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests?sort=hotel-asc&pageSize=200&search={suffix}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();

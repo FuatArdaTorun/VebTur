@@ -104,6 +104,11 @@ export const routes: Routes = [
                 (m) => m.AdminNotificationList,
               ),
           },
+          {
+            path: 'reviews',
+            loadComponent: () =>
+              import('./features/admin/reviews/admin-review-list/admin-review-list').then((m) => m.AdminReviewList),
+          },
         ],
       },
     ],

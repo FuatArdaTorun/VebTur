@@ -33,6 +33,8 @@ const sampleHotel: HotelDetail = {
   images: [],
   amenities: [],
   roomTypes,
+  customerRating: null,
+  customerReviewCount: 0,
 };
 
 const sampleReservation: ReservationRequestDetail = {

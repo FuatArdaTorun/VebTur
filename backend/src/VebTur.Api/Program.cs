@@ -6,6 +6,7 @@ using VebTur.Application.Auth;
 using VebTur.Application.ExternalRatings;
 using VebTur.Application.Hotels;
 using VebTur.Application.Reservations;
+using VebTur.Application.Reviews;
 using VebTur.Infrastructure.Admin;
 using VebTur.Infrastructure.Auth;
 using VebTur.Infrastructure.ExternalRatings;
@@ -13,6 +14,7 @@ using VebTur.Infrastructure.Hotels;
 using VebTur.Infrastructure.Persistence;
 using VebTur.Infrastructure.Persistence.Seed;
 using VebTur.Infrastructure.Reservations;
+using VebTur.Infrastructure.Reviews;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -58,6 +60,8 @@ builder.Services.AddScoped<IReservationRequestService, ReservationRequestService
 builder.Services.AddScoped<IAdminReservationService, AdminReservationService>();
 builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
 
 builder.Services.Configure<GooglePlacesOptions>(builder.Configuration.GetSection(GooglePlacesOptions.SectionName));
 builder.Services.AddHttpClient<GooglePlacesRatingProvider>(client =>
@@ -153,6 +157,7 @@ if (app.Environment.IsDevelopment())
     var configuration = seedScope.ServiceProvider.GetRequiredService<IConfiguration>();
     var logger = seedScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await IdentitySeeder.SeedAsync(roleManager, userManager, configuration, logger);
+    await ReviewSeeder.SeedAsync(db, userManager);
 }
 
 app.UseHttpsRedirection();

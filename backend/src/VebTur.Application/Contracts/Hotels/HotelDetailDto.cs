@@ -17,4 +17,6 @@ public record HotelDetailDto(
     string? PhoneNumber,
     IReadOnlyList<HotelImageDto> Images,
     IReadOnlyList<AmenityDto> Amenities,
-    IReadOnlyList<RoomTypeDto> RoomTypes);
+    IReadOnlyList<RoomTypeDto> RoomTypes,
+    decimal? CustomerRating,
+    int CustomerReviewCount);

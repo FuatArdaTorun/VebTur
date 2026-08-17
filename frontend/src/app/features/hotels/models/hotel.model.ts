@@ -53,6 +53,47 @@ export interface HotelDetail {
   images: HotelImage[];
   amenities: Amenity[];
   roomTypes: RoomType[];
+  customerRating: number | null;
+  customerReviewCount: number;
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  reviewerName: string;
+  roomTypeName: string;
+  checkInDate: string;
+  checkOutDate: string;
+  createdAtUtc: string;
+}
+
+/** One of the current customer's own Confirmed reservations at this hotel that doesn't have a review yet. */
+export interface ReviewableReservation {
+  reservationRequestId: string;
+  roomTypeName: string;
+  checkInDate: string;
+  checkOutDate: string;
+}
+
+export interface HotelReviewsResponse {
+  reviews: Review[];
+  myReviewableReservations: ReviewableReservation[];
+}
+
+export interface CreateReviewRequest {
+  reservationRequestId: string;
+  rating: number;
+  comment: string | null;
+}
+
+export interface ExternalRating {
+  provider: string;
+  rating: number;
+  maximumRating: number;
+  reviewCount: number;
+  isDemoData: boolean;
+  lastUpdatedAtUtc: string;
 }
 
 export interface PagedResult<T> {
