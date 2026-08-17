@@ -16,6 +16,7 @@ public class VebTurDbContext(DbContextOptions<VebTurDbContext> options)
     public DbSet<RoomType> RoomTypes => Set<RoomType>();
     public DbSet<HotelSupervisor> HotelSupervisors => Set<HotelSupervisor>();
     public DbSet<ExternalHotelProfile> ExternalHotelProfiles => Set<ExternalHotelProfile>();
+    public DbSet<ExternalRating> ExternalRatings => Set<ExternalRating>();
     public DbSet<ReservationRequest> ReservationRequests => Set<ReservationRequest>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
 

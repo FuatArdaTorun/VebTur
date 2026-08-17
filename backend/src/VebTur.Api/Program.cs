@@ -3,10 +3,12 @@ using System.Text;
 using VebTur.Api.ExceptionHandling;
 using VebTur.Application.Admin;
 using VebTur.Application.Auth;
+using VebTur.Application.ExternalRatings;
 using VebTur.Application.Hotels;
 using VebTur.Application.Reservations;
 using VebTur.Infrastructure.Admin;
 using VebTur.Infrastructure.Auth;
+using VebTur.Infrastructure.ExternalRatings;
 using VebTur.Infrastructure.Hotels;
 using VebTur.Infrastructure.Persistence;
 using VebTur.Infrastructure.Persistence.Seed;
@@ -56,6 +58,15 @@ builder.Services.AddScoped<IReservationRequestService, ReservationRequestService
 builder.Services.AddScoped<IAdminReservationService, AdminReservationService>();
 builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>();
 builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationService>();
+
+builder.Services.Configure<GooglePlacesOptions>(builder.Configuration.GetSection(GooglePlacesOptions.SectionName));
+builder.Services.AddHttpClient<GooglePlacesRatingProvider>(client =>
+{
+    client.BaseAddress = new Uri("https://places.googleapis.com/");
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+builder.Services.AddScoped<ManualExternalRatingProvider>();
+builder.Services.AddScoped<IExternalRatingService, ExternalRatingService>();
 
 builder.Services.AddValidatorsFromAssembly(typeof(IHotelQueryService).Assembly);
 

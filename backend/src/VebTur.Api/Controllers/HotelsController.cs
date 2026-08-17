@@ -1,5 +1,6 @@
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Hotels;
+using VebTur.Application.ExternalRatings;
 using VebTur.Application.Hotels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace VebTur.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/hotels")]
-public class HotelsController(IHotelQueryService hotelQueryService) : ControllerBase
+public class HotelsController(IHotelQueryService hotelQueryService, IExternalRatingService externalRatingService) : ControllerBase
 {
     private const int MaxPageSize = 50;
 
@@ -55,5 +56,17 @@ public class HotelsController(IHotelQueryService hotelQueryService) : Controller
     {
         var hotel = await hotelQueryService.GetHotelByIdOrSlugAsync(idOrSlug, cancellationToken);
         return hotel is null ? NotFound() : Ok(hotel);
+    }
+
+    /// <summary>
+    /// Loaded separately from the main hotel detail response so a slow/unreachable external
+    /// provider never blocks the rest of the page. 204 when
+    /// neither a live nor a demo rating is available for this hotel (not an error case).
+    /// </summary>
+    [HttpGet("{id:guid}/external-rating")]
+    public async Task<ActionResult<ExternalRatingDto>> GetExternalRating(Guid id, CancellationToken cancellationToken)
+    {
+        var rating = await externalRatingService.GetRatingAsync(id, cancellationToken);
+        return rating is null ? NoContent() : Ok(rating);
     }
 }

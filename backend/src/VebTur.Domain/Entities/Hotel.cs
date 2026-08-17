@@ -51,4 +51,5 @@ public class Hotel : IHasTimestamps
     public List<HotelSupervisor> Supervisors { get; set; } = [];
     public List<HotelAmenity> HotelAmenities { get; set; } = [];
     public List<ExternalHotelProfile> ExternalProfiles { get; set; } = [];
+    public List<ExternalRating> ExternalRatings { get; set; } = [];
 }
