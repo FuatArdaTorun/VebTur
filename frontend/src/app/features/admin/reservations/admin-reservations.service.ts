@@ -44,4 +44,9 @@ export class AdminReservationsService {
   deleteReservation(id: string) {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  /** Irreversible bulk delete. AwaitingApproval ids are silently skipped by the backend. */
+  deleteReservations(ids: string[]) {
+    return this.http.delete<void>(this.baseUrl, { body: { ids } });
+  }
 }

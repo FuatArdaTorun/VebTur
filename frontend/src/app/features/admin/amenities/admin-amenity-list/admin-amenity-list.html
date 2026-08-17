@@ -1,12 +1,25 @@
 <div class="admin-amenity-list">
   <h1>Amenities</h1>
 
-  <form class="admin-amenity-list__add" [formGroup]="addForm" (ngSubmit)="addAmenity()">
-    <input type="text" formControlName="name" placeholder="Name (e.g. Sea View)" />
-    <input type="text" formControlName="slug" placeholder="Slug (e.g. sea-view)" />
-    <input type="text" formControlName="iconKey" placeholder="Icon key (optional)" />
-    <button type="submit">+ Add amenity</button>
-  </form>
+  <div class="admin-amenity-list__toolbar">
+    <form class="admin-amenity-list__add" [formGroup]="addForm" (ngSubmit)="addAmenity()">
+      <input type="text" formControlName="name" placeholder="Name (e.g. Sea View)" />
+      <input type="text" formControlName="slug" placeholder="Slug (e.g. sea-view)" />
+      <input type="text" formControlName="iconKey" placeholder="Icon key (optional)" />
+      <button type="submit">+ Add amenity</button>
+    </form>
+
+    <div class="admin-amenity-list__bulk-bar">
+      <button type="button" class="admin-amenity-list__select-toggle" (click)="toggleSelectionMode()">
+        {{ selectionMode() ? 'Cancel' : 'Delete Amenity' }}
+      </button>
+      @if (selectionMode() && selectedCount() > 0) {
+        <button type="button" class="admin-amenity-list__bulk-delete" (click)="requestBulkDelete()">
+          Delete selected ({{ selectedCount() }})
+        </button>
+      }
+    </div>
+  </div>
 
   @if (loading()) {
     <app-loading-state message="Loading amenities…" />
@@ -16,6 +29,11 @@
     <table class="admin-amenity-list__table">
       <thead>
         <tr>
+          @if (selectionMode()) {
+            <th class="admin-amenity-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
           <th>Name</th>
           <th>Slug</th>
           <th>Icon key</th>
@@ -27,24 +45,43 @@
         @for (amenity of amenities(); track amenity.id) {
           @if (editingId() === amenity.id) {
             <tr [formGroup]="editForm">
+              @if (selectionMode()) {
+                <td class="admin-amenity-list__checkbox-col">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(amenity.id)"
+                    (change)="toggleSelect(amenity.id)"
+                    [attr.aria-label]="'Select ' + amenity.name"
+                  />
+                </td>
+              }
               <td><input type="text" formControlName="name" /></td>
               <td><input type="text" formControlName="slug" /></td>
               <td><input type="text" formControlName="iconKey" /></td>
               <td>{{ amenity.hotelCount }} hotels</td>
               <td class="admin-amenity-list__actions">
-                <button type="button" (click)="saveEdit(amenity.id)">Save</button>
-                <button type="button" (click)="cancelEdit()">Cancel</button>
+                <button type="button" class="admin-amenity-list__action-btn" (click)="saveEdit(amenity.id)">Save</button>
+                <button type="button" class="admin-amenity-list__action-btn admin-amenity-list__action-btn--neutral" (click)="cancelEdit()">Cancel</button>
               </td>
             </tr>
           } @else {
             <tr>
+              @if (selectionMode()) {
+                <td class="admin-amenity-list__checkbox-col">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(amenity.id)"
+                    (change)="toggleSelect(amenity.id)"
+                    [attr.aria-label]="'Select ' + amenity.name"
+                  />
+                </td>
+              }
               <td>{{ amenity.name }}</td>
               <td>{{ amenity.slug }}</td>
               <td>{{ amenity.iconKey || '—' }}</td>
               <td>{{ amenity.hotelCount }} hotels</td>
               <td class="admin-amenity-list__actions">
-                <button type="button" (click)="startEdit(amenity)">Edit</button>
-                <button type="button" class="admin-amenity-list__delete" (click)="requestDelete(amenity)">Delete</button>
+                <button type="button" class="admin-amenity-list__action-btn" (click)="startEdit(amenity)">Edit</button>
               </td>
             </tr>
           }
@@ -53,12 +90,12 @@
     </table>
   }
 
-  @if (pendingDelete(); as amenity) {
+  @if (confirmingBulkDelete()) {
     <app-confirm-dialog
-      [message]="'Delete ' + amenity.name + '? This removes it from ' + amenity.hotelCount + ' hotel(s).'"
-      confirmLabel="Delete"
-      (confirmed)="confirmDelete()"
-      (cancelled)="pendingDelete.set(null)"
+      [message]="'Permanently delete ' + selectedCount() + ' ' + (selectedCount() === 1 ? 'amenity' : 'amenities') + '? This removes it from any hotels currently using it and cannot be undone.'"
+      confirmLabel="Delete permanently"
+      (confirmed)="confirmBulkDelete()"
+      (cancelled)="confirmingBulkDelete.set(false)"
     />
   }
 </div>

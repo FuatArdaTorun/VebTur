@@ -13,7 +13,10 @@
       />
       <button type="button" (click)="applyFilter()">Search</button>
     </div>
-    @if (selectedCount() > 0) {
+    <button type="button" class="admin-notification-list__select-toggle" (click)="toggleSelectionMode()">
+      {{ selectionMode() ? 'Cancel' : 'Delete Notification' }}
+    </button>
+    @if (selectionMode() && selectedCount() > 0) {
       <button type="button" class="admin-notification-list__bulk-delete" (click)="requestBulkDelete()">
         Delete selected ({{ selectedCount() }})
       </button>
@@ -30,9 +33,11 @@
     <table class="admin-notification-list__table">
       <thead>
         <tr>
-          <th class="admin-notification-list__checkbox-col">
-            <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
-          </th>
+          @if (selectionMode()) {
+            <th class="admin-notification-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
           <th>Sent At</th>
           <th>Reference</th>
           <th>Recipient</th>
@@ -43,20 +48,22 @@
       <tbody>
         @for (n of notifications(); track n.id) {
           <tr>
-            <td class="admin-notification-list__checkbox-col">
-              <input
-                type="checkbox"
-                [checked]="isSelected(n.id)"
-                (change)="toggleSelect(n.id)"
-                [attr.aria-label]="'Select notification for ' + n.reservationReferenceNumber"
-              />
-            </td>
+            @if (selectionMode()) {
+              <td class="admin-notification-list__checkbox-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(n.id)"
+                  (change)="toggleSelect(n.id)"
+                  [attr.aria-label]="'Select notification for ' + n.reservationReferenceNumber"
+                />
+              </td>
+            }
             <td>{{ n.sentAtUtc | date: 'medium' }}</td>
             <td>{{ n.reservationReferenceNumber }}</td>
             <td>{{ n.recipient }}</td>
             <td>{{ n.subject }}</td>
             <td class="admin-notification-list__actions">
-              <a [routerLink]="['/admin/reservations', n.reservationRequestId]">View reservation</a>
+              <a class="admin-notification-list__action-btn" [routerLink]="['/admin/reservations', n.reservationRequestId]">View reservation</a>
             </td>
           </tr>
         }

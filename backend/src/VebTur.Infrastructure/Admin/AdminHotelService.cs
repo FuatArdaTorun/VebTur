@@ -38,7 +38,8 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
                 h.City,
                 h.IsActive,
                 h.Images.OrderBy(i => i.DisplayOrder).Select(i => i.Url).FirstOrDefault(),
-                h.UpdatedAtUtc))
+                h.UpdatedAtUtc,
+                db.ReservationRequests.Any(r => r.HotelId == h.Id)))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<AdminHotelSummaryDto>(items, request.Page, request.PageSize, totalCount);
@@ -214,9 +215,39 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
             return false;
         }
 
+        // Checked explicitly rather than letting the DB's FK Restrict throw — that would surface
+        // as an opaque 500 with no indication of why. This is deliberately blocked even when
+        // every referencing reservation is already Rejected/Cancelled (terminal): the FK itself
+        // doesn't distinguish by status, and historical reservation rows must never be silently
+        // orphaned or lost. Deactivate the hotel instead, or delete its reservations first.
+        var hasReservationHistory = await db.ReservationRequests.AnyAsync(r => r.HotelId == id, cancellationToken);
+        if (hasReservationHistory)
+        {
+            throw new ValidationException(nameof(hotel.Id),
+                "This hotel has reservation history and cannot be permanently deleted. Deactivate it instead, or delete its reservation requests first.");
+        }
+
         db.Hotels.Remove(hotel);
         await db.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<int> DeleteManyPermanentlyAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        var hotels = await db.Hotels.Where(h => ids.Contains(h.Id)).ToListAsync(cancellationToken);
+        var hotelIds = hotels.Select(h => h.Id).ToList();
+
+        var idsWithReservationHistory = await db.ReservationRequests
+            .Where(r => hotelIds.Contains(r.HotelId))
+            .Select(r => r.HotelId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        var deletable = hotels.Where(h => !idsWithReservationHistory.Contains(h.Id)).ToList();
+
+        db.Hotels.RemoveRange(deletable);
+        await db.SaveChangesAsync(cancellationToken);
+        return deletable.Count;
     }
 
     private async Task<bool> SetActiveAsync(Guid id, bool isActive, CancellationToken cancellationToken)

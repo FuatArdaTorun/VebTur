@@ -12,7 +12,8 @@ namespace VebTur.Api.Controllers.Admin;
 [Authorize(Roles = "Admin")]
 public class AdminAmenitiesController(
     IAdminAmenityService adminAmenityService,
-    IValidator<AdminAmenityUpsertDto> validator) : ControllerBase
+    IValidator<AdminAmenityUpsertDto> validator,
+    IValidator<DeleteAmenitiesDto> deleteManyValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<List<AdminAmenityDto>>> GetAmenities(CancellationToken cancellationToken)
@@ -51,5 +52,19 @@ public class AdminAmenitiesController(
     {
         var deleted = await adminAmenityService.DeleteAmenityAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
+    }
+
+    /// <summary>Bulk delete — irreversible. Ids that no longer exist are silently ignored.</summary>
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAmenities(DeleteAmenitiesDto dto, CancellationToken cancellationToken)
+    {
+        var validation = await deleteManyValidator.ValidateAsync(dto, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(validation.ToModelStateDictionary());
+        }
+
+        await adminAmenityService.DeleteManyAsync(dto.Ids, cancellationToken);
+        return NoContent();
     }
 }

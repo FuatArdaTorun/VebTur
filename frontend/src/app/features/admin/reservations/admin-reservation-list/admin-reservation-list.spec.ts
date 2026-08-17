@@ -1,19 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { AdminReservationList } from './admin-reservation-list';
 import { AdminReservationsService } from '../admin-reservations.service';
+import { ReservationStatus } from '../../../reservations/models/reservation.model';
 
 describe('AdminReservationList', () => {
   let fixture: ComponentFixture<AdminReservationList>;
   let component: AdminReservationList;
-  let serviceStub: { getReservations: ReturnType<typeof vi.fn>; deleteReservation?: ReturnType<typeof vi.fn> };
+  let serviceStub: {
+    getReservations: ReturnType<typeof vi.fn>;
+    deleteReservations?: ReturnType<typeof vi.fn>;
+  };
 
-  function createComponent(): void {
+  function createComponent(queryParams: Record<string, string> = {}): void {
     TestBed.configureTestingModule({
       imports: [AdminReservationList],
-      providers: [provideRouter([]), { provide: AdminReservationsService, useValue: serviceStub }],
+      providers: [
+        provideRouter([]),
+        { provide: AdminReservationsService, useValue: serviceStub },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } } },
+      ],
     });
 
     fixture = TestBed.createComponent(AdminReservationList);
@@ -46,11 +55,11 @@ describe('AdminReservationList', () => {
     expect(component['error']()).toBe(true);
   });
 
-  it('defaults to created-desc and sends it on the initial fetch', () => {
+  it('defaults to status-asc (AwaitingApproval first) and sends it on the initial fetch', () => {
     serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
     createComponent();
 
-    expect(serviceStub.getReservations).toHaveBeenCalledWith(expect.objectContaining({ sort: 'created-desc' }));
+    expect(serviceStub.getReservations).toHaveBeenCalledWith(expect.objectContaining({ sort: 'status-asc' }));
   });
 
   it('clicking a column header sorts ascending by that column and resets to page 1', () => {
@@ -107,29 +116,166 @@ describe('AdminReservationList', () => {
     expect(serviceStub.getReservations).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'jane@example.com', page: 1 }));
   });
 
-  it('requesting delete opens a confirmation for that reservation', () => {
+  it('does not allow delete for an AwaitingApproval reservation (must be confirmed/rejected first)', () => {
     serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
     createComponent();
 
-    const reservation = { id: 'res-1', referenceNumber: 'VEB-4F7K9QRT' } as never;
-    component['requestDelete'](reservation);
-
-    expect(component['pendingDelete']()).toBe(reservation);
+    const reservation = { id: 'res-1', status: 'AwaitingApproval' as ReservationStatus } as never;
+    expect(component['canDelete'](reservation)).toBe(false);
   });
 
-  it('confirming delete calls the service, clears the pending state, and refetches', () => {
+  it.each<ReservationStatus>(['Confirmed', 'Rejected', 'Cancelled'])('allows delete for a %s reservation', (status) => {
+    serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    const reservation = { id: 'res-1', status } as never;
+    expect(component['canDelete'](reservation)).toBe(true);
+  });
+
+  it('selection mode is off by default, with no checkboxes and no single Delete button hidden', () => {
     serviceStub = {
-      getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })),
-      deleteReservation: vi.fn().mockReturnValue(of(undefined)),
+      getReservations: vi.fn().mockReturnValue(of({ items: [{ id: 'res-1', status: 'Confirmed' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })),
     };
     createComponent();
 
-    const reservation = { id: 'res-1', referenceNumber: 'VEB-4F7K9QRT' } as never;
-    component['requestDelete'](reservation);
-    component['confirmDelete']();
+    expect(component['selectionMode']()).toBe(false);
+    expect(fixture.nativeElement.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Delete Reservation');
+    expect(fixture.nativeElement.textContent).toContain('Delete');
+  });
 
-    expect(serviceStub.deleteReservation).toHaveBeenCalledWith('res-1');
-    expect(component['pendingDelete']()).toBeNull();
+  it('toggling selection mode on shows checkboxes only for deletable rows; toggling it off clears any selection', () => {
+    serviceStub = {
+      getReservations: vi.fn().mockReturnValue(
+        of({
+          items: [
+            { id: 'res-1', status: 'Confirmed' },
+            { id: 'res-2', status: 'AwaitingApproval' },
+          ],
+          page: 1,
+          pageSize: 20,
+          totalCount: 2,
+          totalPages: 1,
+        }),
+      ),
+    };
+    createComponent();
+
+    component['toggleSelectionMode']();
+    fixture.detectChanges();
+
+    expect(component['selectionMode']()).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('tbody input[type="checkbox"]').length).toBe(1);
+
+    component['toggleSelect']('res-1');
+    expect(component['selectedCount']()).toBe(1);
+
+    component['toggleSelectionMode']();
+    expect(component['selectionMode']()).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
+  });
+
+  it('select-all only selects deletable (non-AwaitingApproval) rows', () => {
+    serviceStub = {
+      getReservations: vi.fn().mockReturnValue(
+        of({
+          items: [
+            { id: 'res-1', status: 'Confirmed' },
+            { id: 'res-2', status: 'AwaitingApproval' },
+            { id: 'res-3', status: 'Rejected' },
+          ],
+          page: 1,
+          pageSize: 20,
+          totalCount: 3,
+          totalPages: 1,
+        }),
+      ),
+    };
+    createComponent();
+    component['toggleSelectionMode']();
+
+    component['toggleSelectAll']();
+
+    expect(component['isAllSelected']()).toBe(true);
+    expect(component['selectedCount']()).toBe(2);
+    expect(component['isSelected']('res-2')).toBe(false);
+
+    component['toggleSelectAll']();
+    expect(component['selectedCount']()).toBe(0);
+  });
+
+  it('requestBulkDelete opens the confirm dialog only when something is selected', () => {
+    serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [{ id: 'res-1', status: 'Confirmed' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })) };
+    createComponent();
+    component['toggleSelectionMode']();
+
+    component['requestBulkDelete']();
+    expect(component['confirmingBulkDelete']()).toBe(false);
+
+    component['toggleSelect']('res-1');
+    component['requestBulkDelete']();
+    expect(component['confirmingBulkDelete']()).toBe(true);
+  });
+
+  it('confirming bulk delete calls the service with the selected ids, exits selection mode, and refetches', () => {
+    serviceStub = {
+      getReservations: vi.fn().mockReturnValue(of({ items: [{ id: 'res-1', status: 'Confirmed' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })),
+      deleteReservations: vi.fn().mockReturnValue(of(undefined)),
+    };
+    createComponent();
+    component['toggleSelectionMode']();
+    component['toggleSelect']('res-1');
+    component['requestBulkDelete']();
+
+    component['confirmBulkDelete']();
+
+    expect(serviceStub.deleteReservations).toHaveBeenCalledWith(['res-1']);
+    expect(component['confirmingBulkDelete']()).toBe(false);
+    expect(component['selectionMode']()).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
     expect(serviceStub.getReservations).toHaveBeenCalledTimes(2);
+  });
+
+  it('surfaces the error from a rejected bulk delete without refetching', () => {
+    serviceStub = {
+      getReservations: vi.fn().mockReturnValue(of({ items: [{ id: 'res-1', status: 'Confirmed' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })),
+      deleteReservations: vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: { errors: { Ids: ['Select at least one reservation to delete.'] } } }))),
+    };
+    createComponent();
+    component['toggleSelectionMode']();
+    component['toggleSelect']('res-1');
+    component['requestBulkDelete']();
+
+    component['confirmBulkDelete']();
+
+    expect(component['deleteError']()).toBe('Select at least one reservation to delete.');
+    expect(component['confirmingBulkDelete']()).toBe(false);
+    expect(serviceStub.getReservations).toHaveBeenCalledTimes(1);
+  });
+
+  it('pre-fills the search box from a "search" route query param and sends it on the initial fetch', () => {
+    serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent({ search: 'Cancel Restriction Test Hotel' });
+
+    expect(component['searchControl'].value).toBe('Cancel Restriction Test Hotel');
+    expect(serviceStub.getReservations).toHaveBeenCalledWith(expect.objectContaining({ search: 'Cancel Restriction Test Hotel' }));
+  });
+
+  it('leaves the search box empty when arriving without a "search" query param', () => {
+    serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    expect(component['searchControl'].value).toBe('');
+    expect(serviceStub.getReservations).toHaveBeenCalledWith(expect.objectContaining({ search: undefined }));
+  });
+
+  it('clearing the pre-filled search box and re-applying removes the filter, same as any other search edit', () => {
+    serviceStub = { getReservations: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent({ search: 'Cancel Restriction Test Hotel' });
+
+    component['searchControl'].setValue('');
+    component['applyFilter']();
+
+    expect(serviceStub.getReservations).toHaveBeenLastCalledWith(expect.objectContaining({ search: undefined }));
   });
 });

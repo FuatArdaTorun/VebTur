@@ -15,6 +15,7 @@ public class HotelsController(IHotelQueryService hotelQueryService, IExternalRat
     [HttpGet]
     public async Task<ActionResult<PagedResult<HotelSummaryDto>>> GetHotels(
         [FromQuery] string? city = null,
+        [FromQuery] string? search = null,
         [FromQuery] decimal? minPrice = null,
         [FromQuery] decimal? maxPrice = null,
         [FromQuery] int? minStarRating = null,
@@ -38,6 +39,7 @@ public class HotelsController(IHotelQueryService hotelQueryService, IExternalRat
 
         var request = new HotelSearchRequest(
             city,
+            search,
             minPrice,
             maxPrice,
             minStarRating,

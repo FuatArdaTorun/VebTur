@@ -13,7 +13,8 @@ namespace VebTur.Api.Controllers.Admin;
 [Authorize(Roles = "Admin")]
 public class AdminHotelsController(
     IAdminHotelService adminHotelService,
-    IValidator<AdminHotelUpsertDto> validator) : ControllerBase
+    IValidator<AdminHotelUpsertDto> validator,
+    IValidator<DeleteHotelsDto> deleteManyValidator) : ControllerBase
 {
     private const int MaxPageSize = 50;
 
@@ -85,5 +86,19 @@ public class AdminHotelsController(
     {
         var deleted = await adminHotelService.DeleteHotelPermanentlyAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
+    }
+
+    /// <summary>Bulk permanent delete — irreversible. Hotels with reservation history are silently skipped (see <see cref="IAdminHotelService.DeleteManyPermanentlyAsync"/>); ids that no longer exist are silently ignored.</summary>
+    [HttpDelete("permanent")]
+    public async Task<IActionResult> DeleteHotelsPermanently(DeleteHotelsDto dto, CancellationToken cancellationToken)
+    {
+        var validation = await deleteManyValidator.ValidateAsync(dto, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(validation.ToModelStateDictionary());
+        }
+
+        await adminHotelService.DeleteManyPermanentlyAsync(dto.Ids, cancellationToken);
+        return NoContent();
     }
 }

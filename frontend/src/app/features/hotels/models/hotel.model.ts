@@ -67,6 +67,7 @@ export type HotelSortOrder = 'recommended' | 'price-asc' | 'price-desc' | 'star-
 
 export interface HotelSearchParams {
   city?: string;
+  search?: string;
   minPrice?: number;
   maxPrice?: number;
   minStarRating?: number;

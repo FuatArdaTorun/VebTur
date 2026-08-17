@@ -12,6 +12,7 @@ export class HotelsService {
     let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
 
     if (params.city) httpParams = httpParams.set('city', params.city);
+    if (params.search) httpParams = httpParams.set('search', params.search);
     if (params.minPrice != null) httpParams = httpParams.set('minPrice', params.minPrice);
     if (params.maxPrice != null) httpParams = httpParams.set('maxPrice', params.maxPrice);
     if (params.minStarRating != null) httpParams = httpParams.set('minStarRating', params.minStarRating);

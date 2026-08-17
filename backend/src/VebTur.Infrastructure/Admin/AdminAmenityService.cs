@@ -60,6 +60,14 @@ public class AdminAmenityService(VebTurDbContext db) : IAdminAmenityService
         return true;
     }
 
+    public async Task<int> DeleteManyAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        var amenities = await db.Amenities.Where(a => ids.Contains(a.Id)).ToListAsync(cancellationToken);
+        db.Amenities.RemoveRange(amenities);
+        await db.SaveChangesAsync(cancellationToken);
+        return amenities.Count;
+    }
+
     private async Task EnsureSlugAvailableAsync(string slug, Guid? excludingId, CancellationToken cancellationToken)
     {
         var query = db.Amenities.Where(a => a.Slug == slug);

@@ -8,4 +8,6 @@ public record AdminHotelSummaryDto(
     string City,
     bool IsActive,
     string? ThumbnailUrl,
-    DateTime UpdatedAtUtc);
+    DateTime UpdatedAtUtc,
+    /// <summary>True if any ReservationRequest still references this hotel — it can't be permanently deleted (FK Restrict) until that's resolved. Lets the list hide the bulk-delete checkbox for it up front instead of the admin discovering the block only after selecting it.</summary>
+    bool HasReservationHistory);

@@ -31,6 +31,7 @@ export interface AdminHotelSummary {
   isActive: boolean;
   thumbnailUrl: string | null;
   updatedAtUtc: string;
+  hasReservationHistory: boolean;
 }
 
 export interface AdminHotelDetail {

@@ -23,4 +23,13 @@ public interface IAdminHotelService
     /// from the database. Unlike <see cref="DeactivateHotelAsync"/>, there is no undo.
     /// </summary>
     Task<bool> DeleteHotelPermanentlyAsync(Guid id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Bulk variant of <see cref="DeleteHotelPermanentlyAsync"/>. Hotels with reservation history
+    /// are silently skipped rather than rejecting the whole batch — defense-in-depth only, since
+    /// the admin list UI never lets one be selected in the first place (see
+    /// <see cref="AdminHotelSummaryDto.HasReservationHistory"/>). Ids that don't exist are
+    /// likewise silently ignored. Returns how many were actually removed.
+    /// </summary>
+    Task<int> DeleteManyPermanentlyAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken);
 }

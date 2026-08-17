@@ -17,6 +17,12 @@ public class HotelQueryService(VebTurDbContext db) : IHotelQueryService
             query = query.Where(h => h.City == request.City);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var pattern = $"%{request.Search.Trim()}%";
+            query = query.Where(h => EF.Functions.ILike(h.Name, pattern) || EF.Functions.ILike(h.City, pattern));
+        }
+
         if (request.MinStarRating.HasValue)
         {
             query = query.Where(h => h.StarRating >= request.MinStarRating.Value);

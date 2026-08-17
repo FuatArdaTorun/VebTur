@@ -23,4 +23,9 @@ export class AdminAmenitiesService {
   deleteAmenity(id: string) {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  /** Irreversible bulk delete. Ids that no longer exist are silently ignored by the backend. */
+  deleteAmenities(ids: string[]) {
+    return this.http.delete<void>(this.baseUrl, { body: { ids } });
+  }
 }

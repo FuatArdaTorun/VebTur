@@ -8,10 +8,11 @@ import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 import { StatusLabelPipe } from '../../../../shared/status-label/status-label.pipe';
+import { WarningBanner } from '../../../../shared/warning-banner/warning-banner';
 
 @Component({
   selector: 'app-admin-reservation-detail',
-  imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog, StatusLabelPipe],
+  imports: [RouterLink, DatePipe, LoadingState, ErrorState, ConfirmDialog, StatusLabelPipe, WarningBanner],
   templateUrl: './admin-reservation-detail.html',
   styleUrl: './admin-reservation-detail.scss',
 })

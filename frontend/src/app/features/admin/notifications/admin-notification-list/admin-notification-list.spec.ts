@@ -75,6 +75,32 @@ describe('AdminNotificationList', () => {
     expect(serviceStub.getNotifications).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
   });
 
+  it('selection mode is off by default, with no checkboxes rendered', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })) };
+    createComponent();
+
+    expect(component['selectionMode']()).toBe(false);
+    expect(fixture.nativeElement.querySelector('input[type="checkbox"]')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Delete Notification');
+  });
+
+  it('toggling selection mode on shows checkboxes; toggling it off again clears any selection', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 })) };
+    createComponent();
+
+    component['toggleSelectionMode']();
+    fixture.detectChanges();
+    expect(component['selectionMode']()).toBe(true);
+    expect(fixture.nativeElement.querySelector('input[type="checkbox"]')).not.toBeNull();
+
+    component['toggleSelect']('n-1');
+    expect(component['selectedCount']()).toBe(1);
+
+    component['toggleSelectionMode']();
+    expect(component['selectionMode']()).toBe(false);
+    expect(component['selectedCount']()).toBe(0);
+  });
+
   it('toggling a row selects/deselects it', () => {
     serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [{ id: 'n-1' }, { id: 'n-2' }], page: 1, pageSize: 20, totalCount: 2, totalPages: 1 })) };
     createComponent();
@@ -137,6 +163,7 @@ describe('AdminNotificationList', () => {
 
     expect(serviceStub.deleteNotifications).toHaveBeenCalledWith(['n-1']);
     expect(component['confirmingBulkDelete']()).toBe(false);
+    expect(component['selectionMode']()).toBe(false);
     expect(component['selectedCount']()).toBe(0);
     expect(serviceStub.getNotifications).toHaveBeenCalledTimes(2);
   });

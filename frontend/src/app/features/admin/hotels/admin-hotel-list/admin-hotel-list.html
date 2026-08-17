@@ -13,6 +13,14 @@
       <input type="checkbox" [formControl]="showInactiveControl" (change)="applySearch()" />
       Show deactivated
     </label>
+    <button type="button" class="admin-hotel-list__select-toggle" (click)="toggleSelectionMode()">
+      {{ selectionMode() ? 'Cancel' : 'Delete Hotel' }}
+    </button>
+    @if (selectionMode() && selectedCount() > 0) {
+      <button type="button" class="admin-hotel-list__bulk-delete" (click)="requestBulkDelete()">
+        Delete selected ({{ selectedCount() }})
+      </button>
+    }
   </div>
 
   @if (loading()) {
@@ -25,6 +33,11 @@
     <table class="admin-hotel-list__table">
       <thead>
         <tr>
+          @if (selectionMode()) {
+            <th class="admin-hotel-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
           <th>Thumbnail</th>
           <th>Name</th>
           <th>City</th>
@@ -36,6 +49,25 @@
       <tbody>
         @for (hotel of hotels(); track hotel.id) {
           <tr [class.admin-hotel-list__row--inactive]="!hotel.isActive">
+            @if (selectionMode()) {
+              <td class="admin-hotel-list__checkbox-col">
+                @if (canDelete(hotel)) {
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(hotel.id)"
+                    (change)="toggleSelect(hotel.id)"
+                    [attr.aria-label]="'Select ' + hotel.name"
+                  />
+                } @else {
+                  <a
+                    class="admin-hotel-list__blocked-hint"
+                    [routerLink]="['/admin/reservations']"
+                    [queryParams]="{ search: hotel.name }"
+                    title="Has reservation history — can't be deleted until that's resolved. Click to view its reservations."
+                  >🔒</a>
+                }
+              </td>
+            }
             <td>
               @if (hotel.thumbnailUrl) {
                 <img class="admin-hotel-list__thumb" [src]="hotel.thumbnailUrl" [alt]="hotel.name" />
@@ -46,11 +78,15 @@
             <td>{{ hotel.isActive ? 'Active' : 'Deactivated' }}</td>
             <td>{{ hotel.updatedAtUtc | date: 'medium' }}</td>
             <td class="admin-hotel-list__actions">
-              <a [routerLink]="['/admin/hotels', hotel.id, 'edit']">Edit</a>
-              <button type="button" (click)="requestToggle(hotel)">
+              <a class="admin-hotel-list__action-btn" [routerLink]="['/admin/hotels', hotel.id, 'edit']">Edit</a>
+              <button
+                type="button"
+                class="admin-hotel-list__action-btn"
+                [class.admin-hotel-list__action-btn--danger]="hotel.isActive"
+                (click)="requestToggle(hotel)"
+              >
                 {{ hotel.isActive ? 'Deactivate' : 'Reactivate' }}
               </button>
-              <button type="button" class="admin-hotel-list__delete" (click)="requestDelete(hotel)">Delete</button>
             </td>
           </tr>
         }
@@ -75,13 +111,13 @@
     />
   }
 
-  @if (pendingDelete(); as hotel) {
+  @if (confirmingBulkDelete()) {
     <app-confirm-dialog
-      [message]="'Permanently delete ' + hotel.name + '? This removes it and all its data from the database and cannot be undone.'"
+      [message]="'Permanently delete ' + selectedCount() + ' ' + (selectedCount() === 1 ? 'hotel' : 'hotels') + '? This removes all their data and cannot be undone.'"
       confirmLabel="Delete permanently"
-      [requireTypedConfirmation]="hotel.name"
-      (confirmed)="confirmDelete()"
-      (cancelled)="pendingDelete.set(null)"
+      [requireTypedConfirmation]="'DELETE'"
+      (confirmed)="confirmBulkDelete()"
+      (cancelled)="confirmingBulkDelete.set(false)"
     />
   }
 </div>

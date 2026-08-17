@@ -1,8 +1,10 @@
+using VebTur.Api.Validation;
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Reservations;
 using VebTur.Application.Reservations;
 using VebTur.Domain.Enums;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +13,9 @@ namespace VebTur.Api.Controllers.Admin;
 [ApiController]
 [Route("api/v1/admin/reservation-requests")]
 [Authorize(Roles = "Admin")]
-public class AdminReservationsController(IAdminReservationService adminReservationService) : ControllerBase
+public class AdminReservationsController(
+    IAdminReservationService adminReservationService,
+    IValidator<DeleteReservationRequestsDto> deleteManyValidator) : ControllerBase
 {
     private const int MaxPageSize = 50;
 
@@ -79,5 +83,19 @@ public class AdminReservationsController(IAdminReservationService adminReservati
     {
         var deleted = await adminReservationService.DeleteAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
+    }
+
+    /// <summary>Bulk delete — irreversible. AwaitingApproval ids are silently skipped (must be confirmed/rejected first); ids that no longer exist are silently ignored.</summary>
+    [HttpDelete]
+    public async Task<IActionResult> DeleteReservations(DeleteReservationRequestsDto dto, CancellationToken cancellationToken)
+    {
+        var validation = await deleteManyValidator.ValidateAsync(dto, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(validation.ToModelStateDictionary());
+        }
+
+        await adminReservationService.DeleteManyAsync(dto.Ids, cancellationToken);
+        return NoContent();
     }
 }

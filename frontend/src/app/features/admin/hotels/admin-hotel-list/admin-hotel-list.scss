@@ -50,6 +50,22 @@
     }
   }
 
+  &__select-toggle,
+  &__bulk-delete {
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #c5221f;
+    background: #fff;
+    color: #c5221f;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: #fdecea;
+    }
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;
@@ -61,6 +77,15 @@
       border-bottom: 1px solid #eee;
       font-size: 0.9rem;
     }
+  }
+
+  &__checkbox-col {
+    width: 2rem;
+  }
+
+  &__blocked-hint {
+    text-decoration: none;
+    cursor: pointer;
   }
 
   &__thumb {
@@ -76,20 +101,35 @@
 
   &__actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
+  }
 
-    a {
-      color: #1a73e8;
+  &__action-btn {
+    display: inline-block;
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid #1a73e8;
+    background: #fff;
+    color: #1a73e8;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: #e8f0fe;
     }
 
-    button {
-      border: none;
-      background: none;
+    &--danger {
+      border-color: #c5221f;
       color: #c5221f;
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 0;
+
+      &:hover {
+        background: #fdecea;
+      }
     }
   }
 

@@ -25,6 +25,7 @@ export class AdminNotificationList {
   protected readonly error = signal(false);
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
+  protected readonly selectionMode = signal(false);
   protected readonly selectedIds = signal<Set<string>>(new Set());
   protected readonly confirmingBulkDelete = signal(false);
 
@@ -54,6 +55,12 @@ export class AdminNotificationList {
     this.fetch();
   }
 
+  /** Toggling off drops any in-progress selection so re-entering selection mode starts fresh. */
+  protected toggleSelectionMode(): void {
+    this.selectionMode.set(!this.selectionMode());
+    this.selectedIds.set(new Set());
+  }
+
   protected isSelected(id: string): boolean {
     return this.selectedIds().has(id);
   }
@@ -81,6 +88,7 @@ export class AdminNotificationList {
   protected confirmBulkDelete(): void {
     this.notificationsService.deleteNotifications([...this.selectedIds()]).subscribe(() => {
       this.confirmingBulkDelete.set(false);
+      this.selectionMode.set(false);
       this.selectedIds.set(new Set());
       this.fetch();
     });

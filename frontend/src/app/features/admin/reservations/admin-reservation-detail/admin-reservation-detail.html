@@ -37,7 +37,7 @@
     </dl>
 
     @if (actionError(); as message) {
-      <p class="admin-reservation-detail__error">{{ message }}</p>
+      <app-warning-banner [message]="message" />
     }
 
     <div class="admin-reservation-detail__actions">

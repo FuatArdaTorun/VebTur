@@ -12,6 +12,7 @@ const PAGE_SIZE = 12;
 const CITIES = ['Antalya', 'Marmaris', 'Dalyan'];
 
 interface FilterFormValue {
+  search: string | null;
   city: string | null;
   minPrice: number | null;
   maxPrice: number | null;
@@ -43,6 +44,7 @@ export class HotelList {
   protected readonly totalCount = signal(0);
 
   protected readonly filterForm = new FormGroup({
+    search: new FormControl<string | null>(null),
     city: new FormControl<string | null>(null),
     minPrice: new FormControl<number | null>(null),
     maxPrice: new FormControl<number | null>(null),
@@ -59,6 +61,7 @@ export class HotelList {
 
       this.filterForm.patchValue(
         {
+          search: params.get('search'),
           city: params.get('city'),
           minPrice: toNumber('minPrice'),
           maxPrice: toNumber('maxPrice'),
@@ -97,6 +100,7 @@ export class HotelList {
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
+        search: v.search || null,
         city: v.city || null,
         minPrice: v.minPrice || null,
         maxPrice: v.maxPrice || null,
@@ -115,6 +119,7 @@ export class HotelList {
 
     const v = this.filterForm.value as FilterFormValue;
     const params: HotelSearchParams = {
+      search: v.search ?? undefined,
       city: v.city ?? undefined,
       minPrice: v.minPrice ?? undefined,
       maxPrice: v.maxPrice ?? undefined,

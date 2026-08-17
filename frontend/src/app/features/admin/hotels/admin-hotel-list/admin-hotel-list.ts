@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -26,10 +26,19 @@ export class AdminHotelList {
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
   protected readonly pendingToggle = signal<AdminHotelSummary | null>(null);
-  protected readonly pendingDelete = signal<AdminHotelSummary | null>(null);
+
+  protected readonly selectionMode = signal(false);
+  protected readonly selectedIds = signal<Set<string>>(new Set());
+  protected readonly confirmingBulkDelete = signal(false);
 
   protected readonly searchControl = new FormControl('', { nonNullable: true });
   protected readonly showInactiveControl = new FormControl(false, { nonNullable: true });
+
+  protected readonly selectedCount = computed(() => this.selectedIds().size);
+  protected readonly isAllSelected = computed(() => {
+    const eligible = this.hotels().filter((h) => this.canDelete(h));
+    return eligible.length > 0 && eligible.every((h) => this.selectedIds().has(h.id));
+  });
 
   constructor() {
     this.fetch();
@@ -69,18 +78,52 @@ export class AdminHotelList {
     });
   }
 
-  protected requestDelete(hotel: AdminHotelSummary): void {
-    this.pendingDelete.set(hotel);
+  /**
+   * A hotel with reservation history can't be permanently deleted (FK Restrict — see
+   * AdminHotelService.DeleteHotelPermanentlyAsync) — no checkbox for it here, so the admin sees
+   * upfront it isn't selectable instead of finding out only after attempting the delete.
+   */
+  protected canDelete(hotel: AdminHotelSummary): boolean {
+    return !hotel.hasReservationHistory;
   }
 
-  protected confirmDelete(): void {
-    const hotel = this.pendingDelete();
-    if (!hotel) {
-      return;
-    }
+  /** Toggling off drops any in-progress selection so re-entering selection mode starts fresh. */
+  protected toggleSelectionMode(): void {
+    this.selectionMode.set(!this.selectionMode());
+    this.selectedIds.set(new Set());
+  }
 
-    this.hotelsService.deleteHotelPermanently(hotel.id).subscribe(() => {
-      this.pendingDelete.set(null);
+  protected isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  protected toggleSelect(id: string): void {
+    const next = new Set(this.selectedIds());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  /** Only deletable-eligible rows carry a checkbox, so "select all" only ever targets those. */
+  protected toggleSelectAll(): void {
+    const eligible = this.hotels().filter((h) => this.canDelete(h));
+    this.selectedIds.set(this.isAllSelected() ? new Set() : new Set(eligible.map((h) => h.id)));
+  }
+
+  protected requestBulkDelete(): void {
+    if (this.selectedCount() > 0) {
+      this.confirmingBulkDelete.set(true);
+    }
+  }
+
+  protected confirmBulkDelete(): void {
+    this.hotelsService.deleteHotelsPermanently([...this.selectedIds()]).subscribe(() => {
+      this.confirmingBulkDelete.set(false);
+      this.selectionMode.set(false);
+      this.selectedIds.set(new Set());
       this.fetch();
     });
   }
@@ -88,6 +131,7 @@ export class AdminHotelList {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(false);
+    this.selectedIds.set(new Set());
 
     this.hotelsService
       .getHotels({

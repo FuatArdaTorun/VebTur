@@ -159,6 +159,13 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
             return false;
         }
 
+        // A still-pending request must be Confirmed/Rejected first — deleting it outright would
+        // silently discard a guest's request with no record of it ever having been acted on.
+        if (reservation.Status == ReservationStatus.AwaitingApproval)
+        {
+            throw new ValidationException(nameof(reservation.Status), "A reservation still awaiting approval must be confirmed or rejected before it can be deleted.");
+        }
+
         // Deleting a still-Confirmed reservation must release its held slot, same as cancelling it —
         // otherwise the room stays counted as unavailable forever with no record explaining why.
         if (reservation.Status == ReservationStatus.Confirmed)
@@ -169,5 +176,24 @@ public class AdminReservationService(VebTurDbContext db) : IAdminReservationServ
         db.ReservationRequests.Remove(reservation);
         await db.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<int> DeleteManyAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        var reservations = await db.ReservationRequests
+            .Include(r => r.RoomType)
+            .Where(r => ids.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+
+        var deletable = reservations.Where(r => r.Status != ReservationStatus.AwaitingApproval).ToList();
+
+        foreach (var reservation in deletable.Where(r => r.Status == ReservationStatus.Confirmed))
+        {
+            reservation.RoomType!.AvailableCount += 1;
+        }
+
+        db.ReservationRequests.RemoveRange(deletable);
+        await db.SaveChangesAsync(cancellationToken);
+        return deletable.Count;
     }
 }

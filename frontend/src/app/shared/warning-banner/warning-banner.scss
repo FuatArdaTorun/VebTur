@@ -1,0 +1,31 @@
+.warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: #fdecea;
+  border: 1px solid #f3b4ae;
+  border-left: 4px solid #c5221f;
+  border-radius: 6px;
+  color: #7a1a12;
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    color: #c5221f;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}

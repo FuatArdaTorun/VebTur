@@ -4,6 +4,11 @@
   <form class="hotel-list__filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
     <div class="hotel-list__filter-row">
       <label>
+        Search
+        <input type="search" formControlName="search" placeholder="Hotel name…" />
+      </label>
+
+      <label>
         Destination
         <select formControlName="city">
           <option [ngValue]="null">All destinations</option>

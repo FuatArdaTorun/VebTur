@@ -2,6 +2,7 @@ namespace VebTur.Application.Hotels;
 
 public record HotelSearchRequest(
     string? City,
+    string? Search,
     decimal? MinPrice,
     decimal? MaxPrice,
     int? MinStarRating,

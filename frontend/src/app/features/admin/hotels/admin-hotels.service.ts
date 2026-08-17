@@ -40,4 +40,9 @@ export class AdminHotelsService {
   deleteHotelPermanently(id: string) {
     return this.http.delete<void>(`${this.baseUrl}/${id}/permanent`);
   }
+
+  /** Irreversible bulk delete. Hotels with reservation history are silently skipped by the backend. */
+  deleteHotelsPermanently(ids: string[]) {
+    return this.http.delete<void>(`${this.baseUrl}/permanent`, { body: { ids } });
+  }
 }

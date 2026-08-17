@@ -329,11 +329,37 @@ public class ReservationRequestsApiIntegrationTests
     }
 
     [Fact]
+    public async Task AdminReservations_HotelIdFilter_ReturnsOnlyThatHotelsReservations()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelAId, roomTypeAId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+        var (hotelBId, roomTypeBId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+
+        var reservationA = await CreateAsGuestAsync(hotelAId, roomTypeAId);
+        var reservationB = await CreateAsGuestAsync(hotelBId, roomTypeBId);
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests?hotelId={hotelAId}&pageSize=200");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var paged = await response.Content.ReadFromJsonAsync<PagedResult<AdminReservationSummaryDto>>();
+
+        var ids = paged!.Items.Select(r => r.Id).ToList();
+        Assert.Contains(reservationA.Id, ids);
+        Assert.DoesNotContain(reservationB.Id, ids);
+    }
+
+    [Fact]
     public async Task AdminReservations_Delete_RemovesItFromAdminListAndReturnsNotFoundOnRepeat()
     {
         var adminToken = await GetAdminTokenAsync();
         var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
         var reservation = await CreateAsGuestAsync(hotelId, roomTypeId);
+
+        // Must be rejected first — a still-AwaitingApproval reservation can't be deleted directly.
+        using var rejectRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{reservation.Id}/reject");
+        rejectRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.NoContent, (await _client.SendAsync(rejectRequest)).StatusCode);
 
         Assert.Equal(HttpStatusCode.NoContent, await DeleteAsync(adminToken, reservation.Id));
 
@@ -342,6 +368,21 @@ public class ReservationRequestsApiIntegrationTests
         Assert.Equal(HttpStatusCode.NotFound, (await _client.SendAsync(getRequest)).StatusCode);
 
         Assert.Equal(HttpStatusCode.NotFound, await DeleteAsync(adminToken, reservation.Id));
+    }
+
+    [Fact]
+    public async Task AdminReservations_Delete_OfAwaitingApproval_ReturnsBadRequest()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+        var reservation = await CreateAsGuestAsync(hotelId, roomTypeId);
+
+        Assert.Equal(HttpStatusCode.BadRequest, await DeleteAsync(adminToken, reservation.Id));
+
+        // It must still be there, untouched, since the delete was rejected.
+        using var getRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests/{reservation.Id}");
+        getRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.OK, (await _client.SendAsync(getRequest)).StatusCode);
     }
 
     [Fact]
@@ -365,6 +406,87 @@ public class ReservationRequestsApiIntegrationTests
     public async Task AdminReservations_Delete_WithoutToken_ReturnsUnauthorized()
     {
         var response = await _client.DeleteAsync($"/api/v1/admin/reservation-requests/{Guid.NewGuid()}");
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReservations_BulkDelete_RemovesSpecifiedRows_AndLeavesOthersUntouched()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+
+        var toDelete1 = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, toDelete1.Id));
+        var toDelete2 = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, toDelete2.Id));
+        var toKeep = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, toKeep.Id));
+
+        Assert.Equal(HttpStatusCode.NoContent, await BulkDeleteAsync(adminToken, [toDelete1.Id, toDelete2.Id]));
+
+        using var getDeleted1 = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests/{toDelete1.Id}");
+        getDeleted1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.NotFound, (await _client.SendAsync(getDeleted1)).StatusCode);
+
+        using var getKept = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests/{toKeep.Id}");
+        getKept.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.OK, (await _client.SendAsync(getKept)).StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReservations_BulkDelete_SkipsAwaitingApprovalIds_ButDeletesTheRest()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 5);
+
+        var awaitingApproval = await CreateAsGuestAsync(hotelId, roomTypeId);
+        var rejected = await CreateAsGuestAsync(hotelId, roomTypeId);
+        using var rejectRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/admin/reservation-requests/{rejected.Id}/reject");
+        rejectRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.NoContent, (await _client.SendAsync(rejectRequest)).StatusCode);
+
+        // Mixed batch: one AwaitingApproval (must be skipped, not block the rest) + one Rejected (deletable).
+        Assert.Equal(HttpStatusCode.NoContent, await BulkDeleteAsync(adminToken, [awaitingApproval.Id, rejected.Id]));
+
+        using var getAwaiting = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests/{awaitingApproval.Id}");
+        getAwaiting.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.OK, (await _client.SendAsync(getAwaiting)).StatusCode);
+
+        using var getRejected = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reservation-requests/{rejected.Id}");
+        getRejected.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        Assert.Equal(HttpStatusCode.NotFound, (await _client.SendAsync(getRejected)).StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminReservations_BulkDelete_OfConfirmedReservations_ReleasesAvailableCount()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var (hotelId, roomTypeId, _) = await CreateHotelWithRoomTypeAsync(adminToken, availableCount: 1);
+
+        var confirmed = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, confirmed.Id));
+
+        Assert.Equal(HttpStatusCode.NoContent, await BulkDeleteAsync(adminToken, [confirmed.Id]));
+
+        var another = await CreateAsGuestAsync(hotelId, roomTypeId);
+        Assert.Equal(HttpStatusCode.NoContent, await ConfirmAsync(adminToken, another.Id));
+    }
+
+    [Fact]
+    public async Task AdminReservations_BulkDelete_WithEmptyIds_ReturnsBadRequest()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        Assert.Equal(HttpStatusCode.BadRequest, await BulkDeleteAsync(adminToken, []));
+    }
+
+    [Fact]
+    public async Task AdminReservations_BulkDelete_WithoutToken_ReturnsUnauthorized()
+    {
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/reservation-requests")
+        {
+            Content = JsonContent.Create(new DeleteReservationRequestsDto([Guid.NewGuid()])),
+        };
+        var response = await _client.SendAsync(deleteRequest);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
@@ -407,6 +529,17 @@ public class ReservationRequestsApiIntegrationTests
     private async Task<HttpStatusCode> DeleteAsync(string adminToken, Guid reservationId)
     {
         using var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/admin/reservation-requests/{reservationId}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+        var response = await _client.SendAsync(request);
+        return response.StatusCode;
+    }
+
+    private async Task<HttpStatusCode> BulkDeleteAsync(string adminToken, Guid[] ids)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/reservation-requests")
+        {
+            Content = JsonContent.Create(new DeleteReservationRequestsDto(ids)),
+        };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await _client.SendAsync(request);
         return response.StatusCode;

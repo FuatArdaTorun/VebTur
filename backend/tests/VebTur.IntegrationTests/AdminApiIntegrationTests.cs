@@ -5,6 +5,7 @@ using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
 using VebTur.Application.Contracts.Auth;
 using VebTur.Application.Contracts.Hotels;
+using VebTur.Application.Contracts.Reservations;
 using VebTur.Application.Hotels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -89,6 +90,23 @@ public class AdminApiIntegrationTests
         var body = await response.Content.ReadFromJsonAsync<PagedResult<HotelSummaryDto>>();
         Assert.NotNull(body);
         Assert.True(body!.TotalCount >= 18, $"Expected at least the 18 seeded hotels, got {body.TotalCount}.");
+    }
+
+    [Fact]
+    public async Task PublicHotelsList_SearchFiltersByNameOrCity_CaseInsensitively()
+    {
+        var token = await GetAdminTokenAsync();
+        var uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
+        var uniqueName = $"Zzyzx Search Test Hotel {uniqueSuffix}";
+        var created = await PostHotelAsync(token, BuildMinimalHotel($"search-test-{uniqueSuffix}") with { Name = uniqueName });
+        created.EnsureSuccessStatusCode();
+
+        var response = await _client.GetAsync($"/api/v1/hotels?search={Uri.EscapeDataString(uniqueName[..10].ToLowerInvariant())}&pageSize=50");
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<PagedResult<HotelSummaryDto>>();
+
+        Assert.Contains(body!.Items, h => h.Name == uniqueName);
+        Assert.All(body.Items, h => Assert.Contains("zzyzx", h.Name.ToLowerInvariant()));
     }
 
     [Fact]
@@ -265,6 +283,118 @@ public class AdminApiIntegrationTests
         secondDeleteRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var secondDeleteResponse = await _client.SendAsync(secondDeleteRequest);
         Assert.Equal(HttpStatusCode.NotFound, secondDeleteResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task PermanentDelete_OfHotelWithReservationHistory_ReturnsBadRequest_AndLeavesHotelIntact()
+    {
+        var token = await GetAdminTokenAsync();
+        var slug = $"delete-guard-test-{Guid.NewGuid():N}";
+        var createDto = BuildMinimalHotel(slug) with
+        {
+            RoomTypes = [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", 5, true)],
+        };
+        var createResponse = await PostHotelAsync(token, createDto);
+        var created = await createResponse.Content.ReadFromJsonAsync<AdminHotelDetailDto>();
+
+        var reservationDto = new CreateReservationRequestDto(
+            created!.Id, created.RoomTypes[0].Id!.Value, "Guest Name", "guest@example.com", "+90 555 000 00 00",
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(13),
+            AdultCount: 2, ChildCount: 0, SpecialRequests: null);
+        (await _client.PostAsJsonAsync("/api/v1/reservation-requests", reservationDto)).EnsureSuccessStatusCode();
+
+        using var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/admin/hotels/{created.Id}/permanent");
+        deleteRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var deleteResponse = await _client.SendAsync(deleteRequest);
+
+        Assert.Equal(HttpStatusCode.BadRequest, deleteResponse.StatusCode);
+
+        // Untouched — still visible on the public surface.
+        var publicDetail = await _client.GetAsync($"/api/v1/hotels/{slug}");
+        Assert.Equal(HttpStatusCode.OK, publicDetail.StatusCode);
+    }
+
+    [Fact]
+    public async Task AdminHotelsList_ReflectsHasReservationHistory_TrueOnlyForHotelsWithReservations()
+    {
+        var token = await GetAdminTokenAsync();
+        var withHistorySlug = $"has-history-test-{Guid.NewGuid():N}";
+        var withHistoryDto = BuildMinimalHotel(withHistorySlug) with
+        {
+            RoomTypes = [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", 5, true)],
+        };
+        var withHistoryResponse = await PostHotelAsync(token, withHistoryDto);
+        var withHistory = await withHistoryResponse.Content.ReadFromJsonAsync<AdminHotelDetailDto>();
+
+        var reservationDto = new CreateReservationRequestDto(
+            withHistory!.Id, withHistory.RoomTypes[0].Id!.Value, "Guest Name", "guest@example.com", "+90 555 000 00 00",
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(13),
+            AdultCount: 2, ChildCount: 0, SpecialRequests: null);
+        (await _client.PostAsJsonAsync("/api/v1/reservation-requests", reservationDto)).EnsureSuccessStatusCode();
+
+        var withoutHistorySlug = $"no-history-test-{Guid.NewGuid():N}";
+        var withoutHistoryResponse = await PostHotelAsync(token, BuildMinimalHotel(withoutHistorySlug));
+        var withoutHistory = await withoutHistoryResponse.Content.ReadFromJsonAsync<AdminHotelDetailDto>();
+
+        using var listRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/admin/hotels?pageSize=200");
+        listRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var listResponse = await _client.SendAsync(listRequest);
+        var list = await listResponse.Content.ReadFromJsonAsync<PagedResult<AdminHotelSummaryDto>>();
+
+        Assert.True(list!.Items.Single(h => h.Id == withHistory.Id).HasReservationHistory);
+        Assert.False(list.Items.Single(h => h.Id == withoutHistory!.Id).HasReservationHistory);
+    }
+
+    [Fact]
+    public async Task BulkDeleteHotelsPermanently_RemovesEligibleHotels_AndSkipsOnesWithReservationHistory()
+    {
+        var token = await GetAdminTokenAsync();
+
+        var blockedSlug = $"bulk-blocked-test-{Guid.NewGuid():N}";
+        var blockedDto = BuildMinimalHotel(blockedSlug) with
+        {
+            RoomTypes = [new AdminRoomTypeDto(null, "Standard Room", "Desc", 2, 1000m, "TRY", 5, true)],
+        };
+        var blockedResponse = await PostHotelAsync(token, blockedDto);
+        var blocked = await blockedResponse.Content.ReadFromJsonAsync<AdminHotelDetailDto>();
+        var reservationDto = new CreateReservationRequestDto(
+            blocked!.Id, blocked.RoomTypes[0].Id!.Value, "Guest Name", "guest@example.com", "+90 555 000 00 00",
+            DateOnly.FromDateTime(DateTime.UtcNow).AddDays(10), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(13),
+            AdultCount: 2, ChildCount: 0, SpecialRequests: null);
+        (await _client.PostAsJsonAsync("/api/v1/reservation-requests", reservationDto)).EnsureSuccessStatusCode();
+
+        var eligibleSlug = $"bulk-eligible-test-{Guid.NewGuid():N}";
+        var eligibleResponse = await PostHotelAsync(token, BuildMinimalHotel(eligibleSlug));
+        var eligible = await eligibleResponse.Content.ReadFromJsonAsync<AdminHotelDetailDto>();
+
+        Assert.Equal(HttpStatusCode.NoContent, await BulkDeleteHotelsAsync(token, [blocked.Id, eligible!.Id]));
+
+        using var getBlocked = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/hotels/{blocked.Id}");
+        getBlocked.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        Assert.Equal(HttpStatusCode.OK, (await _client.SendAsync(getBlocked)).StatusCode);
+
+        using var getEligible = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/hotels/{eligible.Id}");
+        getEligible.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        Assert.Equal(HttpStatusCode.NotFound, (await _client.SendAsync(getEligible)).StatusCode);
+    }
+
+    [Fact]
+    public async Task BulkDeleteHotelsPermanently_WithEmptyIds_ReturnsBadRequest()
+    {
+        var token = await GetAdminTokenAsync();
+
+        Assert.Equal(HttpStatusCode.BadRequest, await BulkDeleteHotelsAsync(token, []));
+    }
+
+    private async Task<HttpStatusCode> BulkDeleteHotelsAsync(string token, Guid[] ids)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/hotels/permanent")
+        {
+            Content = JsonContent.Create(new DeleteHotelsDto(ids)),
+        };
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _client.SendAsync(request);
+        return response.StatusCode;
     }
 
     private async Task<string> GetAdminTokenAsync()

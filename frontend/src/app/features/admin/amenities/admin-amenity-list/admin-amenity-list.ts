@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminAmenitiesService } from '../admin-amenities.service';
 import { AdminAmenity } from '../models/admin-amenity.model';
@@ -19,7 +19,16 @@ export class AdminAmenityList {
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly editingId = signal<string | null>(null);
-  protected readonly pendingDelete = signal<AdminAmenity | null>(null);
+
+  protected readonly selectionMode = signal(false);
+  protected readonly selectedIds = signal<Set<string>>(new Set());
+  protected readonly confirmingBulkDelete = signal(false);
+
+  protected readonly selectedCount = computed(() => this.selectedIds().size);
+  protected readonly isAllSelected = computed(() => {
+    const items = this.amenities();
+    return items.length > 0 && items.every((a) => this.selectedIds().has(a.id));
+  });
 
   protected readonly addForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -70,18 +79,41 @@ export class AdminAmenityList {
     });
   }
 
-  protected requestDelete(amenity: AdminAmenity): void {
-    this.pendingDelete.set(amenity);
+  /** Toggling off drops any in-progress selection so re-entering selection mode starts fresh. */
+  protected toggleSelectionMode(): void {
+    this.selectionMode.set(!this.selectionMode());
+    this.selectedIds.set(new Set());
   }
 
-  protected confirmDelete(): void {
-    const amenity = this.pendingDelete();
-    if (!amenity) {
-      return;
-    }
+  protected isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
 
-    this.service.deleteAmenity(amenity.id).subscribe(() => {
-      this.pendingDelete.set(null);
+  protected toggleSelect(id: string): void {
+    const next = new Set(this.selectedIds());
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  protected toggleSelectAll(): void {
+    this.selectedIds.set(this.isAllSelected() ? new Set() : new Set(this.amenities().map((a) => a.id)));
+  }
+
+  protected requestBulkDelete(): void {
+    if (this.selectedCount() > 0) {
+      this.confirmingBulkDelete.set(true);
+    }
+  }
+
+  protected confirmBulkDelete(): void {
+    this.service.deleteAmenities([...this.selectedIds()]).subscribe(() => {
+      this.confirmingBulkDelete.set(false);
+      this.selectionMode.set(false);
+      this.selectedIds.set(new Set());
       this.fetch();
     });
   }
@@ -89,6 +121,7 @@ export class AdminAmenityList {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(false);
+    this.selectedIds.set(new Set());
 
     this.service.getAmenities().subscribe({
       next: (list) => {

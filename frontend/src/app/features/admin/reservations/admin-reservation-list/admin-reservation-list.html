@@ -22,7 +22,19 @@
       />
       <button type="button" (click)="applyFilter()">Search</button>
     </div>
+    <button type="button" class="admin-reservation-list__select-toggle" (click)="toggleSelectionMode()">
+      {{ selectionMode() ? 'Cancel' : 'Delete Reservation' }}
+    </button>
+    @if (selectionMode() && selectedCount() > 0) {
+      <button type="button" class="admin-reservation-list__bulk-delete" (click)="requestBulkDelete()">
+        Delete selected ({{ selectedCount() }})
+      </button>
+    }
   </div>
+
+  @if (deleteError(); as message) {
+    <app-warning-banner [message]="message" />
+  }
 
   @if (loading()) {
     <app-loading-state message="Loading reservations…" />
@@ -34,6 +46,11 @@
     <table class="admin-reservation-list__table">
       <thead>
         <tr>
+          @if (selectionMode()) {
+            <th class="admin-reservation-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
           <th>Reference</th>
           <th class="admin-reservation-list__sortable" (click)="toggleSort('hotel')">Hotel <span class="admin-reservation-list__sort-indicator">{{ sortIndicator('hotel') }}</span></th>
           <th>Guest</th>
@@ -45,14 +62,25 @@
       <tbody>
         @for (r of reservations(); track r.id) {
           <tr>
+            @if (selectionMode()) {
+              <td class="admin-reservation-list__checkbox-col">
+                @if (canDelete(r)) {
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(r.id)"
+                    (change)="toggleSelect(r.id)"
+                    [attr.aria-label]="'Select reservation ' + r.referenceNumber"
+                  />
+                }
+              </td>
+            }
             <td>{{ r.referenceNumber }}</td>
             <td>{{ r.hotelName }}</td>
             <td>{{ r.guestFullName }}</td>
             <td>{{ r.checkInDate | date: 'mediumDate' }} — {{ r.checkOutDate | date: 'mediumDate' }}</td>
             <td>{{ r.status | statusLabel }}</td>
             <td class="admin-reservation-list__actions">
-              <a [routerLink]="['/admin/reservations', r.id]">View</a>
-              <button type="button" class="admin-reservation-list__delete" (click)="requestDelete(r)">Delete</button>
+              <a class="admin-reservation-list__action-btn" [routerLink]="['/admin/reservations', r.id]">View</a>
             </td>
           </tr>
         }
@@ -68,12 +96,12 @@
     }
   }
 
-  @if (pendingDelete(); as reservation) {
+  @if (confirmingBulkDelete()) {
     <app-confirm-dialog
-      [message]="'Permanently delete reservation ' + reservation.referenceNumber + '? This cannot be undone.'"
+      [message]="'Permanently delete ' + selectedCount() + ' ' + (selectedCount() === 1 ? 'reservation' : 'reservations') + '? This cannot be undone.'"
       confirmLabel="Delete permanently"
-      (confirmed)="confirmDelete()"
-      (cancelled)="pendingDelete.set(null)"
+      (confirmed)="confirmBulkDelete()"
+      (cancelled)="confirmingBulkDelete.set(false)"
     />
   }
 </div>
