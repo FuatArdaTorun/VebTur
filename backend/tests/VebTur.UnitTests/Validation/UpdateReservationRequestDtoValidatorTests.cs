@@ -23,6 +23,14 @@ public class UpdateReservationRequestDtoValidatorTests
     }
 
     [Fact]
+    public void CheckInDateInThePast_FailsValidation()
+    {
+        var result = _validator.Validate(ValidDto() with { CheckInDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-1) });
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "CheckInDate");
+    }
+
+    [Fact]
     public void CheckOutDateNotAfterCheckInDate_FailsValidation()
     {
         var checkIn = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(5);
@@ -37,5 +45,13 @@ public class UpdateReservationRequestDtoValidatorTests
         var result = _validator.Validate(ValidDto() with { AdultCount = 0 });
         Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == "AdultCount");
+    }
+
+    [Fact]
+    public void NegativeChildCount_FailsValidation()
+    {
+        var result = _validator.Validate(ValidDto() with { ChildCount = -1 });
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == "ChildCount");
     }
 }
