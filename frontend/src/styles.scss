@@ -1,1 +1,76 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles and design tokens */
+
+:root {
+  /* Brand — Aegean blue (primary) */
+  --color-primary-900: #0a3d57;
+  --color-primary-700: #0f5776;
+  --color-primary-600: #146c94;
+  --color-primary-500: #1c86b8;
+  --color-primary-100: #e5f1f7;
+  --color-primary-50: #f4f9fc;
+
+  /* Warm accent — terracotta (touristic warmth, used sparingly) */
+  --color-accent-700: #c14f27;
+  --color-accent-600: #e0653a;
+  --color-accent-100: #fce8de;
+
+  /* Neutrals — warm-tinted, not cold gray */
+  --color-text: #2a2622;
+  --color-text-muted: #6b6259;
+  --color-border: #e7e1d8;
+  --color-surface: #ffffff;
+  --color-background: #faf7f2;
+  --color-background-alt: #f3eee6;
+
+  /* Semantic */
+  --color-success: #2e7d4f;
+  --color-error: #c0392b;
+  --color-warning: #c77c11;
+  --color-star: #d4a017;
+
+  /* Typography */
+  --font-heading: 'Poppins', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+
+  /* Radius / shadow */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 3px rgba(42, 38, 34, 0.08);
+  --shadow-md: 0 6px 16px rgba(42, 38, 34, 0.12);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-primary-600);
+}

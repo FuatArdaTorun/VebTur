@@ -3,10 +3,12 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AuthLayout } from '../../../shared/auth-layout/auth-layout';
+import { extractErrorMessage } from '../../../core/http/extract-error-message';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AuthLayout],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
@@ -39,21 +41,9 @@ export class Register {
         this.router.navigateByUrl(returnUrl ?? '/');
       },
       error: (response: HttpErrorResponse) => {
-        this.error.set(extractErrorMessage(response));
+        this.error.set(extractErrorMessage(response, 'Could not create your account. Please check your details and try again.'));
         this.loading.set(false);
       },
     });
   }
-}
-
-function extractErrorMessage(response: HttpErrorResponse): string {
-  const errors = response.error?.errors;
-  if (errors && typeof errors === 'object') {
-    const firstMessage = Object.values(errors).flat()[0];
-    if (typeof firstMessage === 'string') {
-      return firstMessage;
-    }
-  }
-
-  return 'Could not create your account. Please check your details and try again.';
 }

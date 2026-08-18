@@ -46,7 +46,7 @@ describe('Login', () => {
     authServiceStub = { login: vi.fn().mockReturnValue(of({ token: 't', expiresAtUtc: '', email: 'a@b.com', displayName: 'A', roles: ['Admin'] })) };
     createComponent();
 
-    component['form'].setValue({ email: 'a@b.com', password: 'secret123' });
+    component['form'].setValue({ emailOrUsername: 'a@b.com', password: 'secret123' });
     component['submit']();
 
     expect(router.navigateByUrl).toHaveBeenCalledWith('/admin/hotels');
@@ -56,7 +56,7 @@ describe('Login', () => {
     authServiceStub = { login: vi.fn().mockReturnValue(of({ token: 't', expiresAtUtc: '', email: 'a@b.com', displayName: 'A', roles: ['Customer'] })) };
     createComponent();
 
-    component['form'].setValue({ email: 'a@b.com', password: 'secret123' });
+    component['form'].setValue({ emailOrUsername: 'a@b.com', password: 'secret123' });
     component['submit']();
 
     expect(router.navigateByUrl).toHaveBeenCalledWith('/');
@@ -66,7 +66,7 @@ describe('Login', () => {
     authServiceStub = { login: vi.fn().mockReturnValue(of({ token: 't', expiresAtUtc: '', email: 'a@b.com', displayName: 'A', roles: ['Customer'] })) };
     createComponent('/hotels/some-hotel');
 
-    component['form'].setValue({ email: 'a@b.com', password: 'secret123' });
+    component['form'].setValue({ emailOrUsername: 'a@b.com', password: 'secret123' });
     component['submit']();
 
     expect(router.navigateByUrl).toHaveBeenCalledWith('/hotels/some-hotel');
@@ -76,7 +76,7 @@ describe('Login', () => {
     authServiceStub = { login: vi.fn().mockReturnValue(throwError(() => new Error('unauthorized'))) };
     createComponent();
 
-    component['form'].setValue({ email: 'a@b.com', password: 'wrong' });
+    component['form'].setValue({ emailOrUsername: 'a@b.com', password: 'wrong' });
     component['submit']();
 
     expect(component['error']()).toBe(true);

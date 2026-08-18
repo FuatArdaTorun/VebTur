@@ -1,6 +1,7 @@
-<div class="register">
-  <form class="register__form" [formGroup]="form" (ngSubmit)="submit()">
+<app-auth-layout>
+  <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
     <h1>Sign Up</h1>
+    <p class="auth-form__subtitle">Create an account to request reservations and track their status.</p>
 
     <label>
       Full name
@@ -18,13 +19,13 @@
     </label>
 
     @if (error(); as message) {
-      <p class="register__error">{{ message }}</p>
+      <p class="auth-form__error">{{ message }}</p>
     }
 
     <button type="submit" [disabled]="loading()">
       {{ loading() ? 'Creating account…' : 'Sign Up' }}
     </button>
 
-    <p class="register__switch">Already have an account? <a routerLink="/login">Sign In</a></p>
+    <p class="auth-form__switch">Already have an account? <a routerLink="/login">Sign In</a></p>
   </form>
-</div>
+</app-auth-layout>
