@@ -8,6 +8,17 @@
     <p class="reservation-form__hotel">{{ hotelName() }}</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
+      @if (!isEditMode() && isAuthenticated()) {
+        <label class="reservation-form__checkbox">
+          <input
+            type="checkbox"
+            [checked]="useMyInfo()"
+            (change)="onUseMyInfoChange($any($event.target).checked)"
+          />
+          Use my saved profile info
+        </label>
+      }
+
       <label>
         Full name
         <input type="text" formControlName="guestFullName" />

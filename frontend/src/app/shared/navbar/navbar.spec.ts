@@ -72,6 +72,19 @@ describe('Navbar', () => {
     expect(links).toContain('My Reservations');
   });
 
+  it('prefers the first name over the display name in the greeting when both are set', async () => {
+    localStorage.setItem('vebtur_token', 'fake-token');
+    localStorage.setItem(
+      'vebtur_user',
+      JSON.stringify({ email: 'user@vebtur.local', displayName: 'Jane Guest', firstName: 'Jane', roles: ['Customer'] }),
+    );
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+
+    expect(fixture.nativeElement.querySelector('.navbar__user').textContent.trim()).toBe('Jane');
+  });
+
   it('shows an Admin Panel link to /admin/hotels for a logged-in Admin, but no My Reservations link', async () => {
     loginAs(['Admin']);
     await createFixture();

@@ -22,7 +22,12 @@ export class Navbar {
 
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
-  protected readonly displayName = computed(() => this.authService.currentUser()?.displayName ?? '');
+  // First name reads friendlier in the greeting; falls back to the registered display name for
+  // anyone who hasn't set a first name on their profile yet.
+  protected readonly displayName = computed(() => {
+    const user = this.authService.currentUser();
+    return user?.firstName || user?.displayName || '';
+  });
   protected readonly recentStatusChanges = signal<NotificationBellItem[]>([]);
 
   constructor() {

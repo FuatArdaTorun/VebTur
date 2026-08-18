@@ -30,6 +30,9 @@ export class ReservationForm {
   protected readonly submitError = signal<string | null>(null);
   protected readonly hotelName = signal('');
   protected readonly roomTypes = signal<RoomType[]>([]);
+  protected readonly useMyInfo = signal(false);
+
+  protected readonly isAuthenticated = this.authService.isAuthenticated;
 
   private reservationId: string | null = null;
   private hotelId = '';
@@ -71,6 +74,23 @@ export class ReservationForm {
 
   protected selectedCurrency(): string {
     return this.roomTypes().find((r) => r.id === this.form.controls.roomTypeId.value)?.currency ?? '';
+  }
+
+  protected onUseMyInfoChange(checked: boolean): void {
+    this.useMyInfo.set(checked);
+
+    if (!checked) {
+      this.form.patchValue({ guestFullName: '', guestEmail: '', guestPhone: '' });
+      return;
+    }
+
+    this.authService.getProfile().subscribe((profile) => {
+      this.form.patchValue({
+        guestFullName: profile.displayName,
+        guestEmail: profile.email,
+        guestPhone: profile.phoneNumber ?? '',
+      });
+    });
   }
 
   protected submit(): void {
@@ -140,12 +160,6 @@ export class ReservationForm {
         this.hotelName.set(hotel.name);
         this.roomTypes.set(hotel.roomTypes);
         this.form.patchValue({ roomTypeId: roomTypeId ?? hotel.roomTypes[0]?.id ?? '' });
-
-        const user = this.authService.currentUser();
-        if (user) {
-          this.form.patchValue({ guestFullName: user.displayName, guestEmail: user.email });
-        }
-
         this.loading.set(false);
       },
       error: () => {

@@ -1,0 +1,33 @@
+<form class="security-form" [formGroup]="form" (ngSubmit)="submit()">
+  <h2>Change Password</h2>
+  <p class="security-form__subtitle">Keep your account secure by updating your password regularly.</p>
+
+  <label>
+    Current password
+    <input type="password" formControlName="currentPassword" autocomplete="current-password" />
+  </label>
+
+  <label>
+    New password
+    <input type="password" formControlName="newPassword" autocomplete="new-password" />
+  </label>
+
+  <label>
+    Confirm new password
+    <input type="password" formControlName="confirmPassword" autocomplete="new-password" />
+  </label>
+
+  @if (form.errors?.['passwordMismatch'] && form.controls.confirmPassword.touched) {
+    <p class="security-form__error">New passwords do not match.</p>
+  }
+  @if (saved()) {
+    <p class="security-form__success">Your password has been updated.</p>
+  }
+  @if (error(); as message) {
+    <p class="security-form__error">{{ message }}</p>
+  }
+
+  <button type="submit" [disabled]="submitting()">
+    {{ submitting() ? 'Updating…' : 'Update Password' }}
+  </button>
+</form>

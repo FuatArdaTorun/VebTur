@@ -6,7 +6,13 @@
     [class.notification-bell__trigger--active]="unreadCount() > 0"
     (click)="toggle()"
   >
-    🔔
+    <svg class="notification-bell__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M14.86 17.08a24 24 0 0 0 5.45-1.31A9 9 0 0 1 18 9.75V9a6 6 0 0 0-12 0v.75a9 9 0 0 1-2.31 6.02 24 24 0 0 0 5.45 1.31m5.72 0a24.3 24.3 0 0 1-5.72 0m5.72 0a2.86 2.86 0 0 1-5.72 0"
+      />
+    </svg>
     @if (unreadCount() > 0) {
       <span class="notification-bell__badge">{{ unreadCount() }}</span>
     }
@@ -36,7 +42,9 @@
               title="Dismiss"
               (click)="dismiss(item.id)"
             >
-              ✕
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
             </button>
           </div>
         }

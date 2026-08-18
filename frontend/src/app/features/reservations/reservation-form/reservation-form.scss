@@ -39,6 +39,17 @@
     margin: 0;
   }
 
+  &__checkbox {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.5rem !important;
+
+    input[type='checkbox'] {
+      width: auto;
+      padding: 0;
+    }
+  }
+
   form {
     display: flex;
     flex-direction: column;

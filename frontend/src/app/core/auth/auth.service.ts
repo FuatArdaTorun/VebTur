@@ -2,7 +2,15 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CurrentUser, LoginRequest, LoginResponse, RegisterRequest } from './auth.models';
+import {
+  ChangePasswordRequest,
+  CurrentUser,
+  CurrentUserResponse,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  UpdateProfileRequest,
+} from './auth.models';
 
 // Shared by both admin and customer sessions — this service authenticates any signed-in user,
 // not just admins (see AuthController.Register in the backend for the "Customer" role path).
@@ -25,9 +33,43 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/register`, request).pipe(tap((response) => this.storeSession(response)));
   }
 
+  // Fetches the full profile (including phone) — the login/register response doesn't carry it.
+  getProfile() {
+    return this.http.get<CurrentUserResponse>(`${this.baseUrl}/auth/me`).pipe(tap((response) => this.updateStoredUser(response)));
+  }
+
+  updateProfile(request: UpdateProfileRequest) {
+    return this.http.put<CurrentUserResponse>(`${this.baseUrl}/auth/me`, request).pipe(tap((response) => this.updateStoredUser(response)));
+  }
+
+  changePassword(request: ChangePasswordRequest) {
+    return this.http.post<void>(`${this.baseUrl}/auth/change-password`, request);
+  }
+
   private storeSession(response: LoginResponse): void {
-    const user: CurrentUser = { email: response.email, displayName: response.displayName, roles: response.roles };
+    this.updateStoredUser({
+      id: '',
+      email: response.email,
+      userName: response.email, // the real value if it's since been customized arrives via getProfile()
+      displayName: response.displayName,
+      phoneNumber: null,
+      firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: null,
+      roles: response.roles,
+    });
     localStorage.setItem(TOKEN_KEY, response.token);
+  }
+
+  private updateStoredUser(response: CurrentUserResponse): void {
+    const user: CurrentUser = {
+      email: response.email,
+      displayName: response.displayName,
+      firstName: response.firstName,
+      phoneNumber: response.phoneNumber,
+      roles: response.roles,
+    };
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     this.currentUser.set(user);
   }

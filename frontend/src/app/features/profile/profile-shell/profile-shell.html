@@ -1,0 +1,32 @@
+<div class="account">
+  <h1>My Account</h1>
+
+  <div class="account__layout">
+    <nav class="account__nav">
+      <a
+        class="account__nav-link"
+        routerLink="/profile"
+        routerLinkActive="account__nav-link--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.25" stroke-linecap="round" stroke-linejoin="round" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 19.5c0-3.6 3.13-6.5 7-6.5s7 2.9 7 6.5" />
+        </svg>
+        Personal Info
+      </a>
+
+      <a class="account__nav-link" routerLink="/profile/security" routerLinkActive="account__nav-link--active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <rect x="5" y="11" width="14" height="9" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7.5a4 4 0 0 1 8 0V11" />
+        </svg>
+        Account Security
+      </a>
+    </nav>
+
+    <div class="account__content">
+      <router-outlet />
+    </div>
+  </div>
+</div>

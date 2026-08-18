@@ -1,0 +1,68 @@
+@if (loading()) {
+  <app-loading-state message="Loading your profile…" />
+} @else if (loadError()) {
+  <app-error-state message="Could not load your profile." />
+} @else {
+  <form class="profile-form" [formGroup]="form" (ngSubmit)="submit()">
+    <h2>Personal Info</h2>
+
+    <label>
+      Username
+      <input type="text" formControlName="userName" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" [value]="email()" disabled />
+    </label>
+
+    <div class="profile-form__row">
+      <label>
+        First name
+        <input type="text" formControlName="firstName" />
+      </label>
+
+      <label>
+        Last name
+        <input type="text" formControlName="lastName" />
+      </label>
+    </div>
+
+    <label>
+      Phone
+      <input type="tel" formControlName="phoneNumber" placeholder="e.g. +90 555 123 45 67" />
+    </label>
+
+    <div class="profile-form__row">
+      <label>
+        Gender
+        <select formControlName="gender">
+          <option value="">— Not set —</option>
+          @for (g of genders; track g) {
+            <option [value]="g">{{ genderLabels[g] }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Date of birth
+        <input type="date" formControlName="dateOfBirth" />
+      </label>
+    </div>
+
+    @if (saved()) {
+      <p class="profile-form__success">Your profile has been updated.</p>
+    }
+    @if (submitError(); as message) {
+      <p class="profile-form__error">{{ message }}</p>
+    }
+
+    <button type="submit" [disabled]="submitting()">
+      {{ submitting() ? 'Saving…' : 'Save Changes' }}
+    </button>
+  </form>
+
+  <p class="profile-info__hint">
+    This information can be used to quickly fill in the guest details when you request a reservation.
+  </p>
+}

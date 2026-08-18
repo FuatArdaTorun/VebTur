@@ -64,7 +64,7 @@ describe('ReservationForm', () => {
   let component: ReservationForm;
   let hotelsServiceStub: { getHotel: ReturnType<typeof vi.fn> };
   let reservationsServiceStub: { getMineById: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; updateMine: ReturnType<typeof vi.fn> };
-  let authServiceStub: { currentUser: ReturnType<typeof vi.fn> };
+  let authServiceStub: { currentUser: ReturnType<typeof vi.fn>; isAuthenticated: ReturnType<typeof vi.fn>; getProfile: ReturnType<typeof vi.fn> };
   let router: Router;
 
   function createComponent(options: { editId?: string; queryParams?: Record<string, string> } = {}): void {
@@ -96,7 +96,11 @@ describe('ReservationForm', () => {
   }
 
   beforeEach(() => {
-    authServiceStub = { currentUser: vi.fn().mockReturnValue(null) };
+    authServiceStub = {
+      currentUser: vi.fn().mockReturnValue(null),
+      isAuthenticated: vi.fn().mockReturnValue(false),
+      getProfile: vi.fn(),
+    };
   });
 
   describe('create mode', () => {
@@ -114,13 +118,35 @@ describe('ReservationForm', () => {
       expect(component['form'].controls.roomTypeId.value).toBe('room-2');
     });
 
-    it('pre-fills guest name/email from the signed-in user', () => {
-      authServiceStub.currentUser.mockReturnValue({ email: 'a@b.com', displayName: 'A B', roles: ['Customer'] });
+    it('does not show the "use my info" checkbox for a signed-out guest', () => {
+      createComponent({ queryParams: { hotelId: 'hotel-1' } });
+
+      expect(component['isAuthenticated']()).toBe(false);
+    });
+
+    it('fills guest name/email/phone from the profile when "use my info" is checked', () => {
+      authServiceStub.isAuthenticated.mockReturnValue(true);
+      authServiceStub.getProfile.mockReturnValue(
+        of({ id: 'u1', email: 'a@b.com', displayName: 'A B', phoneNumber: '+90 555 111 22 33', roles: ['Customer'] }),
+      );
 
       createComponent({ queryParams: { hotelId: 'hotel-1' } });
+      component['onUseMyInfoChange'](true);
 
       expect(component['form'].controls.guestFullName.value).toBe('A B');
       expect(component['form'].controls.guestEmail.value).toBe('a@b.com');
+      expect(component['form'].controls.guestPhone.value).toBe('+90 555 111 22 33');
+    });
+
+    it('clears the guest fields when "use my info" is unchecked', () => {
+      createComponent({ queryParams: { hotelId: 'hotel-1' } });
+      component['form'].patchValue({ guestFullName: 'Someone', guestEmail: 'x@y.com', guestPhone: '123' });
+
+      component['onUseMyInfoChange'](false);
+
+      expect(component['form'].controls.guestFullName.value).toBe('');
+      expect(component['form'].controls.guestEmail.value).toBe('');
+      expect(component['form'].controls.guestPhone.value).toBe('');
     });
 
     it('computes the estimated price as nights times the selected room rate', () => {

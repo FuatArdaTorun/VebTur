@@ -37,6 +37,21 @@ export const routes: Routes = [
       import('./features/reservations/reservation-lookup/reservation-lookup').then((m) => m.ReservationLookup),
   },
   {
+    path: 'profile',
+    canActivate: [authenticatedGuard],
+    loadComponent: () => import('./features/profile/profile-shell/profile-shell').then((m) => m.ProfileShell),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/profile/profile-info/profile-info').then((m) => m.ProfileInfo),
+      },
+      {
+        path: 'security',
+        loadComponent: () => import('./features/profile/profile-security/profile-security').then((m) => m.ProfileSecurity),
+      },
+    ],
+  },
+  {
     path: 'my-reservations',
     canActivate: [authenticatedGuard],
     children: [

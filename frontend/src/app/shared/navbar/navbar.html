@@ -9,6 +9,7 @@
       @if (isAdmin()) {
         <a class="navbar__admin-link" routerLink="/admin/hotels">Admin Panel</a>
       } @else {
+        <a routerLink="/profile" routerLinkActive="navbar__link--active">My Profile</a>
         <a routerLink="/my-reservations" routerLinkActive="navbar__link--active">My Reservations</a>
         <app-notification-bell
           [items]="recentStatusChanges()"

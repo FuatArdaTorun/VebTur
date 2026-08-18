@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AuthService } from './auth.service';
-import { LoginResponse } from './auth.models';
+import { CurrentUserResponse, LoginResponse } from './auth.models';
 
 describe('AuthService', () => {
   let httpMock: HttpTestingController;
@@ -44,7 +44,7 @@ describe('AuthService', () => {
     };
 
     let received: unknown;
-    service.login({ email: 'admin@vebtur.local', password: 'secret' }).subscribe((r) => (received = r));
+    service.login({ emailOrUsername: 'admin@vebtur.local', password: 'secret' }).subscribe((r) => (received = r));
 
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/login'));
     expect(req.request.method).toBe('POST');
@@ -86,7 +86,7 @@ describe('AuthService', () => {
   it('logout clears stored token/user and flips isAuthenticated back to false', () => {
     const service = createService();
 
-    service.login({ email: 'admin@vebtur.local', password: 'secret' }).subscribe();
+    service.login({ emailOrUsername: 'admin@vebtur.local', password: 'secret' }).subscribe();
     httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/login')).flush({
       token: 't',
       expiresAtUtc: new Date().toISOString(),
@@ -116,5 +116,86 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(true);
     expect(service.getToken()).toBe('persisted-token');
     expect(service.hasRole('Admin')).toBe(true);
+  });
+
+  it('getProfile fetches /auth/me and stores the phone number alongside the rest of the profile', () => {
+    const service = createService();
+    const response: CurrentUserResponse = {
+      id: 'u1',
+      email: 'guest@example.com',
+      userName: 'guest@example.com',
+      displayName: 'Guest User',
+      phoneNumber: '+90 555 111 22 33',
+      firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: null,
+      roles: ['Customer'],
+    };
+
+    let received: unknown;
+    service.getProfile().subscribe((r) => (received = r));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/me'));
+    expect(req.request.method).toBe('GET');
+    req.flush(response);
+
+    expect(received).toEqual(response);
+    expect(service.currentUser()?.phoneNumber).toBe('+90 555 111 22 33');
+  });
+
+  it('updateProfile PUTs /auth/me and updates the stored user', () => {
+    const service = createService();
+    const response: CurrentUserResponse = {
+      id: 'u1',
+      email: 'guest@example.com',
+      userName: 'updated_username',
+      displayName: 'Guest User',
+      phoneNumber: '+90 555 999 88 77',
+      firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: null,
+      roles: ['Customer'],
+    };
+
+    let received: unknown;
+    service
+      .updateProfile({
+        userName: 'updated_username',
+        phoneNumber: '+90 555 999 88 77',
+        firstName: null,
+        lastName: null,
+        gender: null,
+        dateOfBirth: null,
+      })
+      .subscribe((r) => (received = r));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/me'));
+    expect(req.request.method).toBe('PUT');
+    req.flush(response);
+
+    expect(received).toEqual(response);
+    expect(service.currentUser()?.displayName).toBe('Guest User');
+    expect(service.currentUser()?.phoneNumber).toBe('+90 555 999 88 77');
+  });
+
+  it('changePassword POSTs /auth/change-password', () => {
+    const service = createService();
+
+    let received: unknown;
+    let completed = false;
+    service.changePassword({ currentPassword: 'old', newPassword: 'NewPassw0rd1' }).subscribe({
+      next: (r) => (received = r),
+      complete: () => (completed = true),
+    });
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/change-password'));
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ currentPassword: 'old', newPassword: 'NewPassw0rd1' });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(completed).toBe(true);
+    expect(received).toBeNull();
   });
 });
