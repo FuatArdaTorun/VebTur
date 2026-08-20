@@ -27,7 +27,7 @@
       <textarea formControlName="replyMessage" rows="6" placeholder="Write your reply…"></textarea>
 
       @if (submitError(); as errorMessage) {
-        <p class="admin-support-message-detail__error">{{ errorMessage }}</p>
+        <app-warning-banner [message]="errorMessage" />
       }
 
       <button type="submit" [disabled]="submitting()">

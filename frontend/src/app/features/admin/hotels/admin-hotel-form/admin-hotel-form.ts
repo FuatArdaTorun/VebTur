@@ -8,6 +8,7 @@ import { HotelsService } from '../../../hotels/hotels.service';
 import { Amenity } from '../../../hotels/models/hotel.model';
 import { UrlListEditor } from '../../../../shared/url-list-editor/url-list-editor';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
+import { WarningBanner } from '../../../../shared/warning-banner/warning-banner';
 
 interface ValidationProblemDetails {
   errors?: Record<string, string[]>;
@@ -15,7 +16,7 @@ interface ValidationProblemDetails {
 
 @Component({
   selector: 'app-admin-hotel-form',
-  imports: [ReactiveFormsModule, RouterLink, UrlListEditor, LoadingState],
+  imports: [ReactiveFormsModule, RouterLink, UrlListEditor, LoadingState, WarningBanner],
   templateUrl: './admin-hotel-form.html',
   styleUrl: './admin-hotel-form.scss',
 })

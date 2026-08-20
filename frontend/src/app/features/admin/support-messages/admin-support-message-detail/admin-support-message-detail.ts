@@ -7,11 +7,12 @@ import { AdminSupportMessagesService } from '../admin-support-messages.service';
 import { AdminSupportMessage } from '../models/admin-support-message.model';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
+import { WarningBanner } from '../../../../shared/warning-banner/warning-banner';
 import { extractErrorMessage } from '../../../../core/http/extract-error-message';
 
 @Component({
   selector: 'app-admin-support-message-detail',
-  imports: [RouterLink, DatePipe, ReactiveFormsModule, LoadingState, ErrorState],
+  imports: [RouterLink, DatePipe, ReactiveFormsModule, LoadingState, ErrorState, WarningBanner],
   templateUrl: './admin-support-message-detail.html',
   styleUrl: './admin-support-message-detail.scss',
 })

@@ -2,23 +2,19 @@
   max-width: 900px;
 
   h1 {
+    font-family: var(--font-heading);
+    font-weight: 600;
     margin: 0.5rem 0 1.5rem;
-  }
-
-  &__general-error {
-    background: #fce8e6;
-    color: #c5221f;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
   }
 
   &__section {
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border);
 
     h2 {
+      font-family: var(--font-heading);
+      font-weight: 600;
       font-size: 1.05rem;
       margin-bottom: 0.75rem;
     }
@@ -47,11 +43,12 @@
     gap: 0.35rem;
     font-weight: 500;
     font-size: 0.9rem;
+    color: var(--color-text);
 
     textarea {
       padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       font: inherit;
       resize: vertical;
     }
@@ -63,6 +60,7 @@
     gap: 0.35rem;
     font-weight: 500;
     font-size: 0.9rem;
+    color: var(--color-text);
   }
 
   input[type='text'],
@@ -70,9 +68,16 @@
   input[type='url'],
   input[type='email'] {
     padding: 0.5rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--color-text);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary-500);
+    }
   }
 
   &__rows {
@@ -103,7 +108,7 @@
     button {
       border: none;
       background: none;
-      color: #c5221f;
+      color: var(--color-error);
       cursor: pointer;
       font-size: 1rem;
     }
@@ -128,11 +133,16 @@
     button {
       padding: 0.65rem 1.5rem;
       border: none;
-      border-radius: 6px;
-      background: #1a73e8;
+      border-radius: var(--radius-pill);
+      background: var(--color-primary-600);
       color: #fff;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-700);
+      }
 
       &:disabled {
         opacity: 0.6;
@@ -142,7 +152,12 @@
   }
 
   > a {
-    color: #1a73e8;
+    color: var(--color-primary-600);
     text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--color-primary-700);
+    }
   }
 }

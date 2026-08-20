@@ -41,42 +41,47 @@ export const routes: Routes = [
       import('./features/reservations/reservation-lookup/reservation-lookup').then((m) => m.ReservationLookup),
   },
   {
-    path: 'profile',
+    // Wraps profile/favorites/my-reservations in one persistent account sidebar (mirrors
+    // AdminShell) without changing any of their URLs — this path contributes no URL segment.
+    path: '',
     canActivate: [authenticatedGuard],
     loadComponent: () => import('./features/profile/profile-shell/profile-shell').then((m) => m.ProfileShell),
     children: [
       {
-        path: '',
-        loadComponent: () => import('./features/profile/profile-info/profile-info').then((m) => m.ProfileInfo),
+        path: 'profile',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/profile/profile-info/profile-info').then((m) => m.ProfileInfo),
+          },
+          {
+            path: 'security',
+            loadComponent: () => import('./features/profile/profile-security/profile-security').then((m) => m.ProfileSecurity),
+          },
+        ],
       },
       {
-        path: 'security',
-        loadComponent: () => import('./features/profile/profile-security/profile-security').then((m) => m.ProfileSecurity),
-      },
-    ],
-  },
-  {
-    path: 'favorites',
-    canActivate: [authenticatedGuard],
-    loadComponent: () => import('./features/favorites/favorite-list/favorite-list').then((m) => m.FavoriteList),
-  },
-  {
-    path: 'my-reservations',
-    canActivate: [authenticatedGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/reservations/my-reservation-list/my-reservation-list').then((m) => m.MyReservationList),
+        path: 'favorites',
+        loadComponent: () => import('./features/favorites/favorite-list/favorite-list').then((m) => m.FavoriteList),
       },
       {
-        path: ':id/edit',
-        loadComponent: () => import('./features/reservations/reservation-form/reservation-form').then((m) => m.ReservationForm),
-      },
-      {
-        path: ':id',
-        loadComponent: () =>
-          import('./features/reservations/my-reservation-detail/my-reservation-detail').then((m) => m.MyReservationDetail),
+        path: 'my-reservations',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/reservations/my-reservation-list/my-reservation-list').then((m) => m.MyReservationList),
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () => import('./features/reservations/reservation-form/reservation-form').then((m) => m.ReservationForm),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/reservations/my-reservation-detail/my-reservation-detail').then((m) => m.MyReservationDetail),
+          },
+        ],
       },
     ],
   },

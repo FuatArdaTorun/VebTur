@@ -6,8 +6,8 @@
     <h1>{{ isEditMode ? 'Edit Hotel' : 'New Hotel' }}</h1>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
-      @if (generalError()) {
-        <p class="admin-hotel-form__general-error">{{ generalError() }}</p>
+      @if (generalError(); as message) {
+        <app-warning-banner [message]="message" />
       }
 
       <section class="admin-hotel-form__section">

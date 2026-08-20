@@ -4,12 +4,14 @@
   padding: 1.5rem 1rem 3rem;
 
   h1 {
+    font-family: var(--font-heading);
+    font-weight: 600;
     margin-bottom: 1.25rem;
   }
 
   &__filters {
     background: var(--color-primary-100);
-    border-radius: 0.75rem;
+    border-radius: var(--radius-lg);
     padding: 1rem 1.25rem;
     margin-bottom: 1.5rem;
   }
@@ -25,17 +27,25 @@
       flex-direction: column;
       gap: 0.25rem;
       font-size: 0.8rem;
-      color: #555;
+      color: var(--color-text-muted);
       font-weight: 600;
     }
 
     select,
     input {
-      padding: 0.4rem 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 0.375rem;
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-surface);
       min-width: 8rem;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+      }
     }
   }
 
@@ -51,27 +61,28 @@
     align-items: center;
     gap: 0.35rem;
     font-size: 0.85rem;
-    color: #333;
+    color: var(--color-text);
     font-weight: 400;
   }
 
   &__apply {
     margin-top: 1rem;
-    background: #1a73e8;
+    background: var(--color-primary-600);
     color: #fff;
     border: none;
-    border-radius: 0.375rem;
-    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-pill);
+    padding: 0.55rem 1.4rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.15s ease;
 
     &:hover {
-      background: #1558b3;
+      background: var(--color-primary-700);
     }
   }
 
   &__count {
-    color: #666;
+    color: var(--color-text-muted);
     margin: 0 0 1rem;
   }
 
@@ -87,13 +98,23 @@
     justify-content: center;
     gap: 1.25rem;
     margin-top: 2rem;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
 
     button {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 0.375rem;
-      padding: 0.4rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 1.1rem;
+      color: var(--color-text);
+      font-weight: 500;
       cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--color-primary-500);
+        color: var(--color-primary-600);
+      }
 
       &:disabled {
         opacity: 0.5;

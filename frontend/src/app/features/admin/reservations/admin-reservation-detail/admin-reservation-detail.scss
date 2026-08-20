@@ -1,38 +1,51 @@
 .admin-reservation-detail {
-  max-width: 560px;
+  max-width: 34rem;
 
   &__back {
     display: inline-block;
     margin-bottom: 1rem;
-    color: #1a73e8;
+    color: var(--color-primary-600);
     text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--color-primary-700);
+    }
   }
 
   h1 {
+    font-family: var(--font-heading);
+    font-weight: 600;
     margin-bottom: 0.25rem;
   }
 
   &__reference {
-    color: #555;
+    color: var(--color-text-muted);
     margin: 0 0 1.5rem;
   }
 
   dl {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 0.5rem 1rem;
+    gap: 0.6rem 1.25rem;
     margin: 0 0 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem 1.5rem;
   }
 
   dt {
     font-weight: 600;
-    color: #555;
+    color: var(--color-text-muted);
     font-size: 0.85rem;
   }
 
   dd {
     margin: 0;
     font-size: 0.95rem;
+    color: var(--color-text);
   }
 
   &__actions {
@@ -40,23 +53,37 @@
     gap: 0.75rem;
 
     button {
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #fff;
+      padding: 0.55rem 1.25rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
       cursor: pointer;
       font-weight: 500;
+      transition: border-color 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--color-primary-500);
+      }
     }
   }
 
   &__confirm {
-    background: #1a73e8 !important;
-    border-color: #1a73e8 !important;
+    background: var(--color-primary-600) !important;
+    border-color: var(--color-primary-600) !important;
     color: #fff;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-700) !important;
+    }
   }
 
   &__reject,
   &__cancel {
-    color: #c5221f;
+    color: var(--color-error);
+
+    &:hover:not(:disabled) {
+      border-color: var(--color-error) !important;
+    }
   }
 }
