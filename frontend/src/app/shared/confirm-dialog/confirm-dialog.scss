@@ -9,12 +9,13 @@
 }
 
 .confirm-dialog {
-  background: #fff;
-  border-radius: 10px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   max-width: 360px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
 
   p {
     margin: 0 0 1.25rem;
@@ -30,9 +31,15 @@
 
     input {
       padding: 0.5rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       font-size: 0.95rem;
+      font-family: inherit;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+      }
     }
   }
 
@@ -43,10 +50,17 @@
 
     button {
       padding: 0.5rem 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background: #fff;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-weight: 500;
       cursor: pointer;
+      transition: border-color 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--color-primary-500);
+      }
 
       &:disabled {
         opacity: 0.5;
@@ -56,8 +70,12 @@
   }
 
   &__confirm {
-    background: #c5221f !important;
-    border-color: #c5221f !important;
+    background: var(--color-error) !important;
+    border-color: var(--color-error) !important;
     color: #fff;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.92);
+    }
   }
 }

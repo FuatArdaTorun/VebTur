@@ -2,23 +2,37 @@
   display: flex;
   min-height: calc(100vh - 65px);
 
+  // Sticky and capped to the viewport height, with align-self overriding the flex row's default
+  // stretch — otherwise the sidebar matched the content column's full height on a long admin
+  // page (e.g. a long hotel/reservation list), pushing Log out far below the fold, unreachable
+  // without scrolling all the way down. Height matches .admin-shell's own min-height above
+  // (viewport minus the ~65px navbar) rather than a bare 100vh — before the sidebar actually
+  // engages `sticky` (i.e. on initial load, still in normal flow right below the navbar), a full
+  // 100vh box would itself overflow the viewport by the navbar's height, cutting off Log out at
+  // the bottom exactly the same way this rule was meant to fix.
   &__sidebar {
     width: 220px;
     flex-shrink: 0;
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     padding: 1.5rem 1rem;
-    border-right: 1px solid #eee;
-    background: #fafafa;
+    border-right: 1px solid var(--color-border);
+    background: var(--color-surface);
   }
 
   &__brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-family: var(--font-heading);
     font-weight: 700;
     font-size: 1.1rem;
-    color: #1a73e8;
+    color: var(--color-primary-600);
     text-decoration: none;
     margin-bottom: 2rem;
   }
@@ -28,37 +42,67 @@
     width: 28px;
   }
 
+  // Thin dividers between nav items — vertical counterpart to the navbar's link-group
+  // dividers, so this sidebar reads as a list of distinct destinations rather than one block.
   &__nav {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
     flex: 1;
+    border-top: 1px solid var(--color-border);
 
     a {
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      color: #333;
+      padding: 0.7rem 0.75rem;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
       text-decoration: none;
       font-weight: 500;
+      transition: background 0.15s ease, color 0.15s ease;
+
+      &:hover {
+        background: var(--color-background-alt);
+      }
     }
   }
 
   &__link--active {
-    background: #e8f0fe;
-    color: #1a73e8;
+    background: var(--color-primary-100);
+    color: var(--color-primary-700);
+
+    &:hover {
+      background: var(--color-primary-100);
+    }
   }
 
   &__user {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
+    gap: 0.6rem;
+    padding-top: 1.25rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-border);
   }
 
   &__user-name {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--color-text-muted);
+  }
+
+  &__logout {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      border-color: var(--color-primary-500);
+      color: var(--color-primary-600);
+    }
   }
 
   &__content {

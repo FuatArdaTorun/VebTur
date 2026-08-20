@@ -16,7 +16,7 @@
       @if (currentUser(); as user) {
         <span class="admin-shell__user-name">{{ user.displayName }}</span>
       }
-      <button type="button" (click)="logout()">Log out</button>
+      <button type="button" class="admin-shell__logout" (click)="logout()">Log out</button>
     </div>
   </aside>
   <main class="admin-shell__content">

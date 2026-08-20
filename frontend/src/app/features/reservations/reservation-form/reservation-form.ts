@@ -9,10 +9,12 @@ import { ReservationsService } from '../reservations.service';
 import { CreateReservationRequest, UpdateReservationRequest } from '../models/reservation.model';
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
+import { WarningBanner } from '../../../shared/warning-banner/warning-banner';
+import { extractErrorMessage } from '../../../core/http/extract-error-message';
 
 @Component({
   selector: 'app-reservation-form',
-  imports: [ReactiveFormsModule, LoadingState, ErrorState],
+  imports: [ReactiveFormsModule, LoadingState, ErrorState, WarningBanner],
   templateUrl: './reservation-form.html',
   styleUrl: './reservation-form.scss',
 })
@@ -116,7 +118,9 @@ export class ReservationForm {
       this.reservationsService.updateMine(this.reservationId!, dto).subscribe({
         next: (updated) => this.router.navigate(['/my-reservations', updated.id]),
         error: (response: HttpErrorResponse) => {
-          this.submitError.set(extractErrorMessage(response));
+          this.submitError.set(
+            extractErrorMessage(response, 'Could not save this reservation. Please check your details and try again.'),
+          );
           this.submitting.set(false);
         },
       });
@@ -137,7 +141,9 @@ export class ReservationForm {
       this.reservationsService.create(dto).subscribe({
         next: (created) => this.router.navigate(['/reservations/success', created.referenceNumber]),
         error: (response: HttpErrorResponse) => {
-          this.submitError.set(extractErrorMessage(response));
+          this.submitError.set(
+            extractErrorMessage(response, 'Could not save this reservation. Please check your details and try again.'),
+          );
           this.submitting.set(false);
         },
       });
@@ -207,16 +213,4 @@ export class ReservationForm {
       },
     });
   }
-}
-
-function extractErrorMessage(response: HttpErrorResponse): string {
-  const errors = response.error?.errors;
-  if (errors && typeof errors === 'object') {
-    const firstMessage = Object.values(errors).flat()[0];
-    if (typeof firstMessage === 'string') {
-      return firstMessage;
-    }
-  }
-
-  return 'Could not save this reservation. Please check your details and try again.';
 }

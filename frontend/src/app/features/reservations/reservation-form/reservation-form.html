@@ -77,7 +77,7 @@
       }
 
       @if (submitError(); as message) {
-        <p class="reservation-form__error">{{ message }}</p>
+        <app-warning-banner [message]="message" />
       }
 
       <p class="reservation-form__notice">
