@@ -4,12 +4,14 @@ using VebTur.Api.ExceptionHandling;
 using VebTur.Application.Admin;
 using VebTur.Application.Auth;
 using VebTur.Application.ExternalRatings;
+using VebTur.Application.Favorites;
 using VebTur.Application.Hotels;
 using VebTur.Application.Reservations;
 using VebTur.Application.Reviews;
 using VebTur.Infrastructure.Admin;
 using VebTur.Infrastructure.Auth;
 using VebTur.Infrastructure.ExternalRatings;
+using VebTur.Infrastructure.Favorites;
 using VebTur.Infrastructure.Hotels;
 using VebTur.Infrastructure.Persistence;
 using VebTur.Infrastructure.Persistence.Seed;
@@ -62,6 +64,7 @@ builder.Services.AddScoped<IAdminNotificationService, AdminNotificationService>(
 builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 
 builder.Services.Configure<GooglePlacesOptions>(builder.Configuration.GetSection(GooglePlacesOptions.SectionName));
 builder.Services.AddHttpClient<GooglePlacesRatingProvider>(client =>

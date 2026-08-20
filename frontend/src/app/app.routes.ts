@@ -52,6 +52,11 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'favorites',
+    canActivate: [authenticatedGuard],
+    loadComponent: () => import('./features/favorites/favorite-list/favorite-list').then((m) => m.FavoriteList),
+  },
+  {
     path: 'my-reservations',
     canActivate: [authenticatedGuard],
     children: [

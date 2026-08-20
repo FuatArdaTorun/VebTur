@@ -83,7 +83,12 @@
 
     <div class="hotel-list__grid">
       @for (hotel of hotels(); track hotel.id) {
-        <app-hotel-card [hotel]="hotel" />
+        <app-hotel-card
+          [hotel]="hotel"
+          [showFavorite]="authService.isAuthenticated()"
+          [favorited]="favoriteIds().has(hotel.id)"
+          (favoriteToggle)="toggleFavorite(hotel.id)"
+        />
       }
     </div>
 

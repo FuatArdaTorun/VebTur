@@ -4,6 +4,8 @@ import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { HotelList } from './hotel-list';
 import { HotelsService } from '../hotels.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { FavoritesService } from '../../favorites/favorites.service';
 
 const EMPTY_PAGE = { items: [], page: 1, pageSize: 12, totalCount: 0, totalPages: 0 };
 
@@ -33,14 +35,23 @@ describe('HotelList', () => {
   let fixture: ComponentFixture<HotelList>;
   let component: HotelList;
   let serviceStub: { getHotels: ReturnType<typeof vi.fn>; getAmenities: ReturnType<typeof vi.fn> };
+  let authServiceStub: { isAuthenticated: ReturnType<typeof vi.fn> };
+  let favoritesServiceStub: { getMineIds: ReturnType<typeof vi.fn>; addFavorite: ReturnType<typeof vi.fn>; removeFavorite: ReturnType<typeof vi.fn> };
 
   function createComponent(
     queryParams: Record<string, string> = {},
     getHotelsReturn: Observable<unknown> = of(EMPTY_PAGE),
+    options: { isAuthenticated?: boolean; favoriteIds?: string[] } = {},
   ): void {
     serviceStub = {
       getHotels: vi.fn().mockReturnValue(getHotelsReturn),
       getAmenities: vi.fn().mockReturnValue(of([])),
+    };
+    authServiceStub = { isAuthenticated: vi.fn().mockReturnValue(options.isAuthenticated ?? false) };
+    favoritesServiceStub = {
+      getMineIds: vi.fn().mockReturnValue(of(options.favoriteIds ?? [])),
+      addFavorite: vi.fn().mockReturnValue(of(undefined)),
+      removeFavorite: vi.fn().mockReturnValue(of(undefined)),
     };
 
     TestBed.configureTestingModule({
@@ -48,6 +59,8 @@ describe('HotelList', () => {
       providers: [
         provideRouter([]),
         { provide: HotelsService, useValue: serviceStub },
+        { provide: AuthService, useValue: authServiceStub },
+        { provide: FavoritesService, useValue: favoritesServiceStub },
         { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap(queryParams)) } },
       ],
     });
@@ -173,5 +186,36 @@ describe('HotelList', () => {
       [],
       expect.objectContaining({ queryParams: expect.objectContaining({ amenities: ['wifi'] }) }),
     );
+  });
+
+  it('does not fetch favorite ids when the visitor is not authenticated', () => {
+    createComponent({}, of(EMPTY_PAGE), { isAuthenticated: false });
+
+    expect(favoritesServiceStub.getMineIds).not.toHaveBeenCalled();
+  });
+
+  it('fetches favorite ids on init when authenticated', () => {
+    createComponent({}, of(EMPTY_PAGE), { isAuthenticated: true, favoriteIds: ['h1'] });
+
+    expect(favoritesServiceStub.getMineIds).toHaveBeenCalled();
+    expect(component['favoriteIds']()).toEqual(new Set(['h1']));
+  });
+
+  it('toggleFavorite adds an unfavorited hotel via the service and updates the local set', () => {
+    createComponent({}, of(EMPTY_PAGE), { isAuthenticated: true, favoriteIds: [] });
+
+    component['toggleFavorite']('h1');
+
+    expect(favoritesServiceStub.addFavorite).toHaveBeenCalledWith('h1');
+    expect(component['favoriteIds']().has('h1')).toBe(true);
+  });
+
+  it('toggleFavorite removes an already-favorited hotel via the service and updates the local set', () => {
+    createComponent({}, of(EMPTY_PAGE), { isAuthenticated: true, favoriteIds: ['h1'] });
+
+    component['toggleFavorite']('h1');
+
+    expect(favoritesServiceStub.removeFavorite).toHaveBeenCalledWith('h1');
+    expect(component['favoriteIds']().has('h1')).toBe(false);
   });
 });

@@ -1,0 +1,46 @@
+.favorite-list {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+
+  h1 {
+    margin-bottom: 1.25rem;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+
+    button {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      padding: 0.45rem 1.1rem;
+      color: var(--color-text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--color-primary-500);
+        color: var(--color-primary-600);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

@@ -7,6 +7,8 @@ import { HotelCard } from '../../../shared/hotel-card/hotel-card';
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
+import { AuthService } from '../../../core/auth/auth.service';
+import { FavoritesService } from '../../favorites/favorites.service';
 
 const PAGE_SIZE = 12;
 const CITIES = ['Antalya', 'Marmaris', 'Dalyan'];
@@ -31,6 +33,8 @@ export class HotelList {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly hotelsService = inject(HotelsService);
+  private readonly favoritesService = inject(FavoritesService);
+  protected readonly authService = inject(AuthService);
 
   protected readonly cities = CITIES;
 
@@ -42,6 +46,7 @@ export class HotelList {
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
   protected readonly totalCount = signal(0);
+  protected readonly favoriteIds = signal<Set<string>>(new Set());
 
   protected readonly filterForm = new FormGroup({
     search: new FormControl<string | null>(null),
@@ -55,6 +60,10 @@ export class HotelList {
 
   constructor() {
     this.hotelsService.getAmenities().subscribe((list) => this.amenitiesList.set(list));
+
+    if (this.authService.isAuthenticated()) {
+      this.favoritesService.getMineIds().subscribe((ids) => this.favoriteIds.set(new Set(ids)));
+    }
 
     this.route.queryParamMap.subscribe((params) => {
       const toNumber = (key: string) => (params.get(key) ? Number(params.get(key)) : null);
@@ -76,6 +85,19 @@ export class HotelList {
       const page = toNumber('page') ?? 1;
       this.page.set(page);
       this.fetchHotels(page);
+    });
+  }
+
+  protected toggleFavorite(hotelId: string): void {
+    const isFavorited = this.favoriteIds().has(hotelId);
+    const request = isFavorited ? this.favoritesService.removeFavorite(hotelId) : this.favoritesService.addFavorite(hotelId);
+
+    request.subscribe(() => {
+      this.favoriteIds.update((current) => {
+        const next = new Set(current);
+        isFavorited ? next.delete(hotelId) : next.add(hotelId);
+        return next;
+      });
     });
   }
 

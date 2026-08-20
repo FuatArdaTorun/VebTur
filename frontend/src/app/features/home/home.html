@@ -14,7 +14,12 @@
   } @else {
     <div class="home-featured__grid">
       @for (hotel of featuredHotels(); track hotel.id) {
-        <app-hotel-card [hotel]="hotel" />
+        <app-hotel-card
+          [hotel]="hotel"
+          [showFavorite]="authService.isAuthenticated()"
+          [favorited]="favoriteIds().has(hotel.id)"
+          (favoriteToggle)="toggleFavorite(hotel.id)"
+        />
       }
     </div>
   }

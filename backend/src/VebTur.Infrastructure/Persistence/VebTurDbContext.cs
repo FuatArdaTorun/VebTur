@@ -20,6 +20,7 @@ public class VebTurDbContext(DbContextOptions<VebTurDbContext> options)
     public DbSet<ReservationRequest> ReservationRequests => Set<ReservationRequest>();
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<Favorite> Favorites => Set<Favorite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
