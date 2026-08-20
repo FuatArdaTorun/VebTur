@@ -63,6 +63,7 @@ describe('Navbar', () => {
 
     expect(links).toContain('Sign In');
     expect(links).toContain('Sign Up');
+    expect(links).toContain('Help');
     expect(fixture.nativeElement.querySelector('.navbar__avatar')).toBeNull();
   });
 
@@ -91,6 +92,25 @@ describe('Navbar', () => {
     expect(items).toContain('Personal Info');
     expect(items).toContain('Account Security');
     expect(items).not.toContain('Admin Panel');
+  });
+
+  it('shows a Help link to a logged-in Customer', async () => {
+    loginAs(['Customer']);
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
+    expect(links).toContain('Help');
+  });
+
+  it('hides the Help link from a logged-in Admin — the admin panel is the support team, not a customer needing to contact one', async () => {
+    loginAs(['Admin']);
+    await createFixture();
+    fixture.detectChanges();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
+    expect(links).not.toContain('Help');
   });
 
   it('prefers the first name over the display name in the greeting when both are set', async () => {

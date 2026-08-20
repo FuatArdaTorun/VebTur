@@ -21,6 +21,7 @@ public class VebTurDbContext(DbContextOptions<VebTurDbContext> options)
     public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Favorite> Favorites => Set<Favorite>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

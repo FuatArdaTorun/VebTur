@@ -1,0 +1,90 @@
+<div class="admin-support-message-list">
+  <header class="admin-support-message-list__header">
+    <h1>Support Messages</h1>
+  </header>
+
+  <div class="admin-support-message-list__filters">
+    <div class="admin-support-message-list__search">
+      <input
+        type="search"
+        placeholder="Search by sender, email, or subject…"
+        [formControl]="searchControl"
+        (keyup.enter)="applySearch()"
+      />
+      <button type="button" (click)="applySearch()">Search</button>
+    </div>
+    <button type="button" class="admin-support-message-list__select-toggle" (click)="toggleSelectionMode()">
+      {{ selectionMode() ? 'Cancel' : 'Delete Message' }}
+    </button>
+    @if (selectionMode() && selectedCount() > 0) {
+      <button type="button" class="admin-support-message-list__bulk-delete" (click)="requestBulkDelete()">
+        Delete selected ({{ selectedCount() }})
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <app-loading-state message="Loading support messages…" />
+  } @else if (error()) {
+    <app-error-state message="Could not load support messages." />
+  } @else if (messages().length === 0) {
+    <app-empty-state message="No support messages match your filters." />
+  } @else {
+    <table class="admin-support-message-list__table">
+      <thead>
+        <tr>
+          @if (selectionMode()) {
+            <th class="admin-support-message-list__checkbox-col">
+              <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+            </th>
+          }
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Received</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of messages(); track m.id) {
+          <tr>
+            @if (selectionMode()) {
+              <td class="admin-support-message-list__checkbox-col">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(m.id)"
+                  (change)="toggleSelect(m.id)"
+                  [attr.aria-label]="'Select message from ' + m.senderName"
+                />
+              </td>
+            }
+            <td>{{ m.senderName }}<br /><span class="admin-support-message-list__email">{{ m.senderEmail }}</span></td>
+            <td>{{ m.subject }}</td>
+            <td>{{ m.createdAtUtc | date: 'medium' }}</td>
+            <td>{{ m.replyMessage ? 'Replied' : 'New' }}</td>
+            <td class="admin-support-message-list__actions">
+              <a class="admin-support-message-list__action-btn" [routerLink]="['/admin/support-messages', m.id]">View</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="admin-support-message-list__pagination">
+        <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() === 1">← Previous</button>
+        <span>Page {{ page() }} of {{ totalPages() }}</span>
+        <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() === totalPages()">Next →</button>
+      </div>
+    }
+  }
+
+  @if (confirmingBulkDelete()) {
+    <app-confirm-dialog
+      [message]="'Permanently delete ' + selectedCount() + ' ' + (selectedCount() === 1 ? 'message' : 'messages') + '? This cannot be undone.'"
+      confirmLabel="Delete permanently"
+      (confirmed)="confirmBulkDelete()"
+      (cancelled)="confirmingBulkDelete.set(false)"
+    />
+  }
+</div>

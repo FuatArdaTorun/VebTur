@@ -4,7 +4,16 @@
     VebTur
   </a>
   <div class="navbar__links">
-    <a routerLink="/hotels" routerLinkActive="navbar__link--active">Hotels</a>
+    <div class="navbar__link-group">
+      <a routerLink="/hotels" routerLinkActive="navbar__link--active">Hotels</a>
+      @if (!isAdmin()) {
+        <a routerLink="/help" routerLinkActive="navbar__link--active">Help</a>
+      }
+      @if (!isAuthenticated()) {
+        <a routerLink="/login">Sign In</a>
+        <a routerLink="/register">Sign Up</a>
+      }
+    </div>
     @if (isAuthenticated()) {
       @if (!isAdmin()) {
         <app-notification-bell
@@ -93,9 +102,6 @@
           </div>
         }
       </div>
-    } @else {
-      <a routerLink="/login">Sign In</a>
-      <a routerLink="/register">Sign Up</a>
     }
   </div>
 </nav>

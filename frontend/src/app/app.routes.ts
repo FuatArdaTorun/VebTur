@@ -18,6 +18,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
   },
   {
+    path: 'help',
+    loadComponent: () => import('./features/help/contact-support/contact-support').then((m) => m.ContactSupport),
+  },
+  {
     path: 'reservations/new',
     loadComponent: () => import('./features/reservations/reservation-form/reservation-form').then((m) => m.ReservationForm),
   },
@@ -128,6 +132,20 @@ export const routes: Routes = [
             path: 'reviews',
             loadComponent: () =>
               import('./features/admin/reviews/admin-review-list/admin-review-list').then((m) => m.AdminReviewList),
+          },
+          {
+            path: 'support-messages',
+            loadComponent: () =>
+              import('./features/admin/support-messages/admin-support-message-list/admin-support-message-list').then(
+                (m) => m.AdminSupportMessageList,
+              ),
+          },
+          {
+            path: 'support-messages/:id',
+            loadComponent: () =>
+              import('./features/admin/support-messages/admin-support-message-detail/admin-support-message-detail').then(
+                (m) => m.AdminSupportMessageDetail,
+              ),
           },
         ],
       },

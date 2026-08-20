@@ -17,6 +17,8 @@ using VebTur.Infrastructure.Persistence;
 using VebTur.Infrastructure.Persistence.Seed;
 using VebTur.Infrastructure.Reservations;
 using VebTur.Infrastructure.Reviews;
+using VebTur.Application.Support;
+using VebTur.Infrastructure.Support;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -65,6 +67,8 @@ builder.Services.AddScoped<IHotelNotificationService, DemoHotelNotificationServi
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAdminReviewService, AdminReviewService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<ISupportMessageService, SupportMessageService>();
+builder.Services.AddScoped<IAdminSupportMessageService, AdminSupportMessageService>();
 
 builder.Services.Configure<GooglePlacesOptions>(builder.Configuration.GetSection(GooglePlacesOptions.SectionName));
 builder.Services.AddHttpClient<GooglePlacesRatingProvider>(client =>

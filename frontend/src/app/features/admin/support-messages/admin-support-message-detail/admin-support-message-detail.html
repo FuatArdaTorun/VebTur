@@ -1,0 +1,38 @@
+@if (loading()) {
+  <app-loading-state message="Loading message…" />
+} @else if (loadError() || !message()) {
+  <app-error-state message="Could not load this message." />
+} @else {
+  @let m = message()!;
+
+  <div class="admin-support-message-detail">
+    <a class="admin-support-message-detail__back" routerLink="/admin/support-messages">← Back to support messages</a>
+
+    <h1>{{ m.subject }}</h1>
+    <p class="admin-support-message-detail__meta">
+      From <strong>{{ m.senderName }}</strong> ({{ m.senderEmail }}) · {{ m.createdAtUtc | date: 'medium' }}
+    </p>
+
+    <div class="admin-support-message-detail__message">{{ m.message }}</div>
+
+    <h2>Reply</h2>
+    <p class="admin-support-message-detail__note">
+      Saved here for the team's records — VebTur doesn't send real emails yet (see docs/adr/0007), so this isn't delivered to the sender automatically.
+    </p>
+    @if (m.repliedAtUtc) {
+      <p class="admin-support-message-detail__replied-at">Last saved {{ m.repliedAtUtc | date: 'medium' }}</p>
+    }
+
+    <form [formGroup]="replyForm" (ngSubmit)="submitReply()">
+      <textarea formControlName="replyMessage" rows="6" placeholder="Write your reply…"></textarea>
+
+      @if (submitError(); as errorMessage) {
+        <p class="admin-support-message-detail__error">{{ errorMessage }}</p>
+      }
+
+      <button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Saving…' : (m.repliedAtUtc ? 'Update Reply' : 'Save Reply') }}
+      </button>
+    </form>
+  </div>
+}

@@ -28,10 +28,29 @@
     gap: 1.5rem;
   }
 
-  &__links a {
-    color: var(--color-text);
-    text-decoration: none;
-    font-weight: 500;
+  // Thin dividers between the plain text links (Hotels/Help/Sign In/Sign Up) so they read as
+  // distinct destinations rather than one run-on phrase — the account area's avatar/bell already
+  // stand apart by shape, so they sit outside this group and need no divider of their own.
+  &__link-group {
+    display: flex;
+    align-items: center;
+
+    a {
+      padding: 0 1rem;
+      color: var(--color-text);
+      text-decoration: none;
+      font-weight: 500;
+      border-right: 1px solid var(--color-border);
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        border-right: none;
+        padding-right: 0;
+      }
+    }
   }
 
   &__link--active {
