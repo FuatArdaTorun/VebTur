@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -12,7 +12,13 @@ export class ProfileShell {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  protected readonly currentUser = this.authService.currentUser;
+  protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
+
+  // Same firstName-over-displayName precedence the navbar already uses.
+  protected readonly displayName = computed(() => {
+    const user = this.authService.currentUser();
+    return user?.firstName || user?.displayName || '';
+  });
 
   protected logout(): void {
     this.authService.logout();

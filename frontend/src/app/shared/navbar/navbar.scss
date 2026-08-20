@@ -1,7 +1,8 @@
 .navbar {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 1.5rem;
   padding: 1rem 1.5rem;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -26,6 +27,36 @@
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    margin-left: auto;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__menu-toggle {
+    display: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    svg {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    &:hover {
+      border-color: var(--color-primary-500);
+    }
   }
 
   // Thin dividers between the plain text links (Hotels/Help/Sign In/Sign Up) so they read as
@@ -168,6 +199,56 @@
           color: var(--color-error);
         }
       }
+    }
+  }
+
+  @media (max-width: 720px) {
+    padding: 1rem;
+
+    &__menu-toggle {
+      display: flex;
+    }
+
+    &__links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      padding: 0.25rem 1rem 0.75rem;
+      z-index: 15;
+
+      &--open {
+        display: block;
+      }
+    }
+
+    &__link-group {
+      flex-direction: column;
+      align-items: stretch;
+
+      a {
+        padding: 0.85rem 0;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+
+        &:first-child {
+          padding-left: 0;
+        }
+
+        &:last-child {
+          border-right: none;
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+      }
+    }
+
+    &__dropdown {
+      width: 240px;
     }
   }
 }

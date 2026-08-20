@@ -1,9 +1,15 @@
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 
 import { Navbar } from './navbar';
+
+// A wildcard target so a real click on a routerLink (e.g. the mobile-menu-closes-on-navigation
+// test) resolves instead of rejecting with "Cannot match any routes".
+@Component({ template: '' })
+class BlankRouteStub {}
 
 describe('Navbar', () => {
   let component: Navbar;
@@ -14,7 +20,7 @@ describe('Navbar', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [Navbar],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([{ path: '**', component: BlankRouteStub }]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Navbar);
@@ -65,6 +71,49 @@ describe('Navbar', () => {
     expect(links).toContain('Sign Up');
     expect(links).toContain('Help');
     expect(fixture.nativeElement.querySelector('.navbar__avatar')).toBeNull();
+  });
+
+  it('toggles the mobile menu open and closed', () => {
+    fixture.detectChanges();
+    const toggle: HTMLButtonElement = fixture.nativeElement.querySelector('.navbar__menu-toggle');
+    const links: HTMLElement = fixture.nativeElement.querySelector('.navbar__links');
+    expect(links.classList.contains('navbar__links--open')).toBe(false);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(links.classList.contains('navbar__links--open')).toBe(true);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(links.classList.contains('navbar__links--open')).toBe(false);
+  });
+
+  it('closes the mobile menu when a link inside it is clicked', () => {
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.navbar__menu-toggle').click();
+    fixture.detectChanges();
+
+    const hotelsLink: HTMLAnchorElement = Array.from(fixture.nativeElement.querySelectorAll('a')).find(
+      (a) => (a as HTMLAnchorElement).textContent?.trim() === 'Hotels',
+    ) as HTMLAnchorElement;
+    hotelsLink.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.navbar__links').classList.contains('navbar__links--open')).toBe(false);
+  });
+
+  it('closes the mobile menu when clicking outside it', () => {
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.navbar__menu-toggle').click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.navbar__links').classList.contains('navbar__links--open')).toBe(true);
+
+    document.body.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.navbar__links').classList.contains('navbar__links--open')).toBe(false);
   });
 
   it('shows an avatar with the display-name initial for a logged-in Customer, closed by default', async () => {

@@ -3,17 +3,21 @@
     <img class="navbar__logo" src="/logo.png" alt="VebTur logo">
     VebTur
   </a>
-  <div class="navbar__links">
+
+  <div class="navbar__links" id="navbar-links" [class.navbar__links--open]="mobileMenuOpen()">
     <div class="navbar__link-group">
-      <a routerLink="/hotels" routerLinkActive="navbar__link--active">Hotels</a>
+      <a routerLink="/hotels" routerLinkActive="navbar__link--active" (click)="closeMobileMenu()">Hotels</a>
       @if (!isAdmin()) {
-        <a routerLink="/help" routerLinkActive="navbar__link--active">Help</a>
+        <a routerLink="/help" routerLinkActive="navbar__link--active" (click)="closeMobileMenu()">Help</a>
       }
       @if (!isAuthenticated()) {
-        <a routerLink="/login">Sign In</a>
-        <a routerLink="/register">Sign Up</a>
+        <a routerLink="/login" (click)="closeMobileMenu()">Sign In</a>
+        <a routerLink="/register" (click)="closeMobileMenu()">Sign Up</a>
       }
     </div>
+  </div>
+
+  <div class="navbar__right">
     @if (isAuthenticated()) {
       @if (!isAdmin()) {
         <app-notification-bell
@@ -103,5 +107,24 @@
         }
       </div>
     }
+
+    <button
+      type="button"
+      class="navbar__menu-toggle"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="navbar-links"
+      aria-label="Toggle menu"
+    >
+      @if (mobileMenuOpen()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      }
+    </button>
   </div>
 </nav>

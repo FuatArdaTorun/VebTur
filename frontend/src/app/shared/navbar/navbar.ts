@@ -36,6 +36,7 @@ export class Navbar {
   });
   protected readonly recentStatusChanges = signal<NotificationBellItem[]>([]);
   protected readonly menuOpen = signal(false);
+  protected readonly mobileMenuOpen = signal(false);
 
   constructor() {
     // Customers only — admins get their own "pending approvals" bell in the admin shell instead.
@@ -48,8 +49,9 @@ export class Navbar {
 
   @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
-    if (this.menuOpen() && !this.elementRef.nativeElement.contains(event.target)) {
-      this.menuOpen.set(false);
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      if (this.menuOpen()) this.menuOpen.set(false);
+      if (this.mobileMenuOpen()) this.mobileMenuOpen.set(false);
     }
   }
 
@@ -59,6 +61,14 @@ export class Navbar {
 
   protected closeMenu(): void {
     this.menuOpen.set(false);
+  }
+
+  protected toggleMobileMenu(): void {
+    this.mobileMenuOpen.set(!this.mobileMenuOpen());
+  }
+
+  protected closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
   }
 
   protected logout(): void {

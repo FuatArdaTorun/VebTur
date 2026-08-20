@@ -9,8 +9,9 @@
   --color-primary-100: #e5f1f7;
   --color-primary-50: #f4f9fc;
 
-  /* Warm accent — terracotta (touristic warmth, used sparingly) */
-  --color-accent-700: #c14f27;
+  /* Warm accent — terracotta (touristic warmth, used sparingly). Darkened from a brighter
+     first pick, which failed WCAG AA text contrast (4.5:1) as text-on-accent-100. */
+  --color-accent-700: #a44321;
   --color-accent-600: #e0653a;
   --color-accent-100: #fce8de;
 
@@ -26,8 +27,9 @@
   --color-success: #2e7d4f;
   --color-error: #c0392b;
   --color-error-100: #fbe9e6;
-  --color-warning: #c77c11;
-  --color-star: #d4a017;
+  /* Same reasoning as --color-accent-700 above — darkened to pass WCAG AA text contrast. */
+  --color-warning: #a15c00;
+  --color-star: #8f6c00;
 
   /* Typography */
   --font-heading: 'Poppins', 'Segoe UI', sans-serif;

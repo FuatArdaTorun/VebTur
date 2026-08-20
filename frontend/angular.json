@@ -63,6 +63,10 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "host": "::",
+            "allowedHosts": ["vebtur.local"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
