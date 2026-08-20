@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 import { HotelDetail } from './hotel-detail';
 import { HotelsService } from '../hotels.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { FavoritesService } from '../../favorites/favorites.service';
 import { HotelDetail as HotelDetailModel, HotelReviewsResponse, Review } from '../models/hotel.model';
 
 function buildHotel(overrides: Partial<HotelDetailModel> = {}): HotelDetailModel {
@@ -58,6 +59,7 @@ describe('HotelDetail', () => {
     createReview: ReturnType<typeof vi.fn>;
   };
   let authServiceStub: { isAuthenticated: ReturnType<typeof vi.fn> };
+  let favoritesServiceStub: { getMineIds: ReturnType<typeof vi.fn>; addFavorite: ReturnType<typeof vi.fn>; removeFavorite: ReturnType<typeof vi.fn> };
 
   function createComponent(): void {
     TestBed.configureTestingModule({
@@ -66,6 +68,7 @@ describe('HotelDetail', () => {
         provideRouter([]),
         { provide: HotelsService, useValue: serviceStub },
         { provide: AuthService, useValue: authServiceStub },
+        { provide: FavoritesService, useValue: favoritesServiceStub },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ idOrSlug: 'test-hotel' }) } } },
       ],
     });
@@ -77,6 +80,11 @@ describe('HotelDetail', () => {
 
   beforeEach(() => {
     authServiceStub = { isAuthenticated: vi.fn().mockReturnValue(false) };
+    favoritesServiceStub = {
+      getMineIds: vi.fn().mockReturnValue(of([])),
+      addFavorite: vi.fn().mockReturnValue(of(undefined)),
+      removeFavorite: vi.fn().mockReturnValue(of(undefined)),
+    };
   });
 
   it('loads the hotel, then fetches its external rating using the resolved id', () => {
@@ -254,5 +262,67 @@ describe('HotelDetail', () => {
     component['submitReview']();
 
     expect(serviceStub.createReview).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch favorite state when not authenticated', () => {
+    serviceStub = {
+      getHotel: vi.fn().mockReturnValue(of(buildHotel())),
+      getExternalRating: vi.fn().mockReturnValue(of(null)),
+      getHotelReviews: vi.fn().mockReturnValue(of(EMPTY_REVIEWS)),
+      createReview: vi.fn(),
+    };
+    createComponent();
+
+    expect(favoritesServiceStub.getMineIds).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('.hotel-detail__favorite')).toBeNull();
+  });
+
+  it('fetches favorite state and renders the button as active when this hotel is already favorited', () => {
+    serviceStub = {
+      getHotel: vi.fn().mockReturnValue(of(buildHotel())),
+      getExternalRating: vi.fn().mockReturnValue(of(null)),
+      getHotelReviews: vi.fn().mockReturnValue(of(EMPTY_REVIEWS)),
+      createReview: vi.fn(),
+    };
+    favoritesServiceStub.getMineIds.mockReturnValue(of(['hotel-1']));
+    authServiceStub.isAuthenticated.mockReturnValue(true);
+    createComponent();
+
+    expect(component['favorited']()).toBe(true);
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector('.hotel-detail__favorite');
+    expect(button.classList.contains('hotel-detail__favorite--active')).toBe(true);
+  });
+
+  it('toggleFavorite adds the hotel via the service when not yet favorited', () => {
+    serviceStub = {
+      getHotel: vi.fn().mockReturnValue(of(buildHotel())),
+      getExternalRating: vi.fn().mockReturnValue(of(null)),
+      getHotelReviews: vi.fn().mockReturnValue(of(EMPTY_REVIEWS)),
+      createReview: vi.fn(),
+    };
+    authServiceStub.isAuthenticated.mockReturnValue(true);
+    createComponent();
+
+    component['toggleFavorite']();
+
+    expect(favoritesServiceStub.addFavorite).toHaveBeenCalledWith('hotel-1');
+    expect(component['favorited']()).toBe(true);
+  });
+
+  it('toggleFavorite removes the hotel via the service when already favorited', () => {
+    serviceStub = {
+      getHotel: vi.fn().mockReturnValue(of(buildHotel())),
+      getExternalRating: vi.fn().mockReturnValue(of(null)),
+      getHotelReviews: vi.fn().mockReturnValue(of(EMPTY_REVIEWS)),
+      createReview: vi.fn(),
+    };
+    favoritesServiceStub.getMineIds.mockReturnValue(of(['hotel-1']));
+    authServiceStub.isAuthenticated.mockReturnValue(true);
+    createComponent();
+
+    component['toggleFavorite']();
+
+    expect(favoritesServiceStub.removeFavorite).toHaveBeenCalledWith('hotel-1');
+    expect(component['favorited']()).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ReservationsService } from '../../features/reservations/reservations.service';
@@ -19,6 +19,7 @@ export class Navbar {
   private readonly authService = inject(AuthService);
   private readonly reservationsService = inject(ReservationsService);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef);
 
   protected readonly isAuthenticated = this.authService.isAuthenticated;
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
@@ -28,7 +29,13 @@ export class Navbar {
     const user = this.authService.currentUser();
     return user?.firstName || user?.displayName || '';
   });
+  protected readonly avatarInitial = computed(() => {
+    const user = this.authService.currentUser();
+    const source = user?.firstName || user?.displayName || user?.email || '?';
+    return source.charAt(0).toUpperCase();
+  });
   protected readonly recentStatusChanges = signal<NotificationBellItem[]>([]);
+  protected readonly menuOpen = signal(false);
 
   constructor() {
     // Customers only — admins get their own "pending approvals" bell in the admin shell instead.
@@ -39,7 +46,23 @@ export class Navbar {
     });
   }
 
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (this.menuOpen() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.menuOpen.set(false);
+    }
+  }
+
+  protected toggleMenu(): void {
+    this.menuOpen.set(!this.menuOpen());
+  }
+
+  protected closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
   protected logout(): void {
+    this.closeMenu();
     this.authService.logout();
     this.router.navigateByUrl('/');
   }

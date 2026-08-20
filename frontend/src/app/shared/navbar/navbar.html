@@ -6,11 +6,7 @@
   <div class="navbar__links">
     <a routerLink="/hotels" routerLinkActive="navbar__link--active">Hotels</a>
     @if (isAuthenticated()) {
-      @if (isAdmin()) {
-        <a class="navbar__admin-link" routerLink="/admin/hotels">Admin Panel</a>
-      } @else {
-        <a routerLink="/profile" routerLinkActive="navbar__link--active">My Profile</a>
-        <a routerLink="/my-reservations" routerLinkActive="navbar__link--active">My Reservations</a>
+      @if (!isAdmin()) {
         <app-notification-bell
           [items]="recentStatusChanges()"
           storageKey="customer-reservation-status"
@@ -19,8 +15,84 @@
           (opened)="fetchRecentStatusChanges()"
         />
       }
-      <span class="navbar__user">{{ displayName() }}</span>
-      <button type="button" class="navbar__logout" (click)="logout()">Log out</button>
+
+      <div class="navbar__account">
+        <button
+          type="button"
+          class="navbar__avatar"
+          (click)="toggleMenu()"
+          [attr.aria-expanded]="menuOpen()"
+          aria-haspopup="true"
+          aria-label="Account menu"
+        >{{ avatarInitial() }}</button>
+
+        @if (menuOpen()) {
+          <div class="navbar__dropdown">
+            <p class="navbar__dropdown-greeting">Welcome back, {{ displayName() }}</p>
+
+            <div class="navbar__dropdown-group">
+              <span class="navbar__dropdown-label">Account</span>
+
+              <a class="navbar__dropdown-item" routerLink="/profile" (click)="closeMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.25" stroke-linecap="round" stroke-linejoin="round" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 19.5c0-3.6 3.13-6.5 7-6.5s7 2.9 7 6.5" />
+                </svg>
+                Personal Info
+              </a>
+
+              <a class="navbar__dropdown-item" routerLink="/profile/security" (click)="closeMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <rect x="5" y="11" width="14" height="9" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7.5a4 4 0 0 1 8 0V11" />
+                </svg>
+                Account Security
+              </a>
+            </div>
+
+            @if (isAdmin()) {
+              <div class="navbar__dropdown-group">
+                <span class="navbar__dropdown-label">Management</span>
+
+                <a class="navbar__dropdown-item" routerLink="/admin/hotels" (click)="closeMenu()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3.5" y="4" width="17" height="13" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 20.5h8M12 17v3.5" />
+                  </svg>
+                  Admin Panel
+                </a>
+              </div>
+            } @else {
+              <div class="navbar__dropdown-group">
+                <span class="navbar__dropdown-label">Travel</span>
+
+                <a class="navbar__dropdown-item" routerLink="/favorites" (click)="closeMenu()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5s-7.5-4.6-10-9.3C.5 8 2 4.5 5.6 4c2.2-.3 4.2.8 6.4 3 2.2-2.2 4.2-3.3 6.4-3 3.6.5 5.1 4 3.6 7.2-2.5 4.7-10 9.3-10 9.3Z" />
+                  </svg>
+                  My Favorites
+                </a>
+
+                <a class="navbar__dropdown-item" routerLink="/my-reservations" (click)="closeMenu()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <rect x="3" y="8" width="18" height="11" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 8V6.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V8" />
+                  </svg>
+                  My Reservations
+                </a>
+              </div>
+            }
+
+            <button type="button" class="navbar__dropdown-item navbar__dropdown-item--logout" (click)="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7.5a2 2 0 0 0 2-2v-2" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h11.5m0 0-3-3m3 3-3 3" />
+              </svg>
+              Log out
+            </button>
+          </div>
+        }
+      </div>
     } @else {
       <a routerLink="/login">Sign In</a>
       <a routerLink="/register">Sign Up</a>

@@ -44,25 +44,111 @@
     font-weight: 400 !important;
   }
 
-  &__user {
-    font-size: 0.85rem;
+  &__account {
+    position: relative;
+  }
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-primary-600);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-primary-700);
+    }
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    width: 260px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 0.5rem 0;
+    z-index: 20;
+  }
+
+  &__dropdown-greeting {
+    margin: 0;
+    padding: 0.5rem 1rem 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__dropdown-group {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  &__dropdown-label {
+    display: block;
+    padding: 0.2rem 1rem 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--color-text-muted);
   }
 
-  &__logout {
-    padding: 0.35rem 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
+  &__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.55rem 1rem;
+    border: none;
+    background: none;
     color: var(--color-text);
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 500;
+    text-decoration: none;
+    text-align: left;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    font-family: inherit;
+
+    svg {
+      width: 1.1rem;
+      height: 1.1rem;
+      flex-shrink: 0;
+      color: var(--color-text-muted);
+    }
 
     &:hover {
-      border-color: var(--color-primary-500);
+      background: var(--color-background-alt);
       color: var(--color-primary-600);
+    }
+
+    &--logout {
+      margin-top: 0.25rem;
+
+      &:hover {
+        color: var(--color-error);
+
+        svg {
+          color: var(--color-error);
+        }
+      }
     }
   }
 }

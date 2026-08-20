@@ -3,11 +3,22 @@
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
 
+  h2 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 1.35rem;
+  }
+
   &__back {
     display: inline-block;
     margin-bottom: 1rem;
-    color: #1a73e8;
+    color: var(--color-primary-600);
     text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--color-primary-700);
+    }
   }
 
   &__header {
@@ -17,17 +28,51 @@
 
     h1 {
       margin: 0;
+      font-size: 1.9rem;
     }
   }
 
   &__official-stars {
-    color: #666;
+    color: var(--color-text-muted);
     font-size: 0.9rem;
     font-weight: 600;
   }
 
+  &__favorite {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease;
+
+    svg {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    &:hover {
+      border-color: var(--color-accent-600);
+      color: var(--color-accent-600);
+    }
+
+    &--active {
+      border-color: var(--color-accent-600);
+      background: var(--color-accent-100);
+      color: var(--color-accent-700);
+    }
+  }
+
   &__location {
-    color: #666;
+    color: var(--color-text-muted);
     margin: 0.25rem 0 0.5rem;
   }
 
@@ -39,7 +84,7 @@
   }
 
   &__rating-star {
-    color: #d4a017;
+    color: var(--color-star);
     font-size: 1.1rem;
   }
 
@@ -50,49 +95,55 @@
 
   &__rating-source,
   &__rating-count {
-    color: #666;
+    color: var(--color-text-muted);
     font-size: 0.85rem;
   }
 
   &__rating-demo-badge {
-    color: #8a6d00;
-    background: #fff6dd;
-    border: 1px solid #e8d28a;
-    border-radius: 4px;
-    padding: 0.05rem 0.4rem;
+    color: var(--color-accent-700);
+    background: var(--color-accent-100);
+    border-radius: var(--radius-sm);
+    padding: 0.05rem 0.5rem;
     font-size: 0.75rem;
+    font-weight: 500;
   }
 
   &__gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
 
     img {
       width: 100%;
       height: 140px;
       object-fit: cover;
-      border-radius: 0.5rem;
-      background: #eee;
+      border-radius: var(--radius-md);
+      background: var(--color-background-alt);
     }
   }
 
   &__actions {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-bottom: 1.5rem;
 
     a {
-      color: #1a73e8;
+      color: var(--color-primary-600);
       text-decoration: none;
       font-weight: 600;
+
+      &:hover {
+        color: var(--color-primary-700);
+      }
     }
   }
 
   &__description {
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    line-height: 1.65;
+    margin-bottom: 2rem;
+    color: var(--color-text);
   }
 
   &__amenities {
@@ -101,18 +152,22 @@
     gap: 0.5rem;
     list-style: none;
     padding: 0;
+    margin-bottom: 2rem;
 
     li {
-      background: #f1f3f4;
-      border-radius: 999px;
-      padding: 0.3rem 0.75rem;
+      background: var(--color-primary-100);
+      color: var(--color-primary-700);
+      border-radius: var(--radius-pill);
+      padding: 0.3rem 0.85rem;
       font-size: 0.875rem;
+      font-weight: 500;
     }
   }
 
   &__rooms {
     list-style: none;
     padding: 0;
+    margin-bottom: 2rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -123,44 +178,63 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 0.5rem;
-    padding: 0.875rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem 1.125rem;
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    strong {
+      font-family: var(--font-heading);
+      font-weight: 600;
+    }
 
     p {
       margin: 0.25rem 0 0;
-      color: #666;
+      color: var(--color-text-muted);
       font-size: 0.875rem;
     }
   }
 
   &__room-price {
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--color-accent-700);
     white-space: nowrap;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
 
   &__room-availability {
     font-size: 0.8rem !important;
+    color: var(--color-success) !important;
 
     &--none {
-      color: #b06a00 !important;
+      color: var(--color-warning) !important;
     }
   }
 
   &__room-reserve {
     display: inline-block;
-    padding: 0.35rem 0.8rem;
-    border-radius: 6px;
-    background: #1a73e8;
+    padding: 0.4rem 1.1rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-600);
     color: #fff;
     font-weight: 600;
     font-size: 0.85rem;
     text-decoration: none;
     white-space: nowrap;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--color-primary-700);
+    }
   }
 
   &__reviews {
@@ -171,35 +245,38 @@
     display: flex;
     align-items: baseline;
     gap: 0.4rem;
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.5rem;
     font-size: 0.95rem;
-    color: #444;
+    color: var(--color-text);
   }
 
   &__reviews-summary-star {
-    color: #d4a017;
+    color: var(--color-star);
     font-size: 1.2rem;
   }
 
   &__reviews-summary-value {
     font-weight: 700;
     font-size: 1.2rem;
-    color: #222;
+    color: var(--color-text);
   }
 
   &__review-form {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.7rem;
     max-width: 30rem;
-    margin-bottom: 1.75rem;
-    padding: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 1.125rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
 
     h3 {
       margin: 0;
+      font-family: var(--font-heading);
       font-size: 1rem;
+      font-weight: 600;
     }
 
     label {
@@ -207,26 +284,39 @@
       flex-direction: column;
       gap: 0.3rem;
       font-size: 0.85rem;
-      color: #555;
+      color: var(--color-text-muted);
     }
 
+    select,
     textarea {
-      padding: 0.5rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-surface);
       resize: vertical;
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+      }
     }
 
     button[type='submit'] {
       align-self: flex-start;
-      padding: 0.5rem 1.1rem;
+      padding: 0.55rem 1.25rem;
       border: none;
-      border-radius: 6px;
-      background: #1a73e8;
+      border-radius: var(--radius-pill);
+      background: var(--color-primary-600);
       color: #fff;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-700);
+      }
 
       &:disabled {
         opacity: 0.6;
@@ -245,17 +335,17 @@
     background: none;
     font-size: 1.6rem;
     line-height: 1;
-    color: #d0d0d0;
+    color: var(--color-border);
     cursor: pointer;
     padding: 0;
 
     &--filled {
-      color: #d4a017;
+      color: var(--color-star);
     }
   }
 
   &__review-error {
-    color: #c5221f;
+    color: var(--color-error);
     font-size: 0.85rem;
     margin: 0;
   }
@@ -263,13 +353,14 @@
   &__review-thanks,
   &__review-hint,
   &__review-empty {
-    color: #666;
+    color: var(--color-text-muted);
     font-size: 0.9rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
   &__review-hint a {
-    color: #1a73e8;
+    color: var(--color-primary-600);
+    font-weight: 600;
   }
 
   &__review-list {
@@ -281,9 +372,10 @@
   }
 
   &__review {
-    border: 1px solid #eee;
-    border-radius: 0.5rem;
-    padding: 0.875rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.125rem;
   }
 
   &__review-header {
@@ -291,21 +383,26 @@
     align-items: center;
     gap: 0.6rem;
     margin-bottom: 0.3rem;
+
+    strong {
+      font-family: var(--font-heading);
+    }
   }
 
   &__review-stars {
-    color: #d4a017;
+    color: var(--color-star);
     letter-spacing: 0.1rem;
   }
 
   &__review-stay {
-    margin: 0 0 0.4rem;
-    color: #666;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-muted);
     font-size: 0.8rem;
   }
 
   &__review-comment {
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.55;
+    color: var(--color-text);
   }
 }

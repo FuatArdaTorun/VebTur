@@ -60,6 +60,13 @@ export class AuthService {
       roles: response.roles,
     });
     localStorage.setItem(TOKEN_KEY, response.token);
+
+    // The login/register response never carries firstName (only /auth/me does), so anything
+    // that prefers firstName over displayName — e.g. the navbar greeting — would otherwise show
+    // the wrong name until something else happens to call getProfile() (e.g. visiting Personal
+    // Info), then visibly flip. Refresh it right away, same "load separately, never block the
+    // primary action" pattern as HotelDetail's external rating/reviews.
+    this.getProfile().subscribe();
   }
 
   private updateStoredUser(response: CurrentUserResponse): void {

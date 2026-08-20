@@ -35,6 +35,15 @@ describe('Navbar', () => {
     httpMock.expectOne((r) => r.url.endsWith('/api/v1/reservation-requests/mine')).flush({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 });
   }
 
+  function openMenu(): void {
+    fixture.nativeElement.querySelector('.navbar__avatar').click();
+    fixture.detectChanges();
+  }
+
+  function dropdownLinkTexts(): string[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.navbar__dropdown-item')).map((el) => (el as HTMLElement).textContent?.trim());
+  }
+
   beforeEach(async () => {
     await createFixture();
   });
@@ -48,28 +57,40 @@ describe('Navbar', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows Sign In / Sign Up links and no logout button when unauthenticated', () => {
+  it('shows Sign In / Sign Up links and no avatar when unauthenticated', () => {
     fixture.detectChanges();
     const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
 
     expect(links).toContain('Sign In');
     expect(links).toContain('Sign Up');
-    expect(links).not.toContain('Admin Panel');
-    expect(fixture.nativeElement.querySelector('.navbar__logout')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.navbar__avatar')).toBeNull();
   });
 
-  it('shows the display name, a logout button, and My Reservations, but no Admin Panel link, for a logged-in Customer', async () => {
+  it('shows an avatar with the display-name initial for a logged-in Customer, closed by default', async () => {
     loginAs(['Customer']);
     await createFixture();
     fixture.detectChanges();
     flushMineRequest();
 
-    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
+    const avatar: HTMLButtonElement = fixture.nativeElement.querySelector('.navbar__avatar');
+    expect(avatar.textContent?.trim()).toBe('J');
+    expect(fixture.nativeElement.querySelector('.navbar__dropdown')).toBeNull();
+  });
 
-    expect(fixture.nativeElement.querySelector('.navbar__user').textContent.trim()).toBe('Jane Guest');
-    expect(fixture.nativeElement.querySelector('.navbar__logout')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('.navbar__admin-link')).toBeNull();
-    expect(links).toContain('My Reservations');
+  it('opens the dropdown on avatar click, showing the greeting, My Favorites and My Reservations, but no Admin Panel', async () => {
+    loginAs(['Customer']);
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+    openMenu();
+
+    expect(fixture.nativeElement.querySelector('.navbar__dropdown-greeting').textContent).toContain('Jane Guest');
+    const items = dropdownLinkTexts();
+    expect(items).toContain('My Favorites');
+    expect(items).toContain('My Reservations');
+    expect(items).toContain('Personal Info');
+    expect(items).toContain('Account Security');
+    expect(items).not.toContain('Admin Panel');
   });
 
   it('prefers the first name over the display name in the greeting when both are set', async () => {
@@ -82,20 +103,25 @@ describe('Navbar', () => {
     fixture.detectChanges();
     flushMineRequest();
 
-    expect(fixture.nativeElement.querySelector('.navbar__user').textContent.trim()).toBe('Jane');
+    expect(fixture.nativeElement.querySelector('.navbar__avatar').textContent?.trim()).toBe('J');
+    openMenu();
+    expect(fixture.nativeElement.querySelector('.navbar__dropdown-greeting').textContent).toContain('Jane');
   });
 
-  it('shows an Admin Panel link to /admin/hotels for a logged-in Admin, but no My Reservations link', async () => {
+  it('shows an Admin Panel link to /admin/hotels for a logged-in Admin, but no My Favorites/My Reservations', async () => {
     loginAs(['Admin']);
     await createFixture();
     fixture.detectChanges();
+    openMenu();
 
-    const link: HTMLAnchorElement = fixture.nativeElement.querySelector('.navbar__admin-link');
-    expect(link.textContent?.trim()).toBe('Admin Panel');
+    const link: HTMLAnchorElement = Array.from(fixture.nativeElement.querySelectorAll('.navbar__dropdown-item')).find(
+      (el) => (el as HTMLElement).textContent?.trim() === 'Admin Panel',
+    ) as HTMLAnchorElement;
     expect(link.getAttribute('href')).toBe('/admin/hotels');
 
-    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
-    expect(links).not.toContain('My Reservations');
+    const items = dropdownLinkTexts();
+    expect(items).not.toContain('My Reservations');
+    expect(items).not.toContain('My Favorites');
   });
 
   it('does not fetch reservation status updates for a logged-in Admin', async () => {
@@ -132,14 +158,32 @@ describe('Navbar', () => {
     ]);
   });
 
-  it('logs out and navigates home when the logout button is clicked', async () => {
+  it('closes the dropdown when clicking outside it', async () => {
     loginAs(['Customer']);
     await createFixture();
     fixture.detectChanges();
     flushMineRequest();
+    openMenu();
+    expect(fixture.nativeElement.querySelector('.navbar__dropdown')).not.toBeNull();
+
+    document.body.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.navbar__dropdown')).toBeNull();
+  });
+
+  it('logs out and navigates home when Log out is clicked', async () => {
+    loginAs(['Customer']);
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+    openMenu();
 
     const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
-    fixture.nativeElement.querySelector('.navbar__logout').click();
+    const logoutButton: HTMLButtonElement = Array.from(fixture.nativeElement.querySelectorAll('.navbar__dropdown-item')).find(
+      (el) => (el as HTMLElement).textContent?.trim() === 'Log out',
+    ) as HTMLButtonElement;
+    logoutButton.click();
     fixture.detectChanges();
 
     expect(localStorage.getItem('vebtur_token')).toBeNull();

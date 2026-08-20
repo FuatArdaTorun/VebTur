@@ -33,6 +33,23 @@ describe('AuthService', () => {
     expect(service.getToken()).toBeNull();
   });
 
+  /** login/register fire a follow-up GET /auth/me to refresh firstName etc. right away — see storeSession. */
+  function flushProfileRequest(overrides: Partial<CurrentUserResponse> = {}): void {
+    httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/me')).flush({
+      id: 'u1',
+      email: 'admin@vebtur.local',
+      userName: 'admin@vebtur.local',
+      displayName: 'VebTur Admin',
+      phoneNumber: null,
+      firstName: null,
+      lastName: null,
+      gender: null,
+      dateOfBirth: null,
+      roles: ['Admin'],
+      ...overrides,
+    } satisfies CurrentUserResponse);
+  }
+
   it('login stores the token/user and flips isAuthenticated', () => {
     const service = createService();
     const response: LoginResponse = {
@@ -49,6 +66,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/login'));
     expect(req.request.method).toBe('POST');
     req.flush(response);
+    flushProfileRequest();
 
     expect(received).toEqual(response);
     expect(service.isAuthenticated()).toBe(true);
@@ -57,6 +75,27 @@ describe('AuthService', () => {
     expect(service.hasRole('Admin')).toBe(true);
     expect(service.hasRole('Customer')).toBe(false);
     expect(localStorage.getItem('vebtur_token')).toBe('fake-jwt-token');
+  });
+
+  it('login refreshes firstName from a follow-up /auth/me call, so the profile is accurate immediately — not only after visiting Personal Info', () => {
+    const service = createService();
+
+    service.login({ emailOrUsername: 'admin@vebtur.local', password: 'secret' }).subscribe();
+    httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/login')).flush({
+      token: 'fake-jwt-token',
+      expiresAtUtc: new Date().toISOString(),
+      email: 'admin@vebtur.local',
+      displayName: 'Client',
+      roles: ['Customer'],
+    } satisfies LoginResponse);
+
+    // Right after the login response, firstName is still unknown (not carried by LoginResponse).
+    expect(service.currentUser()?.firstName).toBeNull();
+    expect(service.currentUser()?.displayName).toBe('Client');
+
+    flushProfileRequest({ displayName: 'Client', firstName: 'Arda', roles: ['Customer'] });
+
+    expect(service.currentUser()?.firstName).toBe('Arda');
   });
 
   it('register stores the token/user and flips isAuthenticated, same as login', () => {
@@ -75,6 +114,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/register'));
     expect(req.request.method).toBe('POST');
     req.flush(response);
+    flushProfileRequest({ displayName: 'Guest User', roles: ['Customer'] });
 
     expect(received).toEqual(response);
     expect(service.isAuthenticated()).toBe(true);
@@ -94,6 +134,7 @@ describe('AuthService', () => {
       displayName: 'Admin',
       roles: ['Admin'],
     } satisfies LoginResponse);
+    flushProfileRequest();
     expect(service.isAuthenticated()).toBe(true);
 
     service.logout();

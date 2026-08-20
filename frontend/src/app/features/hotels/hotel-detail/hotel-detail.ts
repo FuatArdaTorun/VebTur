@@ -12,6 +12,7 @@ import {
   ReviewableReservation,
 } from '../models/hotel.model';
 import { AuthService } from '../../../core/auth/auth.service';
+import { FavoritesService } from '../../favorites/favorites.service';
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
 
@@ -24,11 +25,13 @@ import { ErrorState } from '../../../shared/error-state/error-state';
 export class HotelDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly hotelsService = inject(HotelsService);
+  private readonly favoritesService = inject(FavoritesService);
   protected readonly authService = inject(AuthService);
 
   protected readonly hotel = signal<HotelDetailModel | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
+  protected readonly favorited = signal(false);
 
   // Loaded separately, after the main hotel record, so a slow/unreachable external rating
   // provider never delays the rest of the page.
@@ -69,6 +72,7 @@ export class HotelDetail {
         this.loading.set(false);
         this.fetchExternalRating(hotel.id);
         this.fetchReviews(hotel.id);
+        this.fetchFavoriteState(hotel.id);
       },
       error: () => {
         this.error.set(true);
@@ -77,6 +81,11 @@ export class HotelDetail {
         this.reviewsLoading.set(false);
       },
     });
+  }
+
+  protected toggleFavorite(): void {
+    const request = this.favorited() ? this.favoritesService.removeFavorite(this.hotelId) : this.favoritesService.addFavorite(this.hotelId);
+    request.subscribe(() => this.favorited.set(!this.favorited()));
   }
 
   protected mapUrl(hotel: HotelDetailModel): string {
@@ -134,6 +143,15 @@ export class HotelDetail {
         this.reviewSubmitting.set(false);
       },
     });
+  }
+
+  private fetchFavoriteState(hotelId: string): void {
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+
+    // Loaded separately, same reasoning as external rating/reviews above.
+    this.favoritesService.getMineIds().subscribe((ids) => this.favorited.set(ids.includes(hotelId)));
   }
 
   private fetchExternalRating(hotelId: string): void {
