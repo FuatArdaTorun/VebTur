@@ -10,11 +10,12 @@ import { CreateReservationRequest, UpdateReservationRequest } from '../models/re
 import { LoadingState } from '../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../shared/error-state/error-state';
 import { WarningBanner } from '../../../shared/warning-banner/warning-banner';
+import { DateRangePicker } from '../../../shared/date-range-picker/date-range-picker';
 import { extractErrorMessage } from '../../../core/http/extract-error-message';
 
 @Component({
   selector: 'app-reservation-form',
-  imports: [ReactiveFormsModule, LoadingState, ErrorState, WarningBanner],
+  imports: [ReactiveFormsModule, LoadingState, ErrorState, WarningBanner, DateRangePicker],
   templateUrl: './reservation-form.html',
   styleUrl: './reservation-form.scss',
 })
@@ -33,6 +34,7 @@ export class ReservationForm {
   protected readonly hotelName = signal('');
   protected readonly roomTypes = signal<RoomType[]>([]);
   protected readonly useMyInfo = signal(false);
+  protected readonly bookedDates = signal<string[]>([]);
 
   protected readonly isAuthenticated = this.authService.isAuthenticated;
 
@@ -76,6 +78,24 @@ export class ReservationForm {
 
   protected selectedCurrency(): string {
     return this.roomTypes().find((r) => r.id === this.form.controls.roomTypeId.value)?.currency ?? '';
+  }
+
+  protected onRoomTypeChange(): void {
+    this.fetchBookedDates(this.form.controls.roomTypeId.value);
+  }
+
+  private fetchBookedDates(roomTypeId: string): void {
+    if (!roomTypeId) {
+      this.bookedDates.set([]);
+      return;
+    }
+
+    // Loaded separately from the room-type list itself — a slow/failed availability fetch
+    // should never block the form, same reasoning as the hotel-detail external rating/reviews.
+    this.hotelsService.getRoomTypeAvailability(roomTypeId).subscribe({
+      next: (result) => this.bookedDates.set(result.fullyBookedDates),
+      error: () => this.bookedDates.set([]),
+    });
   }
 
   protected onUseMyInfoChange(checked: boolean): void {
@@ -166,6 +186,7 @@ export class ReservationForm {
         this.hotelName.set(hotel.name);
         this.roomTypes.set(hotel.roomTypes);
         this.form.patchValue({ roomTypeId: roomTypeId ?? hotel.roomTypes[0]?.id ?? '' });
+        this.fetchBookedDates(this.form.controls.roomTypeId.value);
         this.loading.set(false);
       },
       error: () => {
@@ -199,6 +220,7 @@ export class ReservationForm {
         this.hotelsService.getHotel(reservation.hotelId).subscribe({
           next: (hotel) => {
             this.roomTypes.set(hotel.roomTypes);
+            this.fetchBookedDates(reservation.roomTypeId);
             this.loading.set(false);
           },
           error: () => {

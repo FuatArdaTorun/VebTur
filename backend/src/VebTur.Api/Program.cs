@@ -58,6 +58,7 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<VebTurDbContext>();
 
 builder.Services.AddScoped<IHotelQueryService, HotelQueryService>();
+builder.Services.AddScoped<IRoomTypeAvailabilityService, RoomTypeAvailabilityService>();
 builder.Services.AddScoped<IAdminHotelService, AdminHotelService>();
 builder.Services.AddScoped<IAdminAmenityService, AdminAmenityService>();
 builder.Services.AddScoped<IReservationRequestService, ReservationRequestService>();
@@ -133,7 +134,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(AngularDevCorsPolicy, policy =>
-        policy.WithOrigins("http://localhost:4200")
+        // vebtur.local is a /etc/hosts-only alias for local dev so the browser shows a nicer
+        // address than "localhost:4200" — not a real domain, never resolves outside this machine.
+        policy.WithOrigins("http://localhost:4200", "http://vebtur.local:4200", "https://vebtur.local:4200")
               .AllowAnyHeader()
               .AllowAnyMethod());
 });

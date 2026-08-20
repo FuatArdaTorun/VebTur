@@ -36,23 +36,22 @@
 
       <label>
         Room type
-        <select formControlName="roomTypeId">
+        <select formControlName="roomTypeId" (change)="onRoomTypeChange()">
           @for (room of roomTypes(); track room.id) {
             <option [value]="room.id">{{ room.name }} — {{ room.baseNightlyPrice }} {{ room.currency }}/night ({{ room.availableCount }} available)</option>
           }
         </select>
       </label>
 
-      <div class="reservation-form__row">
-        <label>
-          Check-in
-          <input type="date" formControlName="checkInDate" />
-        </label>
-
-        <label>
-          Check-out
-          <input type="date" formControlName="checkOutDate" />
-        </label>
+      <div class="reservation-form__dates">
+        <span class="reservation-form__dates-label">Stay dates</span>
+        <app-date-range-picker
+          [checkIn]="form.controls.checkInDate.value"
+          [checkOut]="form.controls.checkOutDate.value"
+          [bookedDates]="bookedDates()"
+          (checkInChange)="form.controls.checkInDate.setValue($event)"
+          (checkOutChange)="form.controls.checkOutDate.setValue($event)"
+        />
       </div>
 
       <div class="reservation-form__row">

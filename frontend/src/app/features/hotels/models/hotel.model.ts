@@ -96,6 +96,10 @@ export interface ExternalRating {
   lastUpdatedAtUtc: string;
 }
 
+export interface RoomTypeAvailability {
+  fullyBookedDates: string[];
+}
+
 export interface PagedResult<T> {
   items: T[];
   page: number;

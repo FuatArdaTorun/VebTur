@@ -24,6 +24,18 @@
     }
   }
 
+  &__dates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  &__dates-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
   &__price {
     margin: 0;
     font-size: 1rem;

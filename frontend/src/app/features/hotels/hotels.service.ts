@@ -11,6 +11,7 @@ import {
   HotelSummary,
   PagedResult,
   Review,
+  RoomTypeAvailability,
 } from './models/hotel.model';
 
 @Injectable({ providedIn: 'root' })
@@ -57,5 +58,10 @@ export class HotelsService {
 
   createReview(hotelId: string, dto: CreateReviewRequest) {
     return this.http.post<Review>(`${this.baseUrl}/hotels/${hotelId}/reviews`, dto);
+  }
+
+  /** Dates within the next year already fully booked for this room type — see the reservation form's date picker. */
+  getRoomTypeAvailability(roomTypeId: string) {
+    return this.http.get<RoomTypeAvailability>(`${this.baseUrl}/hotels/room-types/${roomTypeId}/booked-dates`);
   }
 }

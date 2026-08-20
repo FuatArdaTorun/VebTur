@@ -62,7 +62,7 @@ const sampleReservation: ReservationRequestDetail = {
 describe('ReservationForm', () => {
   let fixture: ComponentFixture<ReservationForm>;
   let component: ReservationForm;
-  let hotelsServiceStub: { getHotel: ReturnType<typeof vi.fn> };
+  let hotelsServiceStub: { getHotel: ReturnType<typeof vi.fn>; getRoomTypeAvailability: ReturnType<typeof vi.fn> };
   let reservationsServiceStub: { getMineById: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; updateMine: ReturnType<typeof vi.fn> };
   let authServiceStub: { currentUser: ReturnType<typeof vi.fn>; isAuthenticated: ReturnType<typeof vi.fn>; getProfile: ReturnType<typeof vi.fn> };
   let router: Router;
@@ -105,7 +105,10 @@ describe('ReservationForm', () => {
 
   describe('create mode', () => {
     beforeEach(() => {
-      hotelsServiceStub = { getHotel: vi.fn().mockReturnValue(of(sampleHotel)) };
+      hotelsServiceStub = {
+        getHotel: vi.fn().mockReturnValue(of(sampleHotel)),
+        getRoomTypeAvailability: vi.fn().mockReturnValue(of({ fullyBookedDates: [] })),
+      };
       reservationsServiceStub = { getMineById: vi.fn(), create: vi.fn(), updateMine: vi.fn() };
     });
 
@@ -116,6 +119,23 @@ describe('ReservationForm', () => {
       expect(component['hotelName']()).toBe('Test Hotel');
       expect(component['roomTypes']()).toEqual(roomTypes);
       expect(component['form'].controls.roomTypeId.value).toBe('room-2');
+    });
+
+    it('fetches booked dates for the initially selected room type', () => {
+      createComponent({ queryParams: { hotelId: 'hotel-1', roomTypeId: 'room-2' } });
+
+      expect(hotelsServiceStub.getRoomTypeAvailability).toHaveBeenCalledWith('room-2');
+    });
+
+    it('refetches booked dates when the room type selection changes', () => {
+      hotelsServiceStub.getRoomTypeAvailability.mockReturnValue(of({ fullyBookedDates: ['2026-09-05'] }));
+      createComponent({ queryParams: { hotelId: 'hotel-1', roomTypeId: 'room-1' } });
+
+      component['form'].controls.roomTypeId.setValue('room-2');
+      component['onRoomTypeChange']();
+
+      expect(hotelsServiceStub.getRoomTypeAvailability).toHaveBeenCalledWith('room-2');
+      expect(component['bookedDates']()).toEqual(['2026-09-05']);
     });
 
     it('does not show the "use my info" checkbox for a signed-out guest', () => {
@@ -203,7 +223,10 @@ describe('ReservationForm', () => {
 
   describe('edit mode', () => {
     beforeEach(() => {
-      hotelsServiceStub = { getHotel: vi.fn().mockReturnValue(of(sampleHotel)) };
+      hotelsServiceStub = {
+        getHotel: vi.fn().mockReturnValue(of(sampleHotel)),
+        getRoomTypeAvailability: vi.fn().mockReturnValue(of({ fullyBookedDates: [] })),
+      };
       reservationsServiceStub = {
         getMineById: vi.fn().mockReturnValue(of(sampleReservation)),
         create: vi.fn(),

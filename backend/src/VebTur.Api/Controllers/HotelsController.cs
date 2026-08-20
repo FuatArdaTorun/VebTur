@@ -8,7 +8,10 @@ namespace VebTur.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/hotels")]
-public class HotelsController(IHotelQueryService hotelQueryService, IExternalRatingService externalRatingService) : ControllerBase
+public class HotelsController(
+    IHotelQueryService hotelQueryService,
+    IExternalRatingService externalRatingService,
+    IRoomTypeAvailabilityService roomTypeAvailabilityService) : ControllerBase
 {
     private const int MaxPageSize = 50;
 
@@ -70,5 +73,17 @@ public class HotelsController(IHotelQueryService hotelQueryService, IExternalRat
     {
         var rating = await externalRatingService.GetRatingAsync(id, cancellationToken);
         return rating is null ? NoContent() : Ok(rating);
+    }
+
+    /// <summary>
+    /// Dates within the next year where every currently-Confirmed reservation's stay already fills
+    /// this room type's capacity — see RoomTypeAvailabilityService for how capacity is
+    /// reconstructed from the non-date-scoped AvailableCount counter. 404 for an unknown room type.
+    /// </summary>
+    [HttpGet("room-types/{roomTypeId:guid}/booked-dates")]
+    public async Task<ActionResult<RoomTypeAvailabilityDto>> GetBookedDates(Guid roomTypeId, CancellationToken cancellationToken)
+    {
+        var result = await roomTypeAvailabilityService.GetBookedDatesAsync(roomTypeId, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
     }
 }

@@ -1,0 +1,34 @@
+<div class="date-range-picker">
+  <div class="date-range-picker__header">
+    <button type="button" class="date-range-picker__nav" (click)="prevMonth()" aria-label="Previous month">‹</button>
+    <span class="date-range-picker__month">{{ monthLabel() }}</span>
+    <button type="button" class="date-range-picker__nav" (click)="nextMonth()" aria-label="Next month">›</button>
+  </div>
+
+  <div class="date-range-picker__grid">
+    @for (day of weekdayLabels; track day) {
+      <span class="date-range-picker__weekday">{{ day }}</span>
+    }
+    @for (cell of cells(); track cell.iso) {
+      <button
+        type="button"
+        class="date-range-picker__day"
+        [class.date-range-picker__day--outside]="!cell.inMonth"
+        [class.date-range-picker__day--disabled]="cell.disabled"
+        [class.date-range-picker__day--booked]="cell.booked"
+        [class.date-range-picker__day--today]="cell.isToday"
+        [class.date-range-picker__day--start]="cell.isRangeStart"
+        [class.date-range-picker__day--end]="cell.isRangeEnd"
+        [class.date-range-picker__day--in-range]="cell.inRange"
+        [disabled]="cell.disabled"
+        [attr.aria-label]="cell.iso"
+        (click)="selectDate(cell)"
+      >{{ cell.date.getDate() }}</button>
+    }
+  </div>
+
+  <p class="date-range-picker__legend">
+    <span class="date-range-picker__legend-item"><i class="date-range-picker__legend-swatch date-range-picker__legend-swatch--booked"></i>Booked</span>
+    <span class="date-range-picker__legend-item"><i class="date-range-picker__legend-swatch date-range-picker__legend-swatch--selected"></i>Selected</span>
+  </p>
+</div>
