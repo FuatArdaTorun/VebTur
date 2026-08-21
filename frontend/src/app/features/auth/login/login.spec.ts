@@ -42,14 +42,14 @@ describe('Login', () => {
     expect(component['form'].touched).toBe(true);
   });
 
-  it('redirects an Admin to /admin/hotels after a successful login with no returnUrl', () => {
+  it('redirects an Admin to /admin/dashboard after a successful login with no returnUrl', () => {
     authServiceStub = { login: vi.fn().mockReturnValue(of({ token: 't', expiresAtUtc: '', email: 'a@b.com', displayName: 'A', roles: ['Admin'] })) };
     createComponent();
 
     component['form'].setValue({ emailOrUsername: 'a@b.com', password: 'secret123' });
     component['submit']();
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/admin/hotels');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/admin/dashboard');
   });
 
   it('redirects a non-Admin to / after a successful login with no returnUrl', () => {

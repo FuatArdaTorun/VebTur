@@ -35,7 +35,7 @@ export class Login {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: (response) => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-        const fallback = response.roles.includes('Admin') ? '/admin/hotels' : '/';
+        const fallback = response.roles.includes('Admin') ? '/admin/dashboard' : '/';
         this.router.navigateByUrl(returnUrl ?? fallback);
       },
       error: () => {

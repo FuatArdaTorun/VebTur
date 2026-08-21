@@ -41,6 +41,13 @@ describe('Navbar', () => {
     httpMock.expectOne((r) => r.url.endsWith('/api/v1/reservation-requests/mine')).flush({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 });
   }
 
+  /** A logged-in Admin's constructor effect fires an AwaitingApproval fetch for the notification bell instead. */
+  function flushPendingApprovalsRequest(): void {
+    httpMock
+      .expectOne((r) => r.url.endsWith('/api/v1/admin/reservation-requests'))
+      .flush({ items: [], page: 1, pageSize: 10, totalCount: 0, totalPages: 0 });
+  }
+
   function openMenu(): void {
     fixture.nativeElement.querySelector('.navbar__avatar').click();
     fixture.detectChanges();
@@ -157,9 +164,32 @@ describe('Navbar', () => {
     loginAs(['Admin']);
     await createFixture();
     fixture.detectChanges();
+    flushPendingApprovalsRequest();
 
     const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a) => (a as HTMLAnchorElement).textContent?.trim());
     expect(links).not.toContain('Help');
+  });
+
+  it('shows a top-level Dashboard link next to Hotels for a logged-in Admin', async () => {
+    loginAs(['Admin']);
+    await createFixture();
+    fixture.detectChanges();
+    flushPendingApprovalsRequest();
+
+    const link = fixture.nativeElement.querySelector('.navbar__link-group a[href="/admin/dashboard"]') as HTMLAnchorElement;
+    expect(link?.textContent?.trim()).toBe('Dashboard');
+  });
+
+  it('does not show the Dashboard link to a logged-in Customer', async () => {
+    loginAs(['Customer']);
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('.navbar__link-group a')).map(
+      (a) => (a as HTMLAnchorElement).textContent?.trim(),
+    );
+    expect(links).not.toContain('Dashboard');
   });
 
   it('prefers the first name over the display name in the greeting when both are set', async () => {
@@ -177,28 +207,43 @@ describe('Navbar', () => {
     expect(fixture.nativeElement.querySelector('.navbar__dropdown-greeting').textContent).toContain('Jane');
   });
 
-  it('shows an Admin Panel link to /admin/hotels for a logged-in Admin, but no My Favorites/My Reservations', async () => {
+  it('shows no Management/Admin Panel dropdown group for a logged-in Admin — the top-level navbar Dashboard link covers that now, but no My Favorites/My Reservations either', async () => {
     loginAs(['Admin']);
     await createFixture();
     fixture.detectChanges();
+    flushPendingApprovalsRequest();
     openMenu();
 
-    const link: HTMLAnchorElement = Array.from(fixture.nativeElement.querySelectorAll('.navbar__dropdown-item')).find(
-      (el) => (el as HTMLElement).textContent?.trim() === 'Admin Panel',
-    ) as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/admin/hotels');
-
     const items = dropdownLinkTexts();
+    expect(items).not.toContain('Admin Panel');
     expect(items).not.toContain('My Reservations');
     expect(items).not.toContain('My Favorites');
   });
 
-  it('does not fetch reservation status updates for a logged-in Admin', async () => {
+  it('fetches AwaitingApproval reservations for the bell (not customer reservation-status updates) for a logged-in Admin', async () => {
     loginAs(['Admin']);
     await createFixture();
     fixture.detectChanges();
 
     httpMock.expectNone((r) => r.url.endsWith('/api/v1/reservation-requests/mine'));
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/admin/reservation-requests'));
+    expect(req.request.params.getAll('status')).toEqual(['AwaitingApproval']);
+    req.flush({
+      items: [{ id: 'res-1', hotelName: 'Test Hotel', referenceNumber: 'VEB-ABC12345', guestFullName: 'Jane Guest' }],
+      page: 1,
+      pageSize: 10,
+      totalCount: 1,
+      totalPages: 1,
+    });
+
+    expect(component['pendingApprovals']()).toEqual([
+      {
+        id: 'res-1',
+        title: 'Test Hotel — VEB-ABC12345',
+        subtitle: 'Jane Guest · awaiting approval',
+        routerLink: ['/admin/reservations', 'res-1'],
+      },
+    ]);
   });
 
   it('only surfaces reservations with a decided status (Confirmed/Rejected/Cancelled), not AwaitingApproval', async () => {

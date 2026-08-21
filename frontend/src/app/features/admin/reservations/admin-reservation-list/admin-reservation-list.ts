@@ -60,6 +60,14 @@ export class AdminReservationList {
     if (search) {
       this.searchControl.setValue(search);
     }
+
+    // Same idea for the admin dashboard's "Awaiting approval" tile — pre-fills the existing
+    // Status dropdown rather than introducing a separate filter mechanism.
+    const status = this.route.snapshot.queryParamMap.get('status') as ReservationStatus | null;
+    if (status && STATUSES.includes(status)) {
+      this.statusControl.setValue(status);
+    }
+
     this.fetch();
   }
 

@@ -111,12 +111,6 @@
     min-width: 0;
   }
 
-  &__topbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
-  }
-
   @media (max-width: 720px) {
     flex-direction: column;
 

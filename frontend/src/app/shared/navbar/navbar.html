@@ -7,7 +7,9 @@
   <div class="navbar__links" id="navbar-links" [class.navbar__links--open]="mobileMenuOpen()">
     <div class="navbar__link-group">
       <a routerLink="/hotels" routerLinkActive="navbar__link--active" (click)="closeMobileMenu()">Hotels</a>
-      @if (!isAdmin()) {
+      @if (isAdmin()) {
+        <a routerLink="/admin/dashboard" routerLinkActive="navbar__link--active" (click)="closeMobileMenu()">Dashboard</a>
+      } @else {
         <a routerLink="/help" routerLinkActive="navbar__link--active" (click)="closeMobileMenu()">Help</a>
       }
       @if (!isAuthenticated()) {
@@ -19,7 +21,15 @@
 
   <div class="navbar__right">
     @if (isAuthenticated()) {
-      @if (!isAdmin()) {
+      @if (isAdmin()) {
+        <app-notification-bell
+          [items]="pendingApprovals()"
+          storageKey="admin-pending-approvals"
+          emptyMessage="No reservations awaiting approval."
+          ariaLabel="Reservations awaiting approval"
+          (opened)="fetchPendingApprovals()"
+        />
+      } @else {
         <app-notification-bell
           [items]="recentStatusChanges()"
           storageKey="customer-reservation-status"
@@ -63,19 +73,7 @@
               </a>
             </div>
 
-            @if (isAdmin()) {
-              <div class="navbar__dropdown-group">
-                <span class="navbar__dropdown-label">Management</span>
-
-                <a class="navbar__dropdown-item" routerLink="/admin/hotels" (click)="closeMenu()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <rect x="3.5" y="4" width="17" height="13" rx="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 20.5h8M12 17v3.5" />
-                  </svg>
-                  Admin Panel
-                </a>
-              </div>
-            } @else {
+            @if (!isAdmin()) {
               <div class="navbar__dropdown-group">
                 <span class="navbar__dropdown-label">Travel</span>
 

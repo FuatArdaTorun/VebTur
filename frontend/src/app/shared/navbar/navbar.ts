@@ -2,12 +2,14 @@ import { Component, ElementRef, HostListener, computed, effect, inject, signal }
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ReservationsService } from '../../features/reservations/reservations.service';
+import { AdminReservationsService } from '../../features/admin/reservations/admin-reservations.service';
 import { NotificationBell } from '../notification-bell/notification-bell';
 import { NotificationBellItem } from '../notification-bell/notification-bell.model';
 import { ReservationStatus } from '../../features/reservations/models/reservation.model';
 
 const DECIDED_STATUSES = new Set<ReservationStatus>(['Confirmed', 'Rejected', 'Cancelled']);
 const RECENT_STATUS_CHANGES_LIMIT = 5;
+const PENDING_APPROVAL_LIMIT = 10;
 
 @Component({
   selector: 'app-navbar',
@@ -18,6 +20,7 @@ const RECENT_STATUS_CHANGES_LIMIT = 5;
 export class Navbar {
   private readonly authService = inject(AuthService);
   private readonly reservationsService = inject(ReservationsService);
+  private readonly adminReservationsService = inject(AdminReservationsService);
   private readonly router = inject(Router);
   private readonly elementRef = inject(ElementRef);
 
@@ -35,13 +38,19 @@ export class Navbar {
     return source.charAt(0).toUpperCase();
   });
   protected readonly recentStatusChanges = signal<NotificationBellItem[]>([]);
+  protected readonly pendingApprovals = signal<NotificationBellItem[]>([]);
   protected readonly menuOpen = signal(false);
   protected readonly mobileMenuOpen = signal(false);
 
   constructor() {
-    // Customers only — admins get their own "pending approvals" bell in the admin shell instead.
     effect(() => {
-      if (this.isAuthenticated() && !this.isAdmin()) {
+      if (!this.isAuthenticated()) {
+        return;
+      }
+
+      if (this.isAdmin()) {
+        this.fetchPendingApprovals();
+      } else {
         this.fetchRecentStatusChanges();
       }
     });
@@ -91,5 +100,20 @@ export class Navbar {
           })),
       );
     });
+  }
+
+  protected fetchPendingApprovals(): void {
+    this.adminReservationsService
+      .getReservations({ status: 'AwaitingApproval', sort: 'created-desc', page: 1, pageSize: PENDING_APPROVAL_LIMIT })
+      .subscribe((result) => {
+        this.pendingApprovals.set(
+          result.items.map((r) => ({
+            id: r.id,
+            title: `${r.hotelName} — ${r.referenceNumber}`,
+            subtitle: `${r.guestFullName} · awaiting approval`,
+            routerLink: ['/admin/reservations', r.id],
+          })),
+        );
+      });
   }
 }

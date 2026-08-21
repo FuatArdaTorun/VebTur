@@ -5,6 +5,7 @@
       VebTur Admin
     </a>
     <nav class="admin-shell__nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="admin-shell__link--active">Dashboard</a>
       <a routerLink="/admin/hotels" routerLinkActive="admin-shell__link--active">Hotels</a>
       <a routerLink="/admin/reservations" routerLinkActive="admin-shell__link--active">Reservations</a>
       <a routerLink="/admin/amenities" routerLinkActive="admin-shell__link--active">Amenities</a>
@@ -20,15 +21,6 @@
     </div>
   </aside>
   <main class="admin-shell__content">
-    <div class="admin-shell__topbar">
-      <app-notification-bell
-        [items]="pendingApprovals()"
-        storageKey="admin-pending-approvals"
-        emptyMessage="No reservations awaiting approval."
-        ariaLabel="Reservations awaiting approval"
-        (opened)="fetchPendingApprovals()"
-      />
-    </div>
     <router-outlet />
   </main>
 </div>

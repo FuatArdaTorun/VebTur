@@ -52,7 +52,7 @@ describe('ProfileShell', () => {
     expect(byHref['/profile/security']).toContain('Account Security');
     expect(byHref['/favorites']).toContain('My Favorites');
     expect(byHref['/my-reservations']).toContain('My Reservations');
-    expect(byHref['/admin/hotels']).toBeUndefined();
+    expect(byHref['/admin/dashboard']).toBeUndefined();
   });
 
   it('shows Admin Panel instead of Favorites/My Reservations for an Admin', () => {
@@ -64,7 +64,7 @@ describe('ProfileShell', () => {
 
     expect(byHref['/profile']).toContain('Personal Info');
     expect(byHref['/profile/security']).toContain('Account Security');
-    expect(byHref['/admin/hotels']).toContain('Admin Panel');
+    expect(byHref['/admin/dashboard']).toContain('Admin Panel');
     expect(byHref['/favorites']).toBeUndefined();
     expect(byHref['/my-reservations']).toBeUndefined();
   });
