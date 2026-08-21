@@ -1,0 +1,59 @@
+.not-found {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+  text-align: center;
+
+  &__code {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--color-primary-600);
+    line-height: 1;
+  }
+
+  &__title {
+    margin: 0.5rem 0 0.75rem;
+    font-size: 1.6rem;
+  }
+
+  &__message {
+    margin: 0 0 2rem;
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__primary,
+  &__secondary {
+    padding: 0.7rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  &__primary {
+    background: var(--color-primary-600);
+    color: #fff;
+
+    &:hover {
+      background: var(--color-primary-700);
+    }
+  }
+
+  &__secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+
+    &:hover {
+      border-color: var(--color-primary-600);
+      color: var(--color-primary-600);
+    }
+  }
+}

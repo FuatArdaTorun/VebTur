@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -26,6 +27,7 @@ export class HotelDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly hotelsService = inject(HotelsService);
   private readonly favoritesService = inject(FavoritesService);
+  private readonly titleService = inject(Title);
   protected readonly authService = inject(AuthService);
 
   protected readonly hotel = signal<HotelDetailModel | null>(null);
@@ -70,6 +72,7 @@ export class HotelDetail {
         this.hotel.set(hotel);
         this.hotelId = hotel.id;
         this.loading.set(false);
+        this.titleService.setTitle(`${hotel.name} | VebTur`);
         this.fetchExternalRating(hotel.id);
         this.fetchReviews(hotel.id);
         this.fetchFavoriteState(hotel.id);

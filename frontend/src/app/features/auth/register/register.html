@@ -17,6 +17,7 @@
       Password
       <input type="password" formControlName="password" autocomplete="new-password" />
     </label>
+    <p class="auth-form__hint">At least 8 characters, with an uppercase letter, a lowercase letter, and a number.</p>
 
     @if (error(); as message) {
       <p class="auth-form__error">{{ message }}</p>
