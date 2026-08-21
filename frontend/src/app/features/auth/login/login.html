@@ -13,6 +13,8 @@
       <input type="password" formControlName="password" autocomplete="current-password" />
     </label>
 
+    <a class="auth-form__forgot-password" routerLink="/forgot-password">Forgot password?</a>
+
     @if (error()) {
       <p class="auth-form__error">Invalid email/username or password.</p>
     }

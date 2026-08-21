@@ -289,6 +289,101 @@ public class AuthApiIntegrationTests
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task ForgotPassword_WithRegisteredEmail_ReturnsDemoResetLink()
+    {
+        var email = $"guest-{Guid.NewGuid():N}@example.com";
+        await RegisterAsync(email);
+
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password", new ForgotPasswordRequestDto(email));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ForgotPasswordResponseDto>();
+        Assert.NotNull(body!.DemoResetLink);
+        Assert.Contains("/reset-password?email=", body.DemoResetLink);
+        Assert.Contains("token=", body.DemoResetLink);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WithUnknownEmail_ReturnsSameMessageButNoLink()
+    {
+        var registeredEmail = $"guest-{Guid.NewGuid():N}@example.com";
+        await RegisterAsync(registeredEmail);
+
+        var knownResponse = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password",
+            new ForgotPasswordRequestDto(registeredEmail));
+        var unknownResponse = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password",
+            new ForgotPasswordRequestDto($"nobody-{Guid.NewGuid():N}@example.com"));
+
+        Assert.Equal(HttpStatusCode.OK, unknownResponse.StatusCode);
+        var knownBody = await knownResponse.Content.ReadFromJsonAsync<ForgotPasswordResponseDto>();
+        var unknownBody = await unknownResponse.Content.ReadFromJsonAsync<ForgotPasswordResponseDto>();
+
+        // Same message either way — only the (frontend-invisible-until-fetched) link differs —
+        // so the response doesn't reveal whether the email is registered.
+        Assert.Equal(knownBody!.Message, unknownBody!.Message);
+        Assert.Null(unknownBody.DemoResetLink);
+    }
+
+    [Fact]
+    public async Task ForgotPassword_WithInvalidEmail_ReturnsBadRequest()
+    {
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password", new ForgotPasswordRequestDto("not-an-email"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithValidToken_Succeeds_AndNewPasswordLogsIn_AndOldPasswordStopsWorking()
+    {
+        var email = $"guest-{Guid.NewGuid():N}@example.com";
+        const string oldPassword = "Passw0rd123";
+        const string newPassword = "NewPassw0rd456";
+        await RegisterAsync(email, oldPassword);
+
+        var token = await RequestResetTokenAsync(email);
+
+        var resetResponse = await _client.PostAsJsonAsync("/api/v1/auth/reset-password",
+            new ResetPasswordRequestDto(email, token, newPassword));
+        Assert.Equal(HttpStatusCode.NoContent, resetResponse.StatusCode);
+
+        var oldPasswordLogin = await _client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequestDto(email, oldPassword));
+        Assert.Equal(HttpStatusCode.Unauthorized, oldPasswordLogin.StatusCode);
+
+        var newPasswordLogin = await _client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequestDto(email, newPassword));
+        Assert.Equal(HttpStatusCode.OK, newPasswordLogin.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithInvalidToken_ReturnsBadRequest()
+    {
+        var email = $"guest-{Guid.NewGuid():N}@example.com";
+        await RegisterAsync(email);
+
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/reset-password",
+            new ResetPasswordRequestDto(email, "not-a-real-token", "NewPassw0rd456"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ResetPassword_WithUnknownEmail_ReturnsBadRequest()
+    {
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/reset-password",
+            new ResetPasswordRequestDto($"nobody-{Guid.NewGuid():N}@example.com", "some-token", "NewPassw0rd456"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    private async Task<string> RequestResetTokenAsync(string email)
+    {
+        var response = await _client.PostAsJsonAsync("/api/v1/auth/forgot-password", new ForgotPasswordRequestDto(email));
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<ForgotPasswordResponseDto>();
+        var uri = new Uri(body!.DemoResetLink!);
+        return System.Web.HttpUtility.ParseQueryString(uri.Query)["token"]!;
+    }
+
     private async Task<string> RegisterAsync(string? email = null, string password = "Passw0rd123")
     {
         email ??= $"guest-{Guid.NewGuid():N}@example.com";

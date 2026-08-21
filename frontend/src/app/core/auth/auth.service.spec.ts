@@ -239,4 +239,32 @@ describe('AuthService', () => {
     expect(completed).toBe(true);
     expect(received).toBeNull();
   });
+
+  it('forgotPassword POSTs /auth/forgot-password and returns the demo reset link', () => {
+    const service = createService();
+
+    let received: { message: string; demoResetLink: string | null } | undefined;
+    service.forgotPassword({ email: 'a@b.com' }).subscribe((r) => (received = r));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/forgot-password'));
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'a@b.com' });
+    req.flush({ message: 'sent', demoResetLink: 'http://localhost:4200/reset-password?email=a%40b.com&token=abc' });
+
+    expect(received?.demoResetLink).toBe('http://localhost:4200/reset-password?email=a%40b.com&token=abc');
+  });
+
+  it('resetPassword POSTs /auth/reset-password', () => {
+    const service = createService();
+
+    let completed = false;
+    service.resetPassword({ email: 'a@b.com', token: 'abc', newPassword: 'NewPassw0rd1' }).subscribe({ complete: () => (completed = true) });
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/api/v1/auth/reset-password'));
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'a@b.com', token: 'abc', newPassword: 'NewPassw0rd1' });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(completed).toBe(true);
+  });
 });

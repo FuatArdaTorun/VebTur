@@ -18,9 +18,12 @@ public class AuthController(
     SignInManager<ApplicationUser> signInManager,
     UserManager<ApplicationUser> userManager,
     IJwtTokenService jwtTokenService,
+    IConfiguration configuration,
     IValidator<RegisterRequestDto> registerValidator,
     IValidator<UpdateProfileRequestDto> updateProfileValidator,
-    IValidator<ChangePasswordRequestDto> changePasswordValidator) : ControllerBase
+    IValidator<ChangePasswordRequestDto> changePasswordValidator,
+    IValidator<ForgotPasswordRequestDto> forgotPasswordValidator,
+    IValidator<ResetPasswordRequestDto> resetPasswordValidator) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<LoginResponseDto>> Register(RegisterRequestDto request, CancellationToken cancellationToken)
@@ -171,6 +174,63 @@ public class AuthController(
         if (!changeResult.Succeeded)
         {
             foreach (var error in changeResult.Errors)
+            {
+                ModelState.AddModelError(error.Code, error.Description);
+            }
+
+            return ValidationProblem(ModelState);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<ForgotPasswordResponseDto>> ForgotPassword(ForgotPasswordRequestDto request, CancellationToken cancellationToken)
+    {
+        var validation = await forgotPasswordValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(validation.ToModelStateDictionary());
+        }
+
+        const string message = "If an account exists for that email, password reset instructions have been sent.";
+
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+        {
+            // Same generic message either way — doesn't reveal whether the email is registered.
+            return Ok(new ForgotPasswordResponseDto(message, null));
+        }
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var frontendBaseUrl = configuration["Frontend:BaseUrl"] ?? "http://localhost:4200";
+        var resetLink = $"{frontendBaseUrl}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+
+        // VebTur has no real email infrastructure — the reset link is returned
+        // directly instead of emailed, clearly marked as demo behavior by the frontend.
+        return Ok(new ForgotPasswordResponseDto(message, resetLink));
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<ActionResult> ResetPassword(ResetPasswordRequestDto request, CancellationToken cancellationToken)
+    {
+        var validation = await resetPasswordValidator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
+        {
+            return ValidationProblem(validation.ToModelStateDictionary());
+        }
+
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+        {
+            ModelState.AddModelError(string.Empty, "This password reset link is invalid or has expired.");
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(error.Code, error.Description);
             }

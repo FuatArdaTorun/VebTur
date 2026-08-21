@@ -6,9 +6,12 @@ import {
   ChangePasswordRequest,
   CurrentUser,
   CurrentUserResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
+  ResetPasswordRequest,
   UpdateProfileRequest,
 } from './auth.models';
 
@@ -44,6 +47,14 @@ export class AuthService {
 
   changePassword(request: ChangePasswordRequest) {
     return this.http.post<void>(`${this.baseUrl}/auth/change-password`, request);
+  }
+
+  forgotPassword(request: ForgotPasswordRequest) {
+    return this.http.post<ForgotPasswordResponse>(`${this.baseUrl}/auth/forgot-password`, request);
+  }
+
+  resetPassword(request: ResetPasswordRequest) {
+    return this.http.post<void>(`${this.baseUrl}/auth/reset-password`, request);
   }
 
   private storeSession(response: LoginResponse): void {

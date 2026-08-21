@@ -54,3 +54,21 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
 }
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+// demoResetLink is null when no account matches the email; when present, it's the full URL a
+// real email would have linked to — VebTur has no real email infrastructure, so
+// it's shown directly in "demo mode" instead of being sent anywhere.
+export interface ForgotPasswordResponse {
+  message: string;
+  demoResetLink: string | null;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
