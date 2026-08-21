@@ -6,6 +6,9 @@ import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 
+type SortableColumn = 'name' | 'slug' | 'hotelCount';
+type AmenitySort = 'name-asc' | 'name-desc' | 'slug-asc' | 'slug-desc' | 'hotelCount-asc' | 'hotelCount-desc';
+
 @Component({
   selector: 'app-admin-amenity-list',
   imports: [ReactiveFormsModule, LoadingState, ErrorState, ConfirmDialog],
@@ -19,6 +22,7 @@ export class AdminAmenityList {
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
   protected readonly editingId = signal<string | null>(null);
+  protected readonly sort = signal<AmenitySort>('name-asc');
 
   protected readonly selectionMode = signal(false);
   protected readonly selectedIds = signal<Set<string>>(new Set());
@@ -28,6 +32,16 @@ export class AdminAmenityList {
   protected readonly isAllSelected = computed(() => {
     const items = this.amenities();
     return items.length > 0 && items.every((a) => this.selectedIds().has(a.id));
+  });
+
+  /** Amenities are fetched unpaged in one go, so sorting is done client-side on the already-loaded list. */
+  protected readonly sortedAmenities = computed(() => {
+    const [column, direction] = this.sort().split('-') as [SortableColumn, 'asc' | 'desc'];
+    const factor = direction === 'asc' ? 1 : -1;
+
+    return [...this.amenities()].sort((a, b) =>
+      column === 'hotelCount' ? (a.hotelCount - b.hotelCount) * factor : a[column].localeCompare(b[column]) * factor,
+    );
   });
 
   protected readonly addForm = new FormGroup({
@@ -77,6 +91,22 @@ export class AdminAmenityList {
       this.editingId.set(null);
       this.fetch();
     });
+  }
+
+  /** Clicking a header toggles asc/desc if it's already the active column, otherwise starts ascending. */
+  protected toggleSort(column: SortableColumn): void {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    const nextDirection = activeColumn === column && activeDirection === 'asc' ? 'desc' : 'asc';
+    this.sort.set(`${column}-${nextDirection}` as AmenitySort);
+  }
+
+  protected sortIndicator(column: SortableColumn): string {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    if (activeColumn !== column) {
+      return '';
+    }
+
+    return activeDirection === 'asc' ? '▲' : '▼';
   }
 
   /** Toggling off drops any in-progress selection so re-entering selection mode starts fresh. */

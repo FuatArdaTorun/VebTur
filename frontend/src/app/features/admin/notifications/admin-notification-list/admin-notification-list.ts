@@ -3,13 +3,15 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AdminNotificationsService } from '../admin-notifications.service';
-import { AdminNotificationLog } from '../models/admin-notification.model';
+import { AdminNotificationLog, AdminNotificationSort } from '../models/admin-notification.model';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 
 const PAGE_SIZE = 20;
+
+type SortableColumn = 'sent' | 'reference' | 'recipient' | 'subject';
 
 @Component({
   selector: 'app-admin-notification-list',
@@ -25,6 +27,7 @@ export class AdminNotificationList {
   protected readonly error = signal(false);
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
+  protected readonly sort = signal<AdminNotificationSort>('created-desc');
   protected readonly selectionMode = signal(false);
   protected readonly selectedIds = signal<Set<string>>(new Set());
   protected readonly confirmingBulkDelete = signal(false);
@@ -53,6 +56,24 @@ export class AdminNotificationList {
 
     this.page.set(page);
     this.fetch();
+  }
+
+  /** Clicking a header toggles asc/desc if it's already the active column, otherwise starts ascending. */
+  protected toggleSort(column: SortableColumn): void {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    const nextDirection = activeColumn === column && activeDirection === 'asc' ? 'desc' : 'asc';
+    this.sort.set(`${column}-${nextDirection}` as AdminNotificationSort);
+    this.page.set(1);
+    this.fetch();
+  }
+
+  protected sortIndicator(column: SortableColumn): string {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    if (activeColumn !== column) {
+      return '';
+    }
+
+    return activeDirection === 'asc' ? '▲' : '▼';
   }
 
   /** Toggling off drops any in-progress selection so re-entering selection mode starts fresh. */
@@ -102,6 +123,7 @@ export class AdminNotificationList {
     this.notificationsService
       .getNotifications({
         search: this.searchControl.value || undefined,
+        sort: this.sort(),
         page: this.page(),
         pageSize: PAGE_SIZE,
       })

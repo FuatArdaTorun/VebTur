@@ -1,3 +1,5 @@
+using VebTur.Application.Support;
+
 namespace VebTur.Application.Admin;
 
-public record AdminSupportMessageListRequest(string? Search, int Page, int PageSize);
+public record AdminSupportMessageListRequest(string? Search, AdminSupportMessageSortOrder Sort, int Page, int PageSize);

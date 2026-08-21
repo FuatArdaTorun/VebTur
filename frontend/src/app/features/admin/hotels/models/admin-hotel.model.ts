@@ -62,9 +62,20 @@ export interface AdminHotelDetail {
 /** POST/PUT body — same shape as AdminHotelDetail minus the server-owned identity/audit fields. */
 export type AdminHotelUpsert = Omit<AdminHotelDetail, 'id' | 'createdAtUtc' | 'updatedAtUtc'>;
 
+export type AdminHotelSort =
+  | 'updated-desc'
+  | 'updated-asc'
+  | 'name-asc'
+  | 'name-desc'
+  | 'city-asc'
+  | 'city-desc'
+  | 'status-asc'
+  | 'status-desc';
+
 export interface AdminHotelListParams {
   search?: string;
   isActive?: boolean;
+  sort?: AdminHotelSort;
   page: number;
   pageSize: number;
 }

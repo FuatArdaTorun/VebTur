@@ -11,8 +11,20 @@ export interface AdminNotificationLog {
   errorMessage: string | null;
 }
 
+export type AdminNotificationSort =
+  | 'created-desc'
+  | 'sent-asc'
+  | 'sent-desc'
+  | 'reference-asc'
+  | 'reference-desc'
+  | 'recipient-asc'
+  | 'recipient-desc'
+  | 'subject-asc'
+  | 'subject-desc';
+
 export interface AdminNotificationListParams {
   search?: string;
+  sort?: AdminNotificationSort;
   page: number;
   pageSize: number;
 }

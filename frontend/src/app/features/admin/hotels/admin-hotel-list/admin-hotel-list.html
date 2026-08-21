@@ -30,6 +30,7 @@
   } @else if (hotels().length === 0) {
     <app-empty-state message="No hotels match your filters." />
   } @else {
+    <div class="admin-hotel-list__table-wrapper">
     <table class="admin-hotel-list__table">
       <thead>
         <tr>
@@ -39,10 +40,10 @@
             </th>
           }
           <th>Thumbnail</th>
-          <th>Name</th>
-          <th>City</th>
-          <th>Status</th>
-          <th>Updated</th>
+          <th class="admin-hotel-list__sortable" (click)="toggleSort('name')">Name <span class="admin-hotel-list__sort-indicator">{{ sortIndicator('name') }}</span></th>
+          <th class="admin-hotel-list__sortable" (click)="toggleSort('city')">City <span class="admin-hotel-list__sort-indicator">{{ sortIndicator('city') }}</span></th>
+          <th class="admin-hotel-list__sortable" (click)="toggleSort('status')">Status <span class="admin-hotel-list__sort-indicator">{{ sortIndicator('status') }}</span></th>
+          <th class="admin-hotel-list__sortable" (click)="toggleSort('updated')">Updated <span class="admin-hotel-list__sort-indicator">{{ sortIndicator('updated') }}</span></th>
           <th></th>
         </tr>
       </thead>
@@ -92,6 +93,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     @if (totalPages() > 1) {
       <div class="admin-hotel-list__pagination">

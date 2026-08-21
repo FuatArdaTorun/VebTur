@@ -11,6 +11,7 @@ export class AdminNotificationsService {
   getNotifications(params: AdminNotificationListParams) {
     let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
     if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.sort) httpParams = httpParams.set('sort', params.sort);
 
     return this.http.get<PagedResult<AdminNotificationLog>>(this.baseUrl, { params: httpParams });
   }

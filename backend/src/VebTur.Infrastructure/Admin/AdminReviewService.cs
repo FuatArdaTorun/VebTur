@@ -1,6 +1,7 @@
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Reviews;
 using VebTur.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,8 +24,20 @@ public class AdminReviewService(VebTurDbContext db) : IAdminReviewService
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        query = request.Sort switch
+        {
+            AdminReviewSortOrder.HotelAscending => query.OrderBy(r => r.Hotel!.Name).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.HotelDescending => query.OrderByDescending(r => r.Hotel!.Name).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.ReviewerAscending => query.OrderBy(r => r.ReservationRequest!.GuestFullName).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.ReviewerDescending => query.OrderByDescending(r => r.ReservationRequest!.GuestFullName).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.RatingAscending => query.OrderBy(r => r.Rating).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.RatingDescending => query.OrderByDescending(r => r.Rating).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.StatusAscending => query.OrderBy(r => r.IsHidden).ThenByDescending(r => r.CreatedAtUtc),
+            AdminReviewSortOrder.StatusDescending => query.OrderByDescending(r => r.IsHidden).ThenByDescending(r => r.CreatedAtUtc),
+            _ => query.OrderByDescending(r => r.CreatedAtUtc),
+        };
+
         var items = await query
-            .OrderByDescending(r => r.CreatedAtUtc)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(r => new AdminReviewSummaryDto(

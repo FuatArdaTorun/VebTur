@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 
 import { AdminHotelList } from './admin-hotel-list';
 import { AdminHotelsService } from '../admin-hotels.service';
-import { AdminHotelSummary } from '../models/admin-hotel.model';
+import { AdminHotelSort, AdminHotelSummary } from '../models/admin-hotel.model';
 
 interface AdminHotelListInternals {
   hotels: WritableSignal<AdminHotelSummary[]>;
@@ -15,6 +15,8 @@ interface AdminHotelListInternals {
   selectionMode: WritableSignal<boolean>;
   selectedIds: WritableSignal<Set<string>>;
   confirmingBulkDelete: WritableSignal<boolean>;
+  page: WritableSignal<number>;
+  sort: WritableSignal<AdminHotelSort>;
   selectedCount(): number;
   isAllSelected(): boolean;
   canDelete(hotel: AdminHotelSummary): boolean;
@@ -26,6 +28,8 @@ interface AdminHotelListInternals {
   toggleSelectAll(): void;
   requestBulkDelete(): void;
   confirmBulkDelete(): void;
+  toggleSort(column: 'name' | 'city' | 'status' | 'updated'): void;
+  sortIndicator(column: 'name' | 'city' | 'status' | 'updated'): string;
 }
 
 describe('AdminHotelList', () => {
@@ -179,5 +183,52 @@ describe('AdminHotelList', () => {
     expect(component.selectionMode()).toBe(false);
     expect(component.selectedCount()).toBe(0);
     expect(serviceStub.getHotels).toHaveBeenCalledTimes(2);
+  });
+
+  it('clicking a column header sorts ascending by that column and resets to page 1', () => {
+    serviceStub = {
+      getHotels: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })),
+      deactivateHotel: vi.fn(),
+      reactivateHotel: vi.fn(),
+    };
+    createComponent();
+    component.page.set(3);
+
+    component.toggleSort('name');
+
+    expect(component.sort()).toBe('name-asc');
+    expect(component.sortIndicator('name')).toBe('▲');
+    expect(serviceStub.getHotels).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'name-asc', page: 1 }));
+  });
+
+  it('clicking the same column header again toggles to descending', () => {
+    serviceStub = {
+      getHotels: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })),
+      deactivateHotel: vi.fn(),
+      reactivateHotel: vi.fn(),
+    };
+    createComponent();
+
+    component.toggleSort('city');
+    component.toggleSort('city');
+
+    expect(component.sort()).toBe('city-desc');
+    expect(component.sortIndicator('city')).toBe('▼');
+  });
+
+  it('switching to a different column starts ascending again', () => {
+    serviceStub = {
+      getHotels: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })),
+      deactivateHotel: vi.fn(),
+      reactivateHotel: vi.fn(),
+    };
+    createComponent();
+
+    component.toggleSort('status');
+    component.toggleSort('status');
+    component.toggleSort('name');
+
+    expect(component.sort()).toBe('name-asc');
+    expect(component.sortIndicator('status')).toBe('');
   });
 });

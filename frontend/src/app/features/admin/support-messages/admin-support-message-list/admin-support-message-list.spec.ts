@@ -161,4 +161,39 @@ describe('AdminSupportMessageList', () => {
     expect(component['selectedCount']()).toBe(0);
     expect(serviceStub.getMessages).toHaveBeenCalledTimes(2);
   });
+
+  it('clicking a column header sorts ascending by that column and resets to page 1', () => {
+    serviceStub = { getMessages: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+    component['page'].set(3);
+
+    component['toggleSort']('sender');
+
+    expect(component['sort']()).toBe('sender-asc');
+    expect(component['sortIndicator']('sender')).toBe('▲');
+    expect(serviceStub.getMessages).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'sender-asc', page: 1 }));
+  });
+
+  it('clicking the same column header again toggles to descending', () => {
+    serviceStub = { getMessages: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('subject');
+    component['toggleSort']('subject');
+
+    expect(component['sort']()).toBe('subject-desc');
+    expect(component['sortIndicator']('subject')).toBe('▼');
+  });
+
+  it('switching to a different column starts ascending again', () => {
+    serviceStub = { getMessages: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('status');
+    component['toggleSort']('status');
+    component['toggleSort']('received');
+
+    expect(component['sort']()).toBe('received-asc');
+    expect(component['sortIndicator']('status')).toBe('');
+  });
 });

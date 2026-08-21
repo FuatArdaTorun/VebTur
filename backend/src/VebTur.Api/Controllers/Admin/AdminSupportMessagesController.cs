@@ -2,6 +2,7 @@ using VebTur.Api.Validation;
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Support;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ public class AdminSupportMessagesController(
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminSupportMessageDto>>> GetMessages(
         [FromQuery] string? search = null,
+        [FromQuery] string sort = "received-desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -28,7 +30,19 @@ public class AdminSupportMessagesController(
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var result = await adminSupportMessageService.GetMessagesAsync(new AdminSupportMessageListRequest(search, page, pageSize), cancellationToken);
+        var sortOrder = sort.ToLowerInvariant() switch
+        {
+            "sender-asc" => AdminSupportMessageSortOrder.SenderAscending,
+            "sender-desc" => AdminSupportMessageSortOrder.SenderDescending,
+            "subject-asc" => AdminSupportMessageSortOrder.SubjectAscending,
+            "subject-desc" => AdminSupportMessageSortOrder.SubjectDescending,
+            "received-asc" => AdminSupportMessageSortOrder.ReceivedAscending,
+            "status-asc" => AdminSupportMessageSortOrder.StatusAscending,
+            "status-desc" => AdminSupportMessageSortOrder.StatusDescending,
+            _ => AdminSupportMessageSortOrder.ReceivedDescending,
+        };
+
+        var result = await adminSupportMessageService.GetMessagesAsync(new AdminSupportMessageListRequest(search, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);
     }
 

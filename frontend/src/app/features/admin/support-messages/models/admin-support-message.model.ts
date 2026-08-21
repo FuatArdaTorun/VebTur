@@ -9,8 +9,19 @@ export interface AdminSupportMessage {
   createdAtUtc: string;
 }
 
+export type AdminSupportMessageSort =
+  | 'received-desc'
+  | 'received-asc'
+  | 'sender-asc'
+  | 'sender-desc'
+  | 'subject-asc'
+  | 'subject-desc'
+  | 'status-asc'
+  | 'status-desc';
+
 export interface AdminSupportMessageListParams {
   search?: string;
+  sort?: AdminSupportMessageSort;
   page: number;
   pageSize: number;
 }

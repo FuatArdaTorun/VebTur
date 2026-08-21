@@ -103,6 +103,26 @@ public class NotificationLogsApiIntegrationTests
     }
 
     [Fact]
+    public async Task AdminNotificationsList_SortByRecipient_OrdersAscendingAndDescending()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var recipientA = $"aaa-sort-{suffix}@example.com";
+        var recipientZ = $"zzz-sort-{suffix}@example.com";
+
+        var (hotelAId, roomTypeAId, _) = await CreateHotelWithRoomTypeAsync(adminToken, 3, supervisorEmail: recipientA);
+        var (hotelZId, roomTypeZId, _) = await CreateHotelWithRoomTypeAsync(adminToken, 3, supervisorEmail: recipientZ);
+        await CreateAsGuestAsync(hotelAId, roomTypeAId);
+        await CreateAsGuestAsync(hotelZId, roomTypeZId);
+
+        var ascResult = await ListAsync(adminToken, search: suffix, sort: "recipient-asc");
+        Assert.Equal([recipientA, recipientZ], ascResult.Items.Select(n => n.Recipient));
+
+        var descResult = await ListAsync(adminToken, search: suffix, sort: "recipient-desc");
+        Assert.Equal([recipientZ, recipientA], descResult.Items.Select(n => n.Recipient));
+    }
+
+    [Fact]
     public async Task AdminNotifications_WithoutToken_ReturnsUnauthorized()
     {
         var response = await _client.GetAsync("/api/v1/admin/notifications");
@@ -186,9 +206,10 @@ public class NotificationLogsApiIntegrationTests
         return (await response.Content.ReadFromJsonAsync<ReservationRequestDetailDto>())!;
     }
 
-    private async Task<PagedResult<AdminNotificationLogDto>> ListAsync(string adminToken, string search)
+    private async Task<PagedResult<AdminNotificationLogDto>> ListAsync(string adminToken, string search, string? sort = null)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/notifications?search={Uri.EscapeDataString(search)}&pageSize=200");
+        var sortQuery = sort is null ? "" : $"&sort={sort}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/notifications?search={Uri.EscapeDataString(search)}&pageSize=200{sortQuery}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();

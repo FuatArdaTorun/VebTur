@@ -386,6 +386,28 @@ public class AdminApiIntegrationTests
         Assert.Equal(HttpStatusCode.BadRequest, await BulkDeleteHotelsAsync(token, []));
     }
 
+    [Fact]
+    public async Task AdminHotelsList_SortByName_OrdersAscendingAndDescending()
+    {
+        var token = await GetAdminTokenAsync();
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var nameA = $"AAA Sort Test {suffix}";
+        var nameZ = $"ZZZ Sort Test {suffix}";
+
+        (await PostHotelAsync(token, BuildMinimalHotel($"sort-test-a-{suffix}") with { Name = nameA })).EnsureSuccessStatusCode();
+        (await PostHotelAsync(token, BuildMinimalHotel($"sort-test-z-{suffix}") with { Name = nameZ })).EnsureSuccessStatusCode();
+
+        using var ascRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/hotels?search={suffix}&sort=name-asc");
+        ascRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var ascResult = await (await _client.SendAsync(ascRequest)).Content.ReadFromJsonAsync<PagedResult<AdminHotelSummaryDto>>();
+        Assert.Equal([nameA, nameZ], ascResult!.Items.Select(h => h.Name));
+
+        using var descRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/hotels?search={suffix}&sort=name-desc");
+        descRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var descResult = await (await _client.SendAsync(descRequest)).Content.ReadFromJsonAsync<PagedResult<AdminHotelSummaryDto>>();
+        Assert.Equal([nameZ, nameA], descResult!.Items.Select(h => h.Name));
+    }
+
     private async Task<HttpStatusCode> BulkDeleteHotelsAsync(string token, Guid[] ids)
     {
         using var request = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/admin/hotels/permanent")

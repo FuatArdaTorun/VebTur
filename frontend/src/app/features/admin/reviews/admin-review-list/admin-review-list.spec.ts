@@ -184,4 +184,39 @@ describe('AdminReviewList', () => {
 
     expect(serviceStub.unhideReview).toHaveBeenCalledWith('r-1');
   });
+
+  it('clicking a column header sorts ascending by that column and resets to page 1', () => {
+    serviceStub = { getReviews: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+    component['page'].set(3);
+
+    component['toggleSort']('hotel');
+
+    expect(component['sort']()).toBe('hotel-asc');
+    expect(component['sortIndicator']('hotel')).toBe('▲');
+    expect(serviceStub.getReviews).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'hotel-asc', page: 1 }));
+  });
+
+  it('clicking the same column header again toggles to descending', () => {
+    serviceStub = { getReviews: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('rating');
+    component['toggleSort']('rating');
+
+    expect(component['sort']()).toBe('rating-desc');
+    expect(component['sortIndicator']('rating')).toBe('▼');
+  });
+
+  it('switching to a different column starts ascending again', () => {
+    serviceStub = { getReviews: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('status');
+    component['toggleSort']('status');
+    component['toggleSort']('reviewer');
+
+    expect(component['sort']()).toBe('reviewer-asc');
+    expect(component['sortIndicator']('status')).toBe('');
+  });
 });

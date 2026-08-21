@@ -3,13 +3,15 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AdminHotelsService } from '../admin-hotels.service';
-import { AdminHotelSummary } from '../models/admin-hotel.model';
+import { AdminHotelSort, AdminHotelSummary } from '../models/admin-hotel.model';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 
 const PAGE_SIZE = 20;
+
+type SortableColumn = 'name' | 'city' | 'status' | 'updated';
 
 @Component({
   selector: 'app-admin-hotel-list',
@@ -26,6 +28,7 @@ export class AdminHotelList {
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
   protected readonly pendingToggle = signal<AdminHotelSummary | null>(null);
+  protected readonly sort = signal<AdminHotelSort>('updated-desc');
 
   protected readonly selectionMode = signal(false);
   protected readonly selectedIds = signal<Set<string>>(new Set());
@@ -56,6 +59,24 @@ export class AdminHotelList {
 
     this.page.set(page);
     this.fetch();
+  }
+
+  /** Clicking a header toggles asc/desc if it's already the active column, otherwise starts ascending. */
+  protected toggleSort(column: SortableColumn): void {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    const nextDirection = activeColumn === column && activeDirection === 'asc' ? 'desc' : 'asc';
+    this.sort.set(`${column}-${nextDirection}` as AdminHotelSort);
+    this.page.set(1);
+    this.fetch();
+  }
+
+  protected sortIndicator(column: SortableColumn): string {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    if (activeColumn !== column) {
+      return '';
+    }
+
+    return activeDirection === 'asc' ? '▲' : '▼';
   }
 
   protected requestToggle(hotel: AdminHotelSummary): void {
@@ -137,6 +158,7 @@ export class AdminHotelList {
       .getHotels({
         search: this.searchControl.value || undefined,
         isActive: this.showInactiveControl.value ? undefined : true,
+        sort: this.sort(),
         page: this.page(),
         pageSize: PAGE_SIZE,
       })

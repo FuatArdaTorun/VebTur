@@ -1,6 +1,7 @@
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Support;
 using VebTur.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,8 +25,19 @@ public class AdminSupportMessageService(VebTurDbContext db) : IAdminSupportMessa
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        query = request.Sort switch
+        {
+            AdminSupportMessageSortOrder.SenderAscending => query.OrderBy(m => m.SenderName),
+            AdminSupportMessageSortOrder.SenderDescending => query.OrderByDescending(m => m.SenderName),
+            AdminSupportMessageSortOrder.SubjectAscending => query.OrderBy(m => m.Subject),
+            AdminSupportMessageSortOrder.SubjectDescending => query.OrderByDescending(m => m.Subject),
+            AdminSupportMessageSortOrder.ReceivedAscending => query.OrderBy(m => m.CreatedAtUtc),
+            AdminSupportMessageSortOrder.StatusAscending => query.OrderBy(m => m.RepliedAtUtc != null).ThenByDescending(m => m.CreatedAtUtc),
+            AdminSupportMessageSortOrder.StatusDescending => query.OrderByDescending(m => m.RepliedAtUtc != null).ThenByDescending(m => m.CreatedAtUtc),
+            _ => query.OrderByDescending(m => m.CreatedAtUtc),
+        };
+
         var items = await query
-            .OrderByDescending(m => m.CreatedAtUtc)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(m => new AdminSupportMessageDto(m.Id, m.SenderName, m.SenderEmail, m.Subject, m.Message, m.ReplyMessage, m.RepliedAtUtc, m.CreatedAtUtc))

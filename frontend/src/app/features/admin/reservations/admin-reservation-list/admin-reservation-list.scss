@@ -90,15 +90,17 @@
     }
   }
 
+  &__table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow-x: auto;
-    box-shadow: var(--shadow-sm);
-    display: block;
 
     th,
     td {

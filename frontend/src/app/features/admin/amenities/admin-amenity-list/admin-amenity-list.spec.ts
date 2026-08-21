@@ -128,4 +128,38 @@ describe('AdminAmenityList', () => {
     component['cancelEdit']();
     expect(component['editingId']()).toBeNull();
   });
+
+  it('sortedAmenities defaults to name ascending', () => {
+    const zAmenity: AdminAmenity = { id: 'a-2', name: 'Zen Garden', slug: 'zen-garden', iconKey: null, hotelCount: 1 };
+    serviceStub = { getAmenities: vi.fn().mockReturnValue(of([zAmenity, sampleAmenity])) };
+    createComponent();
+
+    expect(component['sortedAmenities']().map((a) => a.name)).toEqual(['Sea View', 'Zen Garden']);
+  });
+
+  it('clicking a column header sorts ascending by that column, without refetching (client-side only)', () => {
+    const zAmenity: AdminAmenity = { id: 'a-2', name: 'Zen Garden', slug: 'zen-garden', iconKey: null, hotelCount: 1 };
+    serviceStub = { getAmenities: vi.fn().mockReturnValue(of([sampleAmenity, zAmenity])) };
+    createComponent();
+
+    component['toggleSort']('hotelCount');
+
+    expect(component['sort']()).toBe('hotelCount-asc');
+    expect(component['sortIndicator']('hotelCount')).toBe('▲');
+    expect(component['sortedAmenities']().map((a) => a.hotelCount)).toEqual([1, 3]);
+    expect(serviceStub.getAmenities).toHaveBeenCalledTimes(1);
+  });
+
+  it('clicking the same column header again toggles to descending', () => {
+    const zAmenity: AdminAmenity = { id: 'a-2', name: 'Zen Garden', slug: 'zen-garden', iconKey: null, hotelCount: 1 };
+    serviceStub = { getAmenities: vi.fn().mockReturnValue(of([sampleAmenity, zAmenity])) };
+    createComponent();
+
+    // Default sort is already 'name-asc', so a single click on the active column flips it.
+    component['toggleSort']('name');
+
+    expect(component['sort']()).toBe('name-desc');
+    expect(component['sortIndicator']('name')).toBe('▼');
+    expect(component['sortedAmenities']().map((a) => a.name)).toEqual(['Zen Garden', 'Sea View']);
+  });
 });

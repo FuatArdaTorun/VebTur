@@ -12,6 +12,7 @@ export class AdminHotelsService {
     let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
     if (params.search) httpParams = httpParams.set('search', params.search);
     if (params.isActive != null) httpParams = httpParams.set('isActive', params.isActive);
+    if (params.sort) httpParams = httpParams.set('sort', params.sort);
 
     return this.http.get<PagedResult<AdminHotelSummary>>(this.baseUrl, { params: httpParams });
   }

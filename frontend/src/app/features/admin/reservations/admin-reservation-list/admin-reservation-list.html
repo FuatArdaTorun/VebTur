@@ -43,6 +43,7 @@
   } @else if (reservations().length === 0) {
     <app-empty-state message="No reservations match your filters." />
   } @else {
+    <div class="admin-reservation-list__table-wrapper">
     <table class="admin-reservation-list__table">
       <thead>
         <tr>
@@ -86,6 +87,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     @if (totalPages() > 1) {
       <div class="admin-reservation-list__pagination">

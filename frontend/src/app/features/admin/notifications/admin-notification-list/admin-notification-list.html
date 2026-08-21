@@ -30,6 +30,7 @@
   } @else if (notifications().length === 0) {
     <app-empty-state message="No notifications match your filters." />
   } @else {
+    <div class="admin-notification-list__table-wrapper">
     <table class="admin-notification-list__table">
       <thead>
         <tr>
@@ -38,10 +39,10 @@
               <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
             </th>
           }
-          <th>Sent At</th>
-          <th>Reference</th>
-          <th>Recipient</th>
-          <th>Subject</th>
+          <th class="admin-notification-list__sortable" (click)="toggleSort('sent')">Sent At <span class="admin-notification-list__sort-indicator">{{ sortIndicator('sent') }}</span></th>
+          <th class="admin-notification-list__sortable" (click)="toggleSort('reference')">Reference <span class="admin-notification-list__sort-indicator">{{ sortIndicator('reference') }}</span></th>
+          <th class="admin-notification-list__sortable" (click)="toggleSort('recipient')">Recipient <span class="admin-notification-list__sort-indicator">{{ sortIndicator('recipient') }}</span></th>
+          <th class="admin-notification-list__sortable" (click)="toggleSort('subject')">Subject <span class="admin-notification-list__sort-indicator">{{ sortIndicator('subject') }}</span></th>
           <th></th>
         </tr>
       </thead>
@@ -69,6 +70,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     @if (totalPages() > 1) {
       <div class="admin-notification-list__pagination">

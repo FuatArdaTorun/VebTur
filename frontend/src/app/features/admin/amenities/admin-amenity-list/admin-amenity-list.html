@@ -26,6 +26,7 @@
   } @else if (error()) {
     <app-error-state message="Could not load amenities." />
   } @else {
+    <div class="admin-amenity-list__table-wrapper">
     <table class="admin-amenity-list__table">
       <thead>
         <tr>
@@ -34,15 +35,15 @@
               <input type="checkbox" [checked]="isAllSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
             </th>
           }
-          <th>Name</th>
-          <th>Slug</th>
+          <th class="admin-amenity-list__sortable" (click)="toggleSort('name')">Name <span class="admin-amenity-list__sort-indicator">{{ sortIndicator('name') }}</span></th>
+          <th class="admin-amenity-list__sortable" (click)="toggleSort('slug')">Slug <span class="admin-amenity-list__sort-indicator">{{ sortIndicator('slug') }}</span></th>
           <th>Icon key</th>
-          <th>Used by</th>
+          <th class="admin-amenity-list__sortable" (click)="toggleSort('hotelCount')">Used by <span class="admin-amenity-list__sort-indicator">{{ sortIndicator('hotelCount') }}</span></th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        @for (amenity of amenities(); track amenity.id) {
+        @for (amenity of sortedAmenities(); track amenity.id) {
           @if (editingId() === amenity.id) {
             <tr [formGroup]="editForm">
               @if (selectionMode()) {
@@ -88,6 +89,7 @@
         }
       </tbody>
     </table>
+    </div>
   }
 
   @if (confirmingBulkDelete()) {

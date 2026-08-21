@@ -2,13 +2,15 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AdminReviewsService } from '../admin-reviews.service';
-import { AdminReviewSummary } from '../models/admin-review.model';
+import { AdminReviewSort, AdminReviewSummary } from '../models/admin-review.model';
 import { LoadingState } from '../../../../shared/loading-state/loading-state';
 import { EmptyState } from '../../../../shared/empty-state/empty-state';
 import { ErrorState } from '../../../../shared/error-state/error-state';
 import { ConfirmDialog } from '../../../../shared/confirm-dialog/confirm-dialog';
 
 const PAGE_SIZE = 20;
+
+type SortableColumn = 'hotel' | 'reviewer' | 'rating' | 'status';
 
 @Component({
   selector: 'app-admin-review-list',
@@ -24,6 +26,7 @@ export class AdminReviewList {
   protected readonly error = signal(false);
   protected readonly page = signal(1);
   protected readonly totalPages = signal(0);
+  protected readonly sort = signal<AdminReviewSort>('created-desc');
 
   protected readonly selectionMode = signal(false);
   protected readonly selectedIds = signal<Set<string>>(new Set());
@@ -53,6 +56,24 @@ export class AdminReviewList {
 
     this.page.set(page);
     this.fetch();
+  }
+
+  /** Clicking a header toggles asc/desc if it's already the active column, otherwise starts ascending. */
+  protected toggleSort(column: SortableColumn): void {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    const nextDirection = activeColumn === column && activeDirection === 'asc' ? 'desc' : 'asc';
+    this.sort.set(`${column}-${nextDirection}` as AdminReviewSort);
+    this.page.set(1);
+    this.fetch();
+  }
+
+  protected sortIndicator(column: SortableColumn): string {
+    const [activeColumn, activeDirection] = this.sort().split('-') as [string, string];
+    if (activeColumn !== column) {
+      return '';
+    }
+
+    return activeDirection === 'asc' ? '▲' : '▼';
   }
 
   protected toggleHidden(review: AdminReviewSummary): void {
@@ -107,6 +128,7 @@ export class AdminReviewList {
     this.reviewsService
       .getReviews({
         search: this.searchControl.value || undefined,
+        sort: this.sort(),
         page: this.page(),
         pageSize: PAGE_SIZE,
       })

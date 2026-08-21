@@ -2,6 +2,7 @@ using VebTur.Api.Validation;
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Reviews;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ public class AdminReviewsController(IAdminReviewService adminReviewService, IVal
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminReviewSummaryDto>>> GetReviews(
         [FromQuery] string? search = null,
+        [FromQuery] string sort = "created-desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -25,7 +27,20 @@ public class AdminReviewsController(IAdminReviewService adminReviewService, IVal
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var result = await adminReviewService.GetReviewsAsync(new AdminReviewListRequest(search, page, pageSize), cancellationToken);
+        var sortOrder = sort.ToLowerInvariant() switch
+        {
+            "hotel-asc" => AdminReviewSortOrder.HotelAscending,
+            "hotel-desc" => AdminReviewSortOrder.HotelDescending,
+            "reviewer-asc" => AdminReviewSortOrder.ReviewerAscending,
+            "reviewer-desc" => AdminReviewSortOrder.ReviewerDescending,
+            "rating-asc" => AdminReviewSortOrder.RatingAscending,
+            "rating-desc" => AdminReviewSortOrder.RatingDescending,
+            "status-asc" => AdminReviewSortOrder.StatusAscending,
+            "status-desc" => AdminReviewSortOrder.StatusDescending,
+            _ => AdminReviewSortOrder.CreatedDescending,
+        };
+
+        var result = await adminReviewService.GetReviewsAsync(new AdminReviewListRequest(search, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);
     }
 

@@ -2,6 +2,7 @@ using VebTur.Api.Validation;
 using VebTur.Application.Admin;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Hotels;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ public class AdminHotelsController(
     public async Task<ActionResult<PagedResult<AdminHotelSummaryDto>>> GetHotels(
         [FromQuery] string? search = null,
         [FromQuery] bool? isActive = null,
+        [FromQuery] string sort = "updated-desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -29,7 +31,19 @@ public class AdminHotelsController(
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var result = await adminHotelService.GetHotelsAsync(new AdminHotelListRequest(search, isActive, page, pageSize), cancellationToken);
+        var sortOrder = sort.ToLowerInvariant() switch
+        {
+            "name-asc" => AdminHotelSortOrder.NameAscending,
+            "name-desc" => AdminHotelSortOrder.NameDescending,
+            "city-asc" => AdminHotelSortOrder.CityAscending,
+            "city-desc" => AdminHotelSortOrder.CityDescending,
+            "status-asc" => AdminHotelSortOrder.StatusAscending,
+            "status-desc" => AdminHotelSortOrder.StatusDescending,
+            "updated-asc" => AdminHotelSortOrder.UpdatedAscending,
+            _ => AdminHotelSortOrder.UpdatedDescending,
+        };
+
+        var result = await adminHotelService.GetHotelsAsync(new AdminHotelListRequest(search, isActive, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);
     }
 

@@ -167,4 +167,39 @@ describe('AdminNotificationList', () => {
     expect(component['selectedCount']()).toBe(0);
     expect(serviceStub.getNotifications).toHaveBeenCalledTimes(2);
   });
+
+  it('clicking a column header sorts ascending by that column and resets to page 1', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+    component['page'].set(3);
+
+    component['toggleSort']('recipient');
+
+    expect(component['sort']()).toBe('recipient-asc');
+    expect(component['sortIndicator']('recipient')).toBe('▲');
+    expect(serviceStub.getNotifications).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'recipient-asc', page: 1 }));
+  });
+
+  it('clicking the same column header again toggles to descending', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('subject');
+    component['toggleSort']('subject');
+
+    expect(component['sort']()).toBe('subject-desc');
+    expect(component['sortIndicator']('subject')).toBe('▼');
+  });
+
+  it('switching to a different column starts ascending again', () => {
+    serviceStub = { getNotifications: vi.fn().mockReturnValue(of({ items: [], page: 1, pageSize: 20, totalCount: 0, totalPages: 0 })) };
+    createComponent();
+
+    component['toggleSort']('reference');
+    component['toggleSort']('reference');
+    component['toggleSort']('sent');
+
+    expect(component['sort']()).toBe('sent-asc');
+    expect(component['sortIndicator']('reference')).toBe('');
+  });
 });

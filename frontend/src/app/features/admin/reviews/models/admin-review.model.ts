@@ -12,8 +12,20 @@ export interface AdminReviewSummary {
   createdAtUtc: string;
 }
 
+export type AdminReviewSort =
+  | 'created-desc'
+  | 'hotel-asc'
+  | 'hotel-desc'
+  | 'reviewer-asc'
+  | 'reviewer-desc'
+  | 'rating-asc'
+  | 'rating-desc'
+  | 'status-asc'
+  | 'status-desc';
+
 export interface AdminReviewListParams {
   search?: string;
+  sort?: AdminReviewSort;
   page: number;
   pageSize: number;
 }

@@ -24,8 +24,20 @@ public class AdminNotificationService(VebTurDbContext db) : IAdminNotificationSe
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        query = request.Sort switch
+        {
+            AdminNotificationSortOrder.SentAscending => query.OrderBy(n => n.SentAtUtc),
+            AdminNotificationSortOrder.SentDescending => query.OrderByDescending(n => n.SentAtUtc),
+            AdminNotificationSortOrder.ReferenceAscending => query.OrderBy(n => n.ReservationRequest!.ReferenceNumber),
+            AdminNotificationSortOrder.ReferenceDescending => query.OrderByDescending(n => n.ReservationRequest!.ReferenceNumber),
+            AdminNotificationSortOrder.RecipientAscending => query.OrderBy(n => n.Recipient),
+            AdminNotificationSortOrder.RecipientDescending => query.OrderByDescending(n => n.Recipient),
+            AdminNotificationSortOrder.SubjectAscending => query.OrderBy(n => n.Subject),
+            AdminNotificationSortOrder.SubjectDescending => query.OrderByDescending(n => n.Subject),
+            _ => query.OrderByDescending(n => n.CreatedAtUtc),
+        };
+
         var items = await query
-            .OrderByDescending(n => n.CreatedAtUtc)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(n => new AdminNotificationLogDto(

@@ -166,9 +166,27 @@ public class SupportMessagesApiIntegrationTests
         Assert.Contains(list.Items, m => m.Subject == subject);
     }
 
-    private async Task<HttpResponseMessage> PostMessageAsync(string subject) => await _client.PostAsJsonAsync(
+    [Fact]
+    public async Task AdminMessagesList_SortBySubject_OrdersAscendingAndDescending()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var subjectA = $"AAA Sort Test {suffix}";
+        var subjectZ = $"ZZZ Sort Test {suffix}";
+
+        (await PostMessageAsync(subjectA)).EnsureSuccessStatusCode();
+        (await PostMessageAsync(subjectZ)).EnsureSuccessStatusCode();
+
+        var ascResult = await GetMessagesAsync(adminToken, search: suffix, sort: "subject-asc");
+        Assert.Equal([subjectA, subjectZ], ascResult.Items.Select(m => m.Subject));
+
+        var descResult = await GetMessagesAsync(adminToken, search: suffix, sort: "subject-desc");
+        Assert.Equal([subjectZ, subjectA], descResult.Items.Select(m => m.Subject));
+    }
+
+    private async Task<HttpResponseMessage> PostMessageAsync(string subject, string senderName = "Test Sender") => await _client.PostAsJsonAsync(
         "/api/v1/support-messages",
-        new CreateSupportMessageDto("Test Sender", "sender@example.com", subject, "Message body."));
+        new CreateSupportMessageDto(senderName, "sender@example.com", subject, "Message body."));
 
     private async Task<Guid> CreateMessageAsync()
     {
@@ -188,9 +206,14 @@ public class SupportMessagesApiIntegrationTests
         return await _client.SendAsync(request);
     }
 
-    private async Task<PagedResult<AdminSupportMessageDto>> GetMessagesAsync(string token, string? search = null)
+    private async Task<PagedResult<AdminSupportMessageDto>> GetMessagesAsync(string token, string? search = null, string? sort = null)
     {
         var query = search is null ? "" : $"?search={Uri.EscapeDataString(search)}&pageSize=50";
+        if (sort is not null)
+        {
+            query += query.Length == 0 ? $"?sort={sort}" : $"&sort={sort}";
+        }
+
         using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/support-messages{query}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await _client.SendAsync(request);

@@ -56,6 +56,24 @@ public class AdminReviewsApiIntegrationTests
     }
 
     [Fact]
+    public async Task AdminReviewsList_SortByHotel_OrdersAscendingAndDescending()
+    {
+        var adminToken = await GetAdminTokenAsync();
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var hotelNameA = $"AAA Sort Test {suffix}";
+        var hotelNameZ = $"ZZZ Sort Test {suffix}";
+
+        await SeedConfirmedReviewAsync(adminToken, hotelName: hotelNameA);
+        await SeedConfirmedReviewAsync(adminToken, hotelName: hotelNameZ);
+
+        var ascResult = await SearchAsync(adminToken, suffix, sort: "hotel-asc");
+        Assert.Equal([hotelNameA, hotelNameZ], ascResult.Items.Select(r => r.HotelName));
+
+        var descResult = await SearchAsync(adminToken, suffix, sort: "hotel-desc");
+        Assert.Equal([hotelNameZ, hotelNameA], descResult.Items.Select(r => r.HotelName));
+    }
+
+    [Fact]
     public async Task Hide_ExcludesReviewFromPublicListAndCustomerRating_UnhideRestoresIt()
     {
         var adminToken = await GetAdminTokenAsync();
@@ -111,9 +129,10 @@ public class AdminReviewsApiIntegrationTests
         Assert.DoesNotContain(stillThereA!.Reviews, r => r.Id == reviewA.Id);
     }
 
-    private async Task<PagedResult<AdminReviewSummaryDto>> SearchAsync(string adminToken, string search)
+    private async Task<PagedResult<AdminReviewSummaryDto>> SearchAsync(string adminToken, string search, string? sort = null)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reviews?search={Uri.EscapeDataString(search)}&pageSize=200");
+        var sortQuery = sort is null ? "" : $"&sort={sort}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/admin/reviews?search={Uri.EscapeDataString(search)}&pageSize=200{sortQuery}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
         var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();

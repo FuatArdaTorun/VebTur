@@ -1,3 +1,3 @@
 namespace VebTur.Application.Admin;
 
-public record AdminNotificationListRequest(string? Search, int Page, int PageSize);
+public record AdminNotificationListRequest(string? Search, AdminNotificationSortOrder Sort, int Page, int PageSize);

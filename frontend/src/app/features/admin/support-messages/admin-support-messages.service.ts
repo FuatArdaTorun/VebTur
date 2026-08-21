@@ -11,6 +11,7 @@ export class AdminSupportMessagesService {
   getMessages(params: AdminSupportMessageListParams) {
     let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize);
     if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.sort) httpParams = httpParams.set('sort', params.sort);
 
     return this.http.get<PagedResult<AdminSupportMessage>>(this.baseUrl, { params: httpParams });
   }

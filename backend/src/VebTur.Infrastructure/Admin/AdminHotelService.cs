@@ -2,6 +2,7 @@ using VebTur.Application.Admin;
 using VebTur.Application.Common;
 using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
+using VebTur.Application.Hotels;
 using VebTur.Domain.Entities;
 using VebTur.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +28,19 @@ public class AdminHotelService(VebTurDbContext db) : IAdminHotelService
 
         var totalCount = await query.CountAsync(cancellationToken);
 
+        query = request.Sort switch
+        {
+            AdminHotelSortOrder.NameAscending => query.OrderBy(h => h.Name),
+            AdminHotelSortOrder.NameDescending => query.OrderByDescending(h => h.Name),
+            AdminHotelSortOrder.CityAscending => query.OrderBy(h => h.City).ThenBy(h => h.Name),
+            AdminHotelSortOrder.CityDescending => query.OrderByDescending(h => h.City).ThenBy(h => h.Name),
+            AdminHotelSortOrder.StatusAscending => query.OrderBy(h => h.IsActive).ThenByDescending(h => h.UpdatedAtUtc),
+            AdminHotelSortOrder.StatusDescending => query.OrderByDescending(h => h.IsActive).ThenByDescending(h => h.UpdatedAtUtc),
+            AdminHotelSortOrder.UpdatedAscending => query.OrderBy(h => h.UpdatedAtUtc),
+            _ => query.OrderByDescending(h => h.UpdatedAtUtc),
+        };
+
         var items = await query
-            .OrderByDescending(h => h.UpdatedAtUtc)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(h => new AdminHotelSummaryDto(

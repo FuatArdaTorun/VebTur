@@ -20,6 +20,7 @@ public class AdminNotificationsController(
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminNotificationLogDto>>> GetNotifications(
         [FromQuery] string? search = null,
+        [FromQuery] string sort = "created-desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -27,8 +28,21 @@ public class AdminNotificationsController(
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
+        var sortOrder = sort.ToLowerInvariant() switch
+        {
+            "sent-asc" => AdminNotificationSortOrder.SentAscending,
+            "sent-desc" => AdminNotificationSortOrder.SentDescending,
+            "reference-asc" => AdminNotificationSortOrder.ReferenceAscending,
+            "reference-desc" => AdminNotificationSortOrder.ReferenceDescending,
+            "recipient-asc" => AdminNotificationSortOrder.RecipientAscending,
+            "recipient-desc" => AdminNotificationSortOrder.RecipientDescending,
+            "subject-asc" => AdminNotificationSortOrder.SubjectAscending,
+            "subject-desc" => AdminNotificationSortOrder.SubjectDescending,
+            _ => AdminNotificationSortOrder.CreatedDescending,
+        };
+
         var result = await adminNotificationService.GetNotificationsAsync(
-            new AdminNotificationListRequest(search, page, pageSize), cancellationToken);
+            new AdminNotificationListRequest(search, sortOrder, page, pageSize), cancellationToken);
         return Ok(result);
     }
 
