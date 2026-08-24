@@ -26,6 +26,8 @@ describe('HotelCard', () => {
       thumbnailUrl: null,
       startingNightlyPrice: 1000,
       currency: 'TRY',
+      customerRating: 4.333,
+      customerReviewCount: 3,
     });
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -33,6 +35,45 @@ describe('HotelCard', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('renders both the Google rating (with count) and the VebTur rating (with count)', () => {
+    fixture.detectChanges();
+
+    const lines: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.hotel-card__rating'));
+    expect(lines.length).toBe(2);
+
+    const [googleLine, vebturLine] = lines;
+    expect(googleLine.querySelector('.hotel-card__rating-value')!.textContent!.trim()).toBe('4.5');
+    expect(googleLine.querySelector('.hotel-card__rating-source')!.textContent!.trim()).toBe('Google');
+    expect(googleLine.querySelector('.hotel-card__rating-count')!.textContent!.trim()).toBe('(1,234)');
+
+    expect(vebturLine.querySelector('.hotel-card__rating-value')!.textContent!.trim()).toBe('4.3');
+    expect(vebturLine.querySelector('.hotel-card__rating-source')!.textContent!.trim()).toBe('VebTur');
+    expect(vebturLine.querySelector('.hotel-card__rating-count')!.textContent!.trim()).toBe('(3)');
+  });
+
+  it('omits the VebTur rating line when the hotel has no VebTur reviews yet', () => {
+    fixture.componentRef.setInput('hotel', {
+      id: '1',
+      name: 'Test Hotel',
+      slug: 'test-hotel',
+      city: 'Antalya',
+      country: 'Turkey',
+      starRating: 4,
+      googleRating: 4.5,
+      googleRatingCount: 1234,
+      thumbnailUrl: null,
+      startingNightlyPrice: 1000,
+      currency: 'TRY',
+      customerRating: null,
+      customerReviewCount: 0,
+    });
+    fixture.detectChanges();
+
+    const lines = fixture.nativeElement.querySelectorAll('.hotel-card__rating');
+    expect(lines.length).toBe(1);
+    expect(lines[0].querySelector('.hotel-card__rating-source').textContent.trim()).toBe('Google');
   });
 
   it('does not render a favorite button when showFavorite is false (the default)', () => {

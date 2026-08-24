@@ -67,7 +67,7 @@ public static class HotelSeeder
             website: "https://crystalhotels.com.tr/en/hotels/crystal-waterworld",
             city: "Antalya", address: "Boğazkent Mah., 33. Sok. No:2, Serik (Belek)",
             lat: 36.850, lon: 31.052, star: null,
-            googleRating: 4.6m, googleRatingCount: null,
+            googleRating: 4.6m, googleRatingCount: 24710,
             phone: "+90 242 777 0 777",
             description: "A family-oriented all-inclusive resort in Boğazkent (Belek/Serik area of Antalya), operated by Crystal Hotels (Kilit Hospitality Group). It features multiple waterparks/slides, several dining venues, a private beach, and a dedicated children's program called Crispy Kids World.",
             amenitySlugs: ["wifi", "air-conditioning", "pool", "beach-access", "family-friendly", "breakfast"],
@@ -238,6 +238,9 @@ public static class HotelSeeder
             website: "https://www.akkahotels.com/claros/en",
             city: "Antalya", address: "Kiriş Mahallesi, Sahil Caddesi 12. Sokak, Kemer",
             lat: 36.576, lon: 30.5810, star: 4,
+            // googleRatingCount re-checked 2026-08-24: this listing's own Google Maps page shows
+            // the 4.5 rating but no review count anywhere (no "(N)" next to the stars, no Reviews
+            // tab at all) — genuinely not exposed by Google for this place, not just uncaptured.
             googleRating: 4.5m, googleRatingCount: null,
             phone: "+90 242 824 71 45",
             description: "A 4-star family hotel in the Kiriş district of Kemer, located in the heart of nature surrounded by orange trees and pine woods. Designed to provide a comfortable, all-inclusive holiday especially for families with children, with an outdoor pool and spa facilities.",

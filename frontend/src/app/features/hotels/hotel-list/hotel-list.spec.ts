@@ -23,6 +23,8 @@ const MULTI_PAGE = {
       thumbnailUrl: null,
       startingNightlyPrice: 1000,
       currency: 'TRY',
+      customerRating: null,
+      customerReviewCount: 0,
     },
   ],
   page: 1,

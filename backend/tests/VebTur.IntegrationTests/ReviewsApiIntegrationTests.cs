@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using VebTur.Application.Contracts;
 using VebTur.Application.Contracts.Admin;
 using VebTur.Application.Contracts.Auth;
 using VebTur.Application.Contracts.Hotels;
@@ -46,6 +47,14 @@ public class ReviewsApiIntegrationTests
         var hotel = await _client.GetFromJsonAsync<HotelDetailDto>($"/api/v1/hotels/{hotelId}");
         Assert.Equal(5m, hotel!.CustomerRating);
         Assert.Equal(1, hotel.CustomerReviewCount);
+
+        // The list/summary endpoint (the hotel card on /hotels and the homepage) carries the same
+        // aggregate, not just the detail page.
+        var listed = await _client.GetFromJsonAsync<PagedResult<HotelSummaryDto>>(
+            $"/api/v1/hotels?search={Uri.EscapeDataString("Review Test Hotel")}&pageSize=50");
+        var summary = listed!.Items.Single(h => h.Id == hotelId);
+        Assert.Equal(5m, summary.CustomerRating);
+        Assert.Equal(1, summary.CustomerReviewCount);
     }
 
     [Fact]

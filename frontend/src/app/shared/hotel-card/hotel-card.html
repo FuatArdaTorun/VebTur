@@ -44,6 +44,15 @@
       </p>
     }
 
+    @if (hotel().customerRating; as rating) {
+      <p class="hotel-card__rating">
+        <span class="hotel-card__rating-star">★</span>
+        <span class="hotel-card__rating-value">{{ rating | number: '1.1-1' }}</span>
+        <span class="hotel-card__rating-source">VebTur</span>
+        <span class="hotel-card__rating-count">({{ hotel().customerReviewCount }})</span>
+      </p>
+    }
+
     @if (hotel().startingNightlyPrice; as price) {
       <p class="hotel-card__price">
         <span class="hotel-card__price-label">From</span>

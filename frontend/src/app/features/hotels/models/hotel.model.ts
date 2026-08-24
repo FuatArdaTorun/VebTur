@@ -10,6 +10,8 @@ export interface HotelSummary {
   thumbnailUrl: string | null;
   startingNightlyPrice: number | null;
   currency: string | null;
+  customerRating: number | null;
+  customerReviewCount: number;
 }
 
 export interface HotelImage {

@@ -11,4 +11,6 @@ public record HotelSummaryDto(
     int? GoogleRatingCount,
     string? ThumbnailUrl,
     decimal? StartingNightlyPrice,
-    string? Currency);
+    string? Currency,
+    decimal? CustomerRating,
+    int CustomerReviewCount);

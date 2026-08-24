@@ -35,7 +35,9 @@ public class FavoriteService(VebTurDbContext db) : IFavoriteService
                 h.GoogleRatingCount,
                 h.Images.OrderBy(i => i.DisplayOrder).Select(i => i.Url).FirstOrDefault(),
                 h.RoomTypes.Where(r => r.IsActive).Select(r => (decimal?)r.BaseNightlyPrice).Min(),
-                h.RoomTypes.Where(r => r.IsActive).Select(r => r.Currency).FirstOrDefault()))
+                h.RoomTypes.Where(r => r.IsActive).Select(r => r.Currency).FirstOrDefault(),
+                db.Reviews.Where(rv => rv.HotelId == h.Id && !rv.IsHidden).Average(rv => (decimal?)rv.Rating),
+                db.Reviews.Count(rv => rv.HotelId == h.Id && !rv.IsHidden)))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<HotelSummaryDto>(items, page, pageSize, totalCount);
