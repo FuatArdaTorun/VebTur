@@ -10,6 +10,11 @@
     margin-bottom: 1.25rem;
   }
 
+  // A reference code is read out and copied as one token, so it never wraps at its hyphen.
+  &__reference {
+    white-space: nowrap;
+  }
+
   &__table {
     width: 100%;
     border-collapse: collapse;

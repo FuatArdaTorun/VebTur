@@ -47,7 +47,7 @@
       border: 1px solid var(--color-border);
       border-right: none;
       border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-      min-width: 240px;
+      min-width: 280px;
       font-family: inherit;
       color: var(--color-text);
 
@@ -88,6 +88,11 @@
     &:hover {
       background: var(--color-error-100);
     }
+  }
+
+  // A reference code is read out and copied as one token, so it never wraps at its hyphen.
+  &__reference {
+    white-space: nowrap;
   }
 
   &__table-wrapper {

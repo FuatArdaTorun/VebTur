@@ -205,6 +205,11 @@
       display: flex;
     }
 
+    // The links collapse into the dropdown here, so push the account and menu buttons to the right edge.
+    &__right {
+      margin-left: auto;
+    }
+
     &__links {
       display: none;
       position: absolute;
