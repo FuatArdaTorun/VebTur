@@ -36,13 +36,20 @@
     <div class="footer__contact">
       <span class="footer__contact-label">Contact Us</span>
 
+      <!-- Placeholder links by design: they give the bar the look of a real contact section but
+           deliberately lead nowhere (href="#", with the click cancelled so the page doesn't jump to
+           the top). VebTur is a demo, so it never sends visitors to a real company's website, app,
+           or WhatsApp number. A "Demo link" tooltip on hover/focus (data-tooltip, drawn in
+           footer.scss) and a screen-reader description (aria-describedby) say so, so a dead click
+           doesn't read as a broken site. -->
       <ul class="footer__contact-links">
         <li>
           <a
             class="footer__contact-link"
-            href="https://www.veboni.com/tr/"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
+            data-tooltip="Demo link"
+            aria-describedby="footer-demo-note"
+            (click)="$event.preventDefault()"
           >
             <svg class="footer__contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
               <circle cx="12" cy="12" r="8.5" />
@@ -56,9 +63,10 @@
         <li>
           <a
             class="footer__contact-link"
-            href="https://play.google.com/store/apps/details?id=com.veboni.vebonib2b"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
+            data-tooltip="Demo link"
+            aria-describedby="footer-demo-note"
+            (click)="$event.preventDefault()"
           >
             <svg class="footer__contact-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 3.3c-.4.2-.7.7-.7 1.3v14.8c0 .6.3 1.1.7 1.3l9.9-8.7L5 3.3Z" fill="#00D3FF" />
@@ -73,10 +81,10 @@
         <li>
           <a
             class="footer__contact-link"
-            href="https://wa.me/905000000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Chat with us on WhatsApp"
+            href="#"
+            data-tooltip="Demo link"
+            aria-describedby="footer-demo-note"
+            (click)="$event.preventDefault()"
           >
             <svg class="footer__contact-icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="11" fill="#25D366" />
@@ -85,10 +93,11 @@
                 d="M16.7 13.6c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.1-.4-2.1-1.3-.8-.7-1.3-1.6-1.4-1.8-.2-.3 0-.4.1-.6l.4-.4c.1-.1.2-.3.2-.4.1-.2 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.5 1.1 2.7c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2 0-.1-.2-.2-.4-.3Z"
               />
             </svg>
-            <span>0500 000 00 00</span>
+            <span>WhatsApp</span>
           </a>
         </li>
       </ul>
+      <span id="footer-demo-note" hidden>Demo link</span>
     </div>
   </div>
 </footer>

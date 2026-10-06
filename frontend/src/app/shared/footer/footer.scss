@@ -92,6 +92,7 @@
 }
 
 .footer__contact-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -104,6 +105,35 @@
 
   &:hover {
     color: var(--color-primary-600);
+  }
+
+  // The "Demo link" bubble above each placeholder link (text from its data-tooltip attribute; see
+  // footer.html for why these links lead nowhere). Hidden with visibility, not just opacity, so the
+  // invisible bubble never adds its text to the link's accessible name.
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: 50%;
+    z-index: 1;
+    transform: translateX(-50%);
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-text);
+    box-shadow: var(--shadow-sm);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
   }
 }
 

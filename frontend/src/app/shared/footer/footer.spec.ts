@@ -27,22 +27,38 @@ describe('Footer', () => {
     expect(items).toEqual(['Verified Hotels', 'Transparent Pricing', 'Free to Request']);
   });
 
-  it('links the website, app, and WhatsApp contact items to the right destinations', () => {
+  it('renders the website, app, and WhatsApp contact items as placeholder links that lead nowhere', () => {
     const links: HTMLAnchorElement[] = Array.from(fixture.nativeElement.querySelectorAll('.footer__contact-link'));
 
-    expect(links.map((a) => a.href)).toEqual([
-      'https://www.veboni.com/tr/',
-      'https://play.google.com/store/apps/details?id=com.veboni.vebonib2b',
-      'https://wa.me/905000000000',
-    ]);
-    expect(links.every((a) => a.target === '_blank')).toBe(true);
-    expect(links.every((a) => a.rel === 'noopener noreferrer')).toBe(true);
+    expect(links.map((a) => a.textContent?.trim())).toEqual(['Our Website', 'Get the App', 'WhatsApp']);
+    expect(links.every((a) => a.getAttribute('href') === '#')).toBe(true);
+    expect(links.every((a) => !a.hasAttribute('target'))).toBe(true);
   });
 
-  it('shows the WhatsApp number as plain text next to its link, not as a tel: link', () => {
-    const whatsappLink = fixture.nativeElement.querySelector('.footer__contact-link[href^="https://wa.me/"]');
+  it('cancels the click on every contact link, so the page neither navigates nor jumps to the top', () => {
+    const links: HTMLAnchorElement[] = Array.from(fixture.nativeElement.querySelectorAll('.footer__contact-link'));
 
-    expect(whatsappLink.textContent).toContain('0500 000 00 00');
-    expect(fixture.nativeElement.querySelector('a[href^="tel:"]')).toBeNull();
+    for (const link of links) {
+      const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+      link.dispatchEvent(click);
+      expect(click.defaultPrevented).toBe(true);
+    }
+  });
+
+  it('marks every contact link as a demo link, with a hover tooltip and a screen-reader description', () => {
+    const links: HTMLAnchorElement[] = Array.from(fixture.nativeElement.querySelectorAll('.footer__contact-link'));
+    const note: HTMLElement = fixture.nativeElement.querySelector('#footer-demo-note');
+
+    expect(links.every((a) => a.dataset['tooltip'] === 'Demo link')).toBe(true);
+    expect(links.every((a) => a.getAttribute('aria-describedby') === 'footer-demo-note')).toBe(true);
+    expect(note.textContent?.trim()).toBe('Demo link');
+    expect(note.hidden).toBe(true);
+  });
+
+  it('shows no phone number and no real external, WhatsApp, or tel: link anywhere in the footer', () => {
+    const footer: HTMLElement = fixture.nativeElement;
+
+    expect(footer.textContent).not.toMatch(/(\d[\s-]?){7,}/);
+    expect(footer.querySelector('a[href^="http"], a[href^="tel:"]')).toBeNull();
   });
 });
