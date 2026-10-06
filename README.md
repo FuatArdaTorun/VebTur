@@ -85,4 +85,4 @@ cd backend && dotnet test
 cd frontend && npm test
 ```
 
-The backend integration tests need the PostgreSQL container to be running.
+The backend integration tests need the PostgreSQL container to be running. They read the database settings from your `.env` (or from environment variables) and use a separate `vebtur_test` database, which they create and delete themselves.
