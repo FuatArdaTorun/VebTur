@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, computed, effect, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ReservationsService } from '../../features/reservations/reservations.service';
 import { AdminReservationsService } from '../../features/admin/reservations/admin-reservations.service';
@@ -13,7 +13,7 @@ const PENDING_APPROVAL_LIMIT = 10;
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, NotificationBell],
+  imports: [RouterLink, NotificationBell],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })

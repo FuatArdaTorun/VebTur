@@ -134,7 +134,7 @@ describe('Navbar', () => {
     expect(fixture.nativeElement.querySelector('.navbar__dropdown')).toBeNull();
   });
 
-  it('opens the dropdown on avatar click, showing the greeting, My Favorites and My Reservations, but no Admin Panel', async () => {
+  it('opens the dropdown on avatar click, showing the greeting and My Favorites, but no Admin Panel', async () => {
     loginAs(['Customer']);
     await createFixture();
     fixture.detectChanges();
@@ -144,10 +144,46 @@ describe('Navbar', () => {
     expect(fixture.nativeElement.querySelector('.navbar__dropdown-greeting').textContent).toContain('Jane Guest');
     const items = dropdownLinkTexts();
     expect(items).toContain('My Favorites');
-    expect(items).toContain('My Reservations');
     expect(items).toContain('Personal Info');
     expect(items).toContain('Account Security');
     expect(items).not.toContain('Admin Panel');
+  });
+
+  it('shows a top-level My Reservations link between Hotels and Help for a logged-in Customer, not repeated in the dropdown', async () => {
+    loginAs(['Customer']);
+    await createFixture();
+    fixture.detectChanges();
+    flushMineRequest();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('.navbar__link-group a')).map(
+      (a) => (a as HTMLAnchorElement).textContent?.trim(),
+    );
+    expect(links).toEqual(['Hotels', 'My Reservations', 'Help']);
+    expect(fixture.nativeElement.querySelector('.navbar__link-group a[href="/my-reservations"]')).not.toBeNull();
+
+    openMenu();
+    expect(dropdownLinkTexts()).not.toContain('My Reservations');
+  });
+
+  it('does not show the My Reservations link when unauthenticated', () => {
+    fixture.detectChanges();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('.navbar__link-group a')).map(
+      (a) => (a as HTMLAnchorElement).textContent?.trim(),
+    );
+    expect(links).not.toContain('My Reservations');
+  });
+
+  it('does not show the My Reservations link to a logged-in Admin', async () => {
+    loginAs(['Admin']);
+    await createFixture();
+    fixture.detectChanges();
+    flushPendingApprovalsRequest();
+
+    const links: string[] = Array.from(fixture.nativeElement.querySelectorAll('.navbar__link-group a')).map(
+      (a) => (a as HTMLAnchorElement).textContent?.trim(),
+    );
+    expect(links).not.toContain('My Reservations');
   });
 
   it('shows a Help link to a logged-in Customer', async () => {
