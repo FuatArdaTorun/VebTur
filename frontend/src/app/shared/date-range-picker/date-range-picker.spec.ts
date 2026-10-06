@@ -11,14 +11,25 @@ function iso(daysFromToday: number): string {
   return `${year}-${month}-${day}`;
 }
 
+// "Today" is frozen for every test. The grid shows one month at a time, so with the real date an
+// offset like "today + 10" moves into the next month during the last days of any month, and the
+// cell a test wants to click is no longer on screen. Mid-month keeps the offsets below in one month.
+const FROZEN_TODAY = new Date(2026, 5, 10, 12, 0, 0);
+
 describe('DateRangePicker', () => {
   let component: DateRangePicker;
   let fixture: ComponentFixture<DateRangePicker>;
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(FROZEN_TODAY);
     await TestBed.configureTestingModule({ imports: [DateRangePicker] }).compileComponents();
     fixture = TestBed.createComponent(DateRangePicker);
     component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   function cellFor(daysFromToday: number): HTMLButtonElement {
@@ -80,6 +91,23 @@ describe('DateRangePicker', () => {
 
     expect(checkInEmitted).toHaveBeenCalledWith(iso(3));
     expect(checkOutEmitted).toHaveBeenCalledWith('');
+  });
+
+  it('lets the user go back a month to pick an earlier date when the check-in is in the next month', () => {
+    // On 24 August the check-in (today + 10) is 3 September, so the grid opens on September and
+    // 27 August (today + 3) only appears after going back a month.
+    vi.setSystemTime(new Date(2026, 7, 24, 12, 0, 0));
+    fixture.componentRef.setInput('checkIn', iso(10));
+    fixture.detectChanges();
+    const checkInEmitted = vi.fn();
+    component.checkInChange.subscribe(checkInEmitted);
+
+    expect(cellFor(3)).toBeNull();
+    fixture.nativeElement.querySelector('[aria-label="Previous month"]').click();
+    fixture.detectChanges();
+    cellFor(3).click();
+
+    expect(checkInEmitted).toHaveBeenCalledWith(iso(3));
   });
 
   it('restarts the selection instead of picking a check-out that would cross a booked date', () => {
