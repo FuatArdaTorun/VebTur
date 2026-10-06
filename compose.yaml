@@ -13,7 +13,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      # Only this machine can reach the database (for `dotnet run` and the tests), not the network.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - vebtur_postgres_data:/var/lib/postgresql
     healthcheck:
