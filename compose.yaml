@@ -1,3 +1,6 @@
+# `docker compose up -d --build` runs the whole app at http://localhost:8080 (WEB_PORT).
+# For local development with `dotnet run` and `ng serve`, start only the database:
+# `docker compose up -d postgres`.
 name: vebtur
 
 services:
@@ -19,6 +22,36 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  api:
+    build: ./backend
+    container_name: vebtur_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Production keeps detailed error pages off; the two flags below opt in to what a fresh
+      # container needs: creating the schema and loading the demo data.
+      ASPNETCORE_ENVIRONMENT: Production
+      Database__MigrateOnStartup: "true"
+      Seed__DemoData: "true"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};GSS Encryption Mode=Disable"
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}
+      Jwt__Issuer: VebTur.Api
+      Jwt__Audience: VebTur.Frontend
+      Admin__Email: ${ADMIN_EMAIL:-}
+      Admin__Password: ${ADMIN_PASSWORD:-}
+      Frontend__BaseUrl: http://localhost:${WEB_PORT:-8080}
+
+  web:
+    build: ./frontend
+    container_name: vebtur_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
 
 volumes:
   vebtur_postgres_data:
