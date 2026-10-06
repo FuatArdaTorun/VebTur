@@ -109,10 +109,10 @@ public static class HotelSeeder
             rooms: [("Standard Room", 2, 4600m), ("Deluxe Room", 3, 6400m), ("Suite", 4, 9000m)],
             images:
             [
+                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/01/Sueno-hotels-deluxe-belek-main-pool.webp",
+                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/01/Sueno-hotels-deluxe-belek-main-pool1.webp",
                 "https://deluxe.sueno.com.tr/wp-content/uploads/2024/05/sueno-hotels-deluxe-belek-antalya-sueno-square-highlighted-photo-2.webp",
-                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/04/Sueno-hotels-deluxe-belek-italian-a-la-carte-restaurant.webp",
-                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/04/Sueno-hotels-deluxe-belek-spa-center.webp",
-                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/04/sueno-hotels-deluxe-belek-wellness.webp",
+                "https://deluxe.sueno.com.tr/wp-content/uploads/2024/01/Sueno-hotels-deluxe-belek-beach-pavillion-pier.webp",
             ]));
 
         hotels.Add(Build(amenities,
@@ -130,10 +130,10 @@ public static class HotelSeeder
                 // Reordered 2026-08-12: added this infinity-pool/sea-view shot (Ramada branding
                 // visible on the railing) from the hotel's own "Beach & Pools" gallery as lead —
                 // the previous 3 images were all room/bathroom interiors, no exterior at all.
+                "https://ramadaplazaantalya.com/assets/images/gallery/5c3c6912-458a-4921-80a0-b2da5db06aab.jpg",
+                "https://ramadaplazaantalya.com/assets/images/gallery/a4a2cc9e-a4d1-4a86-a2bf-bd840a068524.jpg",
                 "https://ramadaplazaantalya.com/assets/images/gallery/22228940-ab7b-4233-90d5-b8df5d728290.jpg",
-                "https://ramadaplazaantalya.com/assets/images/gallery/2c4a6a34-b105-4537-82f6-51c9e5412f8d.jpg",
-                "https://ramadaplazaantalya.com/assets/images/gallery/cc207ee5-eb96-4bef-9809-95f292244ec2.jpg",
-                "https://ramadaplazaantalya.com/assets/images/gallery/26e7ddbc-3996-4e20-90eb-f7fad4859945.jpg",
+                "https://ramadaplazaantalya.com/assets/images/gallery/d3c4e72a-d7dd-4e23-8821-0488046ecb09.jpg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -171,9 +171,9 @@ public static class HotelSeeder
             [
                 // Reordered 2026-08-12: was leading with a bedroom photo; this beach-lounge shot
                 // actually shows the property (loungers, umbrellas, palms) instead of a generic room.
-                "https://content.anexapps.com/v1/selectum-family-resort-belek/026f961b683144c6a587baf67f139614.jpg",
-                "https://content.anexapps.com/v1/selectum-family-resort-belek/005c082fe5c0436090c5f1a34c521fd2.jpg",
-                "https://content.anexapps.com/v1/selectum-family-resort-belek/00f92e87d5b445998a821d2c8a13c721.jpg",
+                "https://content.anexapps.com/v1/selectum-family-resort-belek/27634eb4e47c4a318e94cb49131d778e.jpg",
+                "https://content.anexapps.com/v1/selectum-family-resort-belek/bb523e6b1993436ba8faee1837f54bca.jpg",
+                "https://content.anexapps.com/v1/selectum-family-resort-belek/256727c717a245af86022cd15da28e8c.jpg",
                 "https://content.anexapps.com/v1/selectum-family-resort-belek/03bacda21fdb42a6af446caf7224a405.jpg",
             ]));
 
@@ -209,10 +209,10 @@ public static class HotelSeeder
             rooms: [("Standard Room", 2, 4400m), ("Deluxe Room", 3, 6000m), ("Suite", 4, 8600m)],
             images:
             [
-                "https://www.robinson.com/media/_processed_/3/c/csm_RCNL_Beach_14910_WOL_5e98daa86c.jpg",
+                "https://www.robinson.com/media/_processed_/f/5/csm_RCNL_Beach_14908_WOL_e35d488d09.jpg",
                 "https://www.robinson.com/media/_processed_/2/9/csm_RCSN_Drone_Resort_15829_WOL_c824548e90.jpg",
+                "https://www.robinson.com/media/_processed_/3/c/csm_RCNL_Beach_14910_WOL_5e98daa86c.jpg",
                 "https://www.robinson.com/media/_processed_/2/d/csm_RCNL_Golf_16492_WOL_2cd5093cf0.jpg",
-                "https://www.robinson.com/media/_processed_/0/0/csm_nl_14386_Indoor_pool_WOL_15ad0f1a58.jpg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -227,10 +227,10 @@ public static class HotelSeeder
             rooms: [("Standard Room", 2, 4200m), ("Deluxe Room", 3, 5800m), ("Suite", 4, 8200m)],
             images:
             [
-                "https://cdn.akkahotels.com/Uploads/Cms/akka-alinda-otel-havuz-bar-2_2.jpeg",
-                "https://cdn.akkahotels.com/Uploads/Cms/akka-alinda-otel-plasj-ve-havuz-6_1.jpeg",
+                "https://cdn.akkahotels.com/Uploads/Gallery/akka-alinda-hotel-genel-alanlar-3_18.webp",
+                "https://cdn.akkahotels.com/Uploads/Gallery/akka-alinda-hotel-genel-alanlar-2_2.webp",
+                "https://cdn.akkahotels.com/Uploads/Cms/akka-alinda-otel-plasj-ve-havuz-4_1.jpeg",
                 "https://cdn.akkahotels.com/Uploads/Cms/akka-alinda-otel-lobby-bar-1_7.jpg",
-                "https://cdn.akkahotels.com/Uploads/Cms/alinda-king-suite.jpg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -251,8 +251,8 @@ public static class HotelSeeder
                 // Reordered 2026-08-12: added this aerial shot from the hotel's own gallery as lead —
                 // was a restaurant interior photo, which doesn't show the property itself.
                 "https://cdn.akkahotels.com/Uploads/Gallery/x3_55-min.webp",
-                "https://cdn.akkahotels.com/Uploads/Cms/claros-otel-ana-restoran-12_1.jpg",
-                "https://cdn.akkahotels.com/Uploads/Gallery/akka-hotels-claros-dubleks-oda-2.jpg",
+                "https://cdn.akkahotels.com/Uploads/Gallery/images-2.jpg",
+                "https://cdn.akkahotels.com/Uploads/Gallery/claros-otel-dis-ekim_2.webp",
                 "https://cdn.akkahotels.com/Uploads/Cms/lobby-bar-claros-otel_2.jpeg",
             ]));
 
@@ -272,10 +272,10 @@ public static class HotelSeeder
                 // branded lifestyle/service ads (dessert, spa, gym, staff, a boutique storefront) —
                 // none showed the actual property. These come from the hotel's own dedicated
                 // /gallery page instead, which has real resort photos.
+                "https://static.kilithg.net/networks/1/properties/3/galleries/7/20240812134319027_org.JPG",
+                "https://static.kilithg.net/networks/1/properties/3/galleries/7/20240812134323026_org.JPG",
                 "https://static.kilithg.net/networks/1/properties/1/galleries/1/20240812124711159_org.jpg",
-                "https://static.kilithg.net/networks/1/properties/1/galleries/1/20240812124707898_org.JPG",
-                "https://static.kilithg.net/networks/1/properties/1/galleries/1/20240812124713359_org.jpg",
-                "https://static.kilithg.net/networks/1/properties/1/galleries/1/20240812124708908_org.jpg",
+                "https://static.kilithg.net/networks/1/properties/3/galleries/7/20240812135840877_org.jpg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -293,8 +293,8 @@ public static class HotelSeeder
                 // Reordered 2026-08-12: dropped "Image-271.webp", which turned out to be a DJ-night
                 // event flyer (a person's face, an event date, a phone number) rather than a hotel
                 // photo, despite the generic filename. These three are genuine property photos.
-                "https://www.orangecounty.com.tr/photos/orange-county-OTELIMIZ-12210261.webp",
                 "https://www.orangecounty.com.tr/photos/orange-county-HAVUZ___PLAJ-5817141.webp",
+                "https://www.orangecounty.com.tr/photos/orange-county-OTELIMIZ-12210261.webp",
                 "https://www.orangecounty.com.tr/photos/orange-county-ODALAR-284821.webp",
             ]));
 
@@ -310,10 +310,10 @@ public static class HotelSeeder
             rooms: [("Standard Room", 2, 3000m), ("Deluxe Room", 3, 4200m), ("Suite", 4, 6000m)],
             images:
             [
-                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/DSC00230-1920w.jpg",
+                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/Resort-General-6-1920w.jpg",
+                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/Resort-General-9-1920w.jpg",
                 "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/DJI_0797-1920w.jpg",
-                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/Resort-General-10-1920w.jpg",
-                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/resort-the-adult-restaurant-7-1920w.jpg",
+                "https://irp.cdn-website.com/2e136757/dms3rep/multi/opt/DSC04663-1920w.jpg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -346,10 +346,10 @@ public static class HotelSeeder
             rooms: [("Standard Room", 2, 2200m), ("Suite", 3, 3400m)],
             images:
             [
-                "https://www.michelangelo.com.tr/wp-content/uploads/2024/11/IMG_5211-scaled.jpeg",
-                "https://www.michelangelo.com.tr/wp-content/uploads/2024/11/IMG_5145-scaled.jpeg",
-                "https://www.michelangelo.com.tr/wp-content/uploads/2024/11/IMG_5205-scaled.jpeg",
-                "https://www.michelangelo.com.tr/wp-content/uploads/2024/11/IMG_5158-scaled.jpeg",
+                "https://cdn-cms6.hotelrunner.com/assets/photos/large/9367ba0b-b0f5-4513-9a40-1c972458a6e9.jpeg",
+                "https://cdn-cms4.hotelrunner.com/assets/photos/large/0e70b966-146d-465c-acfa-e037c9e864d8.JPG",
+                "https://cdn-cms5.hotelrunner.com/assets/photos/large/af4e2f4f-197e-4ba7-b438-f0fc0a00a773.jpeg",
+                "https://cdn-cms0.hotelrunner.com/assets/photos/large/150df41e-9102-46ea-a3c0-40a8f04bcb14.jpeg",
             ]));
 
         hotels.Add(Build(amenities,
@@ -366,10 +366,10 @@ public static class HotelSeeder
             [
                 // Reordered 2026-08-12: added this aerial aquapark shot (hotel's own branding visible
                 // on the structure) as lead — was leading with a standard room photo.
+                "https://trendy.com.tr/wp-content/uploads/2023/10/Trendy-Lara-Hava-06-Orta_Boyut.webp",
+                "https://trendy.com.tr/wp-content/uploads/2023/10/Trendy-Lara-Hava-05-Orta_Boyut.webp",
                 "https://trendy.com.tr/wp-content/uploads/2023/09/Trendy-Lara-Hava-04-Orta_Boyut.webp",
-                "https://trendy.com.tr/wp-content/uploads/2023/03/trendy-lara-standard-room-6.webp",
-                "https://trendy.com.tr/wp-content/uploads/2023/04/trendy-lara-garden-suite-2.webp",
-                "https://trendy.com.tr/wp-content/uploads/2023/04/trendy-lara-duplex-room-1.webp",
+                "https://trendy.com.tr/wp-content/uploads/2023/10/Trendy-Lara-Lobi-02-Orta_Boyut-1.webp",
             ]));
 
         hotels.Add(Build(amenities,
@@ -388,10 +388,10 @@ public static class HotelSeeder
                 // their pier — a real photo from their site, but it doesn't show the hotel itself,
                 // so it shouldn't be the lead/thumbnail image. These two (pool with statue, kids'
                 // water playground) clearly show the actual property.
+                "https://miarosakemerbeach.com/images/gallery/page/popup/4.jpg",
+                "https://miarosakemerbeach.com/images/gallery/page/popup/2.jpg",
+                "https://miarosakemerbeach.com/images/gallery/page/popup/genel-2-2.webp",
                 "https://miarosakemerbeach.com/images/gallery/3.webp",
-                "https://miarosakemerbeach.com/images/gallery/4.webp",
-                "https://miarosakemerbeach.com/images/gallery/1.webp",
-                "https://miarosakemerbeach.com/images/gallery/2.webp",
             ]));
 
         hotels.Add(Build(amenities,
