@@ -146,6 +146,15 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+// The Docker stack starts against an empty database, so it opts in to applying pending migrations
+// on startup. Local development keeps running `dotnet ef database update` by hand. This has to run
+// before the role seeding below, which needs the Identity tables to exist.
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    await migrationScope.ServiceProvider.GetRequiredService<VebTurDbContext>().Database.MigrateAsync();
+}
+
 // "Admin"/"Customer" roles must exist in every environment (not just Development) — public
 // self-registration assigns "Customer" on first use, so the role can't be dev-seed-only.
 using (var roleSeedScope = app.Services.CreateScope())
@@ -158,7 +167,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
 
+// Demo data (hotels, the admin account, demo reviews) is seeded in Development, and in the Docker
+// stack, which runs as Production (no developer exception page) but opts in with Seed:DemoData.
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Seed:DemoData"))
+{
     using var seedScope = app.Services.CreateScope();
     var db = seedScope.ServiceProvider.GetRequiredService<VebTurDbContext>();
     await HotelSeeder.SeedAsync(db);
