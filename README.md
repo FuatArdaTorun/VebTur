@@ -4,6 +4,8 @@ VebTur is a hotel discovery and reservation request web app. I built it during m
 
 It is a demo project. It runs locally, it is not deployed anywhere, and it is not a real booking service.
 
+![VebTur home page](screenshots/home.jpg)
+
 ## Features
 
 - Browse hotels, filter them by destination, star rating, price and amenities, and sort the results
@@ -11,6 +13,24 @@ It is a demo project. It runs locally, it is not deployed anywhere, and it is no
 - Reservation requests: the guest sends a request and the hotel confirms or rejects it later, so nothing is booked instantly
 - Customer accounts with a profile, favorites, a list of their own reservations, reviews after a confirmed stay and support messages
 - Admin panel with a dashboard, hotels, amenities, reservation requests, reviews, support messages and a notification log
+
+## Screenshots
+
+| Hotel search | Hotel page |
+| --- | --- |
+| ![Hotel list with search filters](screenshots/hotels.jpg) | ![Hotel detail page with photos and room types](screenshots/hotel-detail.jpg) |
+| **Reservation request** | **My reservations** |
+| ![Reservation request form with date picker and estimated price](screenshots/reservation-form.jpg) | ![Customer's list of reservation requests](screenshots/my-reservations.jpg) |
+
+**Admin panel: reservation requests**
+
+![Admin list of reservation requests](screenshots/admin-reservations.jpg)
+
+**On a phone**
+
+![VebTur on a phone: home page, hotel page and reservation form](screenshots/mobile.jpg)
+
+The screenshots use the demo data described below.
 
 ## About the data
 
