@@ -27,14 +27,29 @@ It is a demo project. It runs locally, it is not deployed anywhere, and it is no
 - Database: PostgreSQL, running in Docker
 - Tests: xUnit unit and integration tests (the integration tests run against a real PostgreSQL), Vitest for the Angular app
 
-## Running it locally
+## Running it with Docker
 
-You need Docker, the .NET 10 SDK and Node.js.
+All you need is Docker.
 
-1. Copy `.env.example` to `.env` and set a database password, then start PostgreSQL:
+```bash
+cp .env.example .env    # then set your own passwords and JWT key in .env
+docker compose up -d --build
+```
+
+Then open http://localhost:8080. On the first start the API creates the database schema and loads the demo data. To open the admin panel, sign in with the `ADMIN_EMAIL` and `ADMIN_PASSWORD` from your `.env`.
+
+`docker compose down` stops everything. The database is kept in a Docker volume, so your data is still there next time.
+
+The stack has three containers: PostgreSQL, the API, and nginx, which serves the Angular build and forwards `/api` requests to the API.
+
+## Local development
+
+For development I run only the database in Docker, and the API and the frontend on my machine with hot reload. This needs the .NET 10 SDK and Node.js as well.
+
+1. Create `.env` as above and start PostgreSQL:
 
    ```bash
-   docker compose up -d
+   docker compose up -d postgres
    ```
 
 2. Set the API's user secrets, apply the migrations and start the API:
