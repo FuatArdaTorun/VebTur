@@ -13,8 +13,8 @@ namespace VebTur.Infrastructure.Persistence.Seed;
 /// real-looking content to show before real customers add their own.
 /// Reviewer names/text are VebTur's own demo content, not claimed or scraped from any
 /// real Google/OTA review.
-/// The real, honestly-sourced hotel facts are left untouched. Nobody is
-/// meant to log in as these accounts, so their passwords are random/unrecorded.
+/// The hotel data itself is left untouched. Nobody is meant to log in as these accounts, so
+/// their passwords are random and not recorded anywhere.
 /// </summary>
 public static class ReviewSeeder
 {

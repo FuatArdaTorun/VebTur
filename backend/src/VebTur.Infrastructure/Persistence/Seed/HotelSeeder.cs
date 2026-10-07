@@ -4,16 +4,11 @@ using Microsoft.EntityFrameworkCore;
 namespace VebTur.Infrastructure.Persistence.Seed;
 
 /// <summary>
-/// Populates the database with real hotels — clients of the hotel-ERP company this project's
-/// author interns at (see https://www.veboni.com/tr/referanslarimiz/). Name, official website,
-/// address, star rating, description, photos, and phone number are sourced from each hotel's
-/// own official website; nothing here is AI-invented. Star ratings are null where the hotel's
-/// own site does not state one — never guessed (re-verified 2026-08-12: several previously-set
-/// ratings turned out unconfirmed on the hotel's own site and were cleared back to null; only
-/// ratings whose exact text appears on the hotel's own page are kept). GoogleRating/GoogleRatingCount
-/// are each hotel's real Google Maps rating, manually captured 2026-08-12 (see Hotel.GoogleRating
-/// for why this isn't live API data yet) — never fabricated, never sourced from review text.
-/// Room types/prices remain demo/estimated values since there is no live rate integration.
+/// Seeds the database with real hotels. Name, website, address, star rating, description, photo
+/// links and phone number come from each hotel's own official website, and StarRating stays null
+/// when the site doesn't state one. GoogleRating/GoogleRatingCount are the public Google Maps
+/// ratings, copied by hand on 2026-08-12 (see <see cref="Hotel.GoogleRating"/>). Room types and
+/// prices are demo values, since there is no live rate integration.
 /// </summary>
 public static class HotelSeeder
 {
